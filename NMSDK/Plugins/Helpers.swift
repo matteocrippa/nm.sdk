@@ -70,23 +70,3 @@ class Beacon: PluginResource {
         super.init(dictionary: ["id": id, "uuid": uuid.UUIDString, "major": maj, "minor": min, "range": rnv])
     }
 }
-class Content: PluginResource {
-    var title: String { return json.string("title")! }
-    var short_description: String { return json.string("short_description")! }
-    var long_description: String { return json.string("long_description")! }
-    var photo_ids: [String] { return json.stringArray("photo_ids")! }
-    
-    required init?(dictionary object: [String : AnyObject]) {
-        let json = JSON(dictionary: object)
-        guard let id = json.string("id") else {
-            return nil
-        }
-        
-        super.init(dictionary: ["id": id,
-            "title": json.string("args.title", fallback: "")!,
-            "short_description": json.string("args.short_description", fallback: "")!,
-            "long_description": json.string("args.long_description", fallback: "")!,
-            "photo_ids": json.stringArray("args.photo_ids", emptyIfNil: true)!]
-        )
-    }
-}

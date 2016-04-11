@@ -137,6 +137,16 @@ public class NearSDK: NSObject, Extensible {
         switch command {
         case "sync":
             delegate?.nearSDKDidSync?(event.content.bool("args.succeeded", fallback: false)!)
+        case "evaluate":
+            var contents = [EvaluatedContent]()
+            let evaluatedContents = event.content.dictionaryArray("args.contents", emptyIfNil: true)!
+            for dictionary in evaluatedContents {
+                if let content = EvaluatedContent(dictionary: dictionary) {
+                    contents.append(content)
+                }
+            }
+            
+            delegate?.nearSDKDidEvaluateContents?(contents)
         default:
             delegate?.nearSDKDidReceiveEvent?(event)
         }

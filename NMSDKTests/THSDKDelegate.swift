@@ -13,6 +13,7 @@ import NMPlug
 class THSDKDelegate: NSObject, NearSDKDelegate {
     var didSync: ((successfully: Bool) -> Void)?
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
+    var didReceiveEvaluatedContents: ((contents: [EvaluatedContent]) -> Void)?
     
     override init() {
         super.init()
@@ -20,5 +21,11 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     
     func nearSDKDidSync(successfully: Bool) {
         didSync?(successfully: successfully)
+    }
+    func nearSDKDidReceiveEvent(event: PluginEvent) {
+        didReceiveEvent?(event: event)
+    }
+    func nearSDKDidEvaluateContents(contents: [EvaluatedContent]) {
+        didReceiveEvaluatedContents?(contents: contents)
     }
 }

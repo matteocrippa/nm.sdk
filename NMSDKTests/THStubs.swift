@@ -12,6 +12,9 @@ import OHHTTPStubs
 import NMJSON
 
 class THStubs {
+    class func clear() {
+        OHHTTPStubs.removeAllStubs()
+    }
     class func stubBeacons() {
         stub(isHost("api.nearit.com") && isPath("/detectors/beacons")) { (response) -> OHHTTPStubsResponse in
             var beacons = [APIResource]()
@@ -20,7 +23,7 @@ class THStubs {
                     "name": "beacon \(i)",
                     "major": i,
                     "minor": i,
-                    "proximity_uuid": NSUUID().UUIDString,
+                    "proximity_uuid": "00000000-0000-0000-0000-000000000000",
                     "range": CLProximity.Near.rawValue])
                 beacons.append(APIResource(type: "beacons", id: "beacon_\(i)", attributes: attributes, relationships: [: ]))
             }
@@ -53,5 +56,8 @@ class THStubs {
             
             return OHHTTPStubsResponse(JSONObject: APIResourceCollection(resources: rules).json(), statusCode: 200, headers: nil)
         }
+    }
+    class func stubBeacon() -> JSON {
+        return JSON(dictionary: ["command": "evaluate", "args": ["proximity_uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1, "range": CLProximity.Near.rawValue]])
     }
 }

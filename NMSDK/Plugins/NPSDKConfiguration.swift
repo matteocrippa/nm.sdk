@@ -16,7 +16,7 @@ class NPSDKConfiguration: Plugin {
     // MARK: In-memory cache
     private var rules = [String: CFGRule]()
     private var beacons = [String: Beacon]()
-    private var contents = [String: Content]()
+    private var contents = [String: EvaluatedContent]()
     
     // MARK: Plugin - override
     override var name: String {
@@ -35,11 +35,45 @@ class NPSDKConfiguration: Plugin {
             
             sync(appToken, timeoutInterval: (arguments.double("timeout_interval") ?? 10))
             return PluginResponse.ok()
-                default:
+        case "evaluate":
+            var dictionary = arguments.dictionary
+            dictionary["id"] = "" // This is only a placeholder value - the key which will be used to get the rule
+            
+            guard let beacon = Beacon(dictionary: dictionary) else {
+                return PluginResponse.error(
+                    "\"evaluate\" command requires arguments \"args.proximity_uuid\", \"args.major\", \"args.minor\" and \"args.range\"; " +
+                    "\"args.proximity_uuid\" must be a valid UUID string, " +
+                    "\"args.major\" and \"args.minor\" must be integers, " +
+                    "\"args.range\" must be an integer representing a CLProximity value")
+            }
+            
+            var responseBody = [String: AnyObject]()
+            let resources = evaluate(beacon: beacon.key)
+            for resource in resources {
+                guard var contents: [[String: AnyObject]] = responseBody["contents"] as? [[String: AnyObject]] else {
+                    responseBody["contents"] = [resource.json.dictionary]
+                    continue
+                }
+                
+                contents.append(resource.json.dictionary)
+                responseBody["contents"] = contents
+            }
+            
+            hub?.dispatch(event: PluginEvent(from: name, content: eventWithCommand(command, args: responseBody)))
+            return PluginResponse.ok(eventWithCommand(command, args: responseBody))
+        default:
             break
         }
         
         return PluginResponse.error("allowed \"command\" values: sync")
+    }
+    
+    // MARK: Common
+    private func eventWithCommand(command: String, args: [String: AnyObject]) -> JSON {
+        return JSON(dictionary: ["command": command, "args": args])
+    }
+    private func merge(id: String, dictionary: [String: AnyObject]) -> [String: AnyObject] {
+        return ["id": id, "args": dictionary]
     }
     
     // MARK: Sync process
@@ -48,10 +82,6 @@ class NPSDKConfiguration: Plugin {
         beacons = [: ]
         contents = [: ]
     }
-    private func eventWithCommand(command: String, args: [String: AnyObject]) -> JSON {
-        return JSON(dictionary: ["command": command, "args": args])
-    }
-    
     private func sync(appToken: String, timeoutInterval: NSTimeInterval) {
         API.authorizationToken = appToken
         API.timeoutInterval = timeoutInterval
@@ -73,7 +103,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for rule in rules.resources {
-                if let ruleObject = CFGRule(dictionary: ["id": rule.id, "args": rule.attributes.dictionary]) {
+                if let ruleObject = CFGRule(dictionary: self.merge(rule.id, dictionary: rule.attributes.dictionary)) {
                     self.rules[rule.id] = ruleObject
                 }
             }
@@ -89,7 +119,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for beacon in beacons.resources {
-                if let beaconObject = Beacon(dictionary: ["id": beacon.id, "args": beacon.attributes.dictionary]) {
+                if let beaconObject = Beacon(dictionary: self.merge(beacon.id, dictionary: beacon.attributes.dictionary)) {
                     self.beacons[beacon.id] = beaconObject
                 }
             }
@@ -105,7 +135,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for content in contents.resources {
-                if let contentObject = Content(dictionary: ["id": content.id, "args": content.attributes.dictionary]) {
+                if let contentObject = EvaluatedContent(dictionary: self.merge(content.id, dictionary: content.attributes.dictionary)) {
                     self.contents[content.id] = contentObject
                 }
             }
@@ -149,5 +179,32 @@ class NPSDKConfiguration: Plugin {
         
         clearInMemoryCache()
         syncDidSucceed()
+    }
+    
+    // MARK: Evaluators
+    private func evaluate(beacon evaluationIdentifier: String) -> [EvaluatedContent] {
+        guard let
+            rawEvaluation = hub?.cache.resource(evaluationIdentifier, inCollection: Collections.CFG.Evaluations.rawValue, forPlugin: self),
+            evaluation = CFGEvaluation(dictionary: rawEvaluation.json.dictionary) else {
+                return []
+        }
+        
+        let rules = evaluation.rules
+        var contents = [EvaluatedContent]()
+        for ruleIdentifier in rules {
+            guard let
+                rawRule = hub?.cache.resource(ruleIdentifier, inCollection: Collections.CFG.Rules.rawValue, forPlugin: self),
+                rule = CFGRule(dictionary: merge(rawRule.id, dictionary: rawRule.json.dictionary)) else {
+                    continue
+            }
+            
+            if let
+                rawContent = hub?.cache.resource(rule.content_id, inCollection: Collections.Common.Contents.rawValue, forPlugin: self),
+                content = EvaluatedContent(dictionary: merge(rawContent.id, dictionary: rawContent.json.dictionary)) {
+                    contents.append(content)
+            }
+        }
+        
+        return contents
     }
 }

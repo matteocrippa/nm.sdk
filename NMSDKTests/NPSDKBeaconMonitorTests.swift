@@ -1,15 +1,16 @@
 //
-//  NPSDKConfigurationTests.swift
+//  NPSDKBeaconMonitorTests.swift
 //  NMSDK
 //
-//  Created by Francesco Colleoni on 08/04/16.
+//  Created by Francesco Colleoni on 11/04/16.
 //  Copyright © 2016 Near srl. All rights reserved.
 //
 
 import XCTest
+import NMPlug
 @testable import NMSDK
 
-class NPSDKConfigurationTests: XCTestCase {
+class NPSDKBeaconMonitorTests: XCTestCase {
     var expectation: XCTestExpectation!
     let SDKDelegate = THSDKDelegate()
     
@@ -34,14 +35,20 @@ class NPSDKConfigurationTests: XCTestCase {
         super.tearDown()
     }
     
-    func testSync() {
+    func testEvaluateKnownBeacon() {
+        SDKDelegate.didReceiveEvaluatedContents = { (contents) -> Void in
+            XCTAssertEqual(contents.count, 1)
+            self.expectation.fulfill()
+        }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             XCTFail("did receive an event which is not related to sync")
             self.expectation.fulfill()
         }
         SDKDelegate.didSync = { (successfully) -> Void in
             XCTAssertTrue(successfully)
-            self.expectation.fulfill()
+            
+            let evaluation = NearSDK.plugins.run(NPSDKConfiguration().name, withArguments: THStubs.stubBeacon())
+            XCTAssertEqual(evaluation.status, PluginResponseStatus.OK)
         }
         
         THStubs.stubBeacons()
@@ -53,4 +60,5 @@ class NPSDKConfigurationTests: XCTestCase {
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    
 }

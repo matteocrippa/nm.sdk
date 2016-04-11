@@ -14,6 +14,8 @@
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20C1CBBD89300FDB39F /* Helpers.swift */; };
+		B5CAB20F1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift */; };
+		B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */; };
 		B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */; };
 		B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */; };
 		B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */; };
@@ -49,6 +51,8 @@
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5CAB20C1CBBD89300FDB39F /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKBeaconMonitorTests.swift; sourceTree = "<group>"; };
+		B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatedContent.swift; sourceTree = "<group>"; };
 		B5FA83AE1CB7D8290090E5CD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 		B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDK.swift; sourceTree = "<group>"; };
 		B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKTests.swift; sourceTree = "<group>"; };
@@ -166,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */,
+				B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -174,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FA83BA1CB8015A0090E5CD /* NPSDKConfigurationTests.swift */,
+				B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -389,6 +395,7 @@
 			files = (
 				B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */,
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
+				B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B51000BF1CBBA99A0050EC2E /* SDKCorePluginsMap.swift in Sources */,
 				B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */,
@@ -402,6 +409,7 @@
 				B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */,
 				B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */,
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
+				B5CAB20F1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift in Sources */,
 				B5FA83BB1CB8015A0090E5CD /* NPSDKConfigurationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
