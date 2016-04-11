@@ -7,7 +7,9 @@
 //
 
 import XCTest
+import NMJSON
 import NMPlug
+
 @testable import NMSDK
 
 class NPSDKBeaconMonitorTests: XCTestCase {
@@ -55,10 +57,32 @@ class NPSDKBeaconMonitorTests: XCTestCase {
         THStubs.stubContents()
         THStubs.stubMatchRules()
         
-        expectation = expectationWithDescription("test sync")
+        expectation = expectationWithDescription("test evaluate known beacon")
         XCTAssertTrue(NearSDK.sync())
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
-    
+    func testCheckReadConfiguration() {
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            XCTFail("did receive an event which is not related to sync")
+            self.expectation.fulfill()
+        }
+        SDKDelegate.didSync = { (successfully) -> Void in
+            XCTAssertTrue(successfully)
+            
+            let beacons = NearSDK.plugins.run(NPSDKConfiguration().name, withArguments: JSON(dictionary: ["command": "read configuration", "scope": "beacons"]))
+            XCTAssertEqual(beacons.status, PluginResponseStatus.OK)
+            XCTAssertEqual(beacons.content.dictionaryArray("objects.beacons", emptyIfNil: true)!.count, 3)
+            self.expectation.fulfill()
+        }
+        
+        THStubs.stubBeacons()
+        THStubs.stubContents()
+        THStubs.stubMatchRules()
+        
+        expectation = expectationWithDescription("test check read configuration")
+        XCTAssertTrue(NearSDK.sync())
+        
+        waitForExpectationsWithTimeout(1000, handler: nil)
+    }
 }

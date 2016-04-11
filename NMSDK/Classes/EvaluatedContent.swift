@@ -35,10 +35,10 @@ public class EvaluatedContent: PluginResource {
         }
         
         super.init(dictionary: ["id": id,
-            "title": json.string("args.title", fallback: "")!,
-            "short_description": json.string("args.short_description", fallback: "")!,
-            "long_description": json.string("args.long_description", fallback: "")!,
-            "photo_ids": json.stringArray("args.photo_ids", emptyIfNil: true)!]
+            "title": json.string("title", fallback: "")!,
+            "short_description": json.string("short_description", fallback: "")!,
+            "long_description": json.string("long_description", fallback: "")!,
+            "photo_ids": json.stringArray("photo_ids", emptyIfNil: true)!]
         )
     }
 }

@@ -57,7 +57,8 @@ class THStubs {
             return OHHTTPStubsResponse(JSONObject: APIResourceCollection(resources: rules).json(), statusCode: 200, headers: nil)
         }
     }
+    
     class func stubBeacon() -> JSON {
-        return JSON(dictionary: ["command": "evaluate", "args": ["proximity_uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1, "range": CLProximity.Near.rawValue]])
+        return JSON(dictionary: ["command": "evaluate", "proximity_uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1, "range": CLProximity.Near.rawValue])
     }
 }

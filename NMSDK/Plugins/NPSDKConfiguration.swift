@@ -14,7 +14,7 @@ import NMPlug
 
 class NPSDKConfiguration: Plugin {
     // MARK: In-memory cache
-    private var rules = [String: CFGRule]()
+    private var rules = [String: ConfigurationRule]()
     private var beacons = [String: Beacon]()
     private var contents = [String: EvaluatedContent]()
     
@@ -41,10 +41,10 @@ class NPSDKConfiguration: Plugin {
             
             guard let beacon = Beacon(dictionary: dictionary) else {
                 return PluginResponse.error(
-                    "\"evaluate\" command requires arguments \"args.proximity_uuid\", \"args.major\", \"args.minor\" and \"args.range\"; " +
-                    "\"args.proximity_uuid\" must be a valid UUID string, " +
-                    "\"args.major\" and \"args.minor\" must be integers, " +
-                    "\"args.range\" must be an integer representing a CLProximity value")
+                    "\"evaluate\" command requires arguments \"proximity_uuid\", \"major\", \"minor\" and \"range\"; " +
+                    "\"proximity_uuid\" must be a valid UUID string, " +
+                    "\"major\" and \"minor\" must be integers, " +
+                    "\"range\" must be an integer representing a CLProximity value")
             }
             
             var responseBody = [String: AnyObject]()
@@ -61,6 +61,24 @@ class NPSDKConfiguration: Plugin {
             
             hub?.dispatch(event: PluginEvent(from: name, content: eventWithCommand(command, args: responseBody)))
             return PluginResponse.ok(eventWithCommand(command, args: responseBody))
+        case "read configuration":
+            guard let scope = arguments.string("scope") where scope == "beacons" else {
+                return PluginResponse.error("\"read configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
+            }
+            
+            var responseBody = [String: AnyObject]()
+            let resources = configuredBeacons()
+            for resource in resources {
+                guard var contents: [[String: AnyObject]] = responseBody["beacons"] as? [[String: AnyObject]] else {
+                    responseBody["beacons"] = [resource.json.dictionary]
+                    continue
+                }
+                
+                contents.append(resource.json.dictionary)
+                responseBody["beacons"] = contents
+            }
+            
+            return PluginResponse.ok(eventWithCommand("read configuration", args: ["scope": "beacons", "objects": responseBody]))
         default:
             break
         }
@@ -70,10 +88,22 @@ class NPSDKConfiguration: Plugin {
     
     // MARK: Common
     private func eventWithCommand(command: String, args: [String: AnyObject]) -> JSON {
-        return JSON(dictionary: ["command": command, "args": args])
+        var dictionary = [String: AnyObject]()
+        for (k, v) in args {
+            dictionary[k] = v
+        }
+        
+        dictionary["command"] = command
+        return JSON(dictionary: dictionary)
     }
-    private func merge(id: String, dictionary: [String: AnyObject]) -> [String: AnyObject] {
-        return ["id": id, "args": dictionary]
+    private func merge(id: String, dictionary args: [String: AnyObject]) -> [String: AnyObject] {
+        var dictionary = [String: AnyObject]()
+        for (k, v) in args {
+            dictionary[k] = v
+        }
+        
+        dictionary["id"] = id
+        return dictionary
     }
     
     // MARK: Sync process
@@ -103,7 +133,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for rule in rules.resources {
-                if let ruleObject = CFGRule(dictionary: self.merge(rule.id, dictionary: rule.attributes.dictionary)) {
+                if let ruleObject = ConfigurationRule(dictionary: self.merge(rule.id, dictionary: rule.attributes.dictionary)) {
                     self.rules[rule.id] = ruleObject
                 }
             }
@@ -159,7 +189,7 @@ class NPSDKConfiguration: Plugin {
         }
         
         for rule in rules.values {
-            hub?.cache.store(rule, inCollection: Collections.CFG.Rules.rawValue, forPlugin: self)
+            hub?.cache.store(rule, inCollection: Collections.Configuration.Rules.rawValue, forPlugin: self)
             guard var map = beaconToRules[rule.beacon_id] else {
                 beaconToRules[rule.beacon_id] = [rule.id]
                 continue
@@ -172,8 +202,8 @@ class NPSDKConfiguration: Plugin {
         }
         
         for (beaconID, ruleIDs) in beaconToRules {
-            if let key = beaconKeys[beaconID], evaluation = CFGEvaluation(dictionary: ["id": key, "rules": ruleIDs, "detector": "beacon"]) {
-                hub?.cache.store(evaluation, inCollection: Collections.CFG.Evaluations.rawValue, forPlugin: self)
+            if let key = beaconKeys[beaconID], evaluation = ConfigurationEvaluation(dictionary: ["id": key, "rules": ruleIDs, "detector": "beacon"]) {
+                hub?.cache.store(evaluation, inCollection: Collections.Configuration.Evaluations.rawValue, forPlugin: self)
             }
         }
         
@@ -181,11 +211,11 @@ class NPSDKConfiguration: Plugin {
         syncDidSucceed()
     }
     
-    // MARK: Evaluators
+    // MARK: Content's evaluation
     private func evaluate(beacon evaluationIdentifier: String) -> [EvaluatedContent] {
         guard let
-            rawEvaluation = hub?.cache.resource(evaluationIdentifier, inCollection: Collections.CFG.Evaluations.rawValue, forPlugin: self),
-            evaluation = CFGEvaluation(dictionary: rawEvaluation.json.dictionary) else {
+            rawEvaluation = hub?.cache.resource(evaluationIdentifier, inCollection: Collections.Configuration.Evaluations.rawValue, forPlugin: self),
+            evaluation = ConfigurationEvaluation(dictionary: rawEvaluation.json.dictionary) else {
                 return []
         }
         
@@ -193,8 +223,8 @@ class NPSDKConfiguration: Plugin {
         var contents = [EvaluatedContent]()
         for ruleIdentifier in rules {
             guard let
-                rawRule = hub?.cache.resource(ruleIdentifier, inCollection: Collections.CFG.Rules.rawValue, forPlugin: self),
-                rule = CFGRule(dictionary: merge(rawRule.id, dictionary: rawRule.json.dictionary)) else {
+                rawRule = hub?.cache.resource(ruleIdentifier, inCollection: Collections.Configuration.Rules.rawValue, forPlugin: self),
+                rule = ConfigurationRule(dictionary: merge(rawRule.id, dictionary: rawRule.json.dictionary)) else {
                     continue
             }
             
@@ -206,5 +236,21 @@ class NPSDKConfiguration: Plugin {
         }
         
         return contents
+    }
+    
+    // MARK: Read access to configuration
+    private func configuredBeacons() -> [Beacon] {
+        guard let resources = hub?.cache.resourcesIn(collection: Collections.Common.Beacons.rawValue, forPlugin: self) where resources.count > 0 else {
+            return []
+        }
+        
+        var beacons = [Beacon]()
+        for resource in resources {
+            if let beacon = Beacon(dictionary: merge(resource.id, dictionary: resource.json.dictionary)) {
+                beacons.append(beacon)
+            }
+        }
+        
+        return beacons
     }
 }

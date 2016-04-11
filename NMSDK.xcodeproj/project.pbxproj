@@ -16,6 +16,8 @@
 		B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20C1CBBD89300FDB39F /* Helpers.swift */; };
 		B5CAB20F1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift */; };
 		B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */; };
+		B5CAB2131CBC05EA00FDB39F /* NPBeaconRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */; };
+		B5CAB2151CBC06C500FDB39F /* Beacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2141CBC06C500FDB39F /* Beacon.swift */; };
 		B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */; };
 		B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */; };
 		B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */; };
@@ -53,6 +55,8 @@
 		B5CAB20C1CBBD89300FDB39F /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconMonitorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKBeaconMonitorTests.swift; sourceTree = "<group>"; };
 		B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatedContent.swift; sourceTree = "<group>"; };
+		B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconRange.swift; sourceTree = "<group>"; };
+		B5CAB2141CBC06C500FDB39F /* Beacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Beacon.swift; sourceTree = "<group>"; };
 		B5FA83AE1CB7D8290090E5CD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 		B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDK.swift; sourceTree = "<group>"; };
 		B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKTests.swift; sourceTree = "<group>"; };
@@ -171,6 +175,7 @@
 			children = (
 				B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */,
 				B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */,
+				B5CAB2141CBC06C500FDB39F /* Beacon.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -187,8 +192,9 @@
 		B5FA83B51CB7E6DE0090E5CD /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */,
 				B5CAB20C1CBBD89300FDB39F /* Helpers.swift */,
+				B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */,
+				B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -394,11 +400,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */,
+				B5CAB2131CBC05EA00FDB39F /* NPBeaconRange.swift in Sources */,
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B51000BF1CBBA99A0050EC2E /* SDKCorePluginsMap.swift in Sources */,
 				B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */,
+				B5CAB2151CBC06C500FDB39F /* Beacon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
