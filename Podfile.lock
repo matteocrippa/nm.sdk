@@ -80,7 +80,7 @@ PODS:
 DEPENDENCIES:
   - JWTDecode (~> 1.0)
   - NMNet (~> 0.1)
-  - NMPlug (~> 0.5)
+  - NMPlug (~> 0.6)
   - OHHTTPStubs
   - OHHTTPStubs/Swift
 
