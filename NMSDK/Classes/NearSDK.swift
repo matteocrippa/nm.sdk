@@ -26,7 +26,7 @@ public class NearSDK: NSObject, Extensible {
         super.init()
         
         pluginHub = PluginHub(extendedObject: self)
-        pluginHub.plug(NPSDKConfiguration())
+        pluginHub.plug(NPConfiguration())
         pluginHub.plug(NPBeaconRange())
         pluginHub.plug(NPEvaluator())
     }
@@ -108,7 +108,7 @@ public class NearSDK: NSObject, Extensible {
     /// This method starts the
     public class func sync() -> Bool {
         let args = JSON(dictionary: ["command": "sync", "app_token": appToken, "timeout_interval": apiTimeoutInterval])
-        let runResult = plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: args)
+        let runResult = plugins.run("com.nearit.plugin.np-configuration", withArguments: args)
         return runResult.status == .OK
     }
     
@@ -120,7 +120,7 @@ public class NearSDK: NSObject, Extensible {
     /// MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
         switch event.from {
-        case "com.nearit.plugin.np-sdk-configuration":
+        case "com.nearit.plugin.np-configuration":
             manageSDKConfigurationCommands(event)
         case "com.nearit.plugin.np-evaluator":
             manageEvaluatedEvents(event)

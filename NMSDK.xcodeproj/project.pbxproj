@@ -15,7 +15,7 @@
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20C1CBBD89300FDB39F /* Helpers.swift */; };
-		B5CAB20F1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift */; };
+		B5CAB20F1CBBEE7200FDB39F /* NPBeaconRangingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20E1CBBEE7200FDB39F /* NPBeaconRangingTests.swift */; };
 		B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */; };
 		B5CAB2151CBC06C500FDB39F /* Beacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2141CBC06C500FDB39F /* Beacon.swift */; };
 		B5CAB2171CBC15E700FDB39F /* THBeaconRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB2161CBC15E700FDB39F /* THBeaconRange.swift */; };
@@ -23,8 +23,8 @@
 		B5D1FFF01CBCD6CB00136741 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CAB20C1CBBD89300FDB39F /* Helpers.swift */; };
 		B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */; };
 		B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */; };
-		B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */; };
-		B5FA83BB1CB8015A0090E5CD /* NPSDKConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83BA1CB8015A0090E5CD /* NPSDKConfigurationTests.swift */; };
+		B5FA83B71CB7E6F70090E5CD /* NPConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B61CB7E6F70090E5CD /* NPConfiguration.swift */; };
+		B5FA83BB1CB8015A0090E5CD /* NPConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83BA1CB8015A0090E5CD /* NPConfigurationTests.swift */; };
 		B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */; };
 		E98A642E4FDCD01D3D611022 /* Pods_NMSDKTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A0974FDF1B02E790CAD89D6F /* Pods_NMSDKTests.framework */; };
 /* End PBXBuildFile section */
@@ -58,7 +58,7 @@
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5CAB20C1CBBD89300FDB39F /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
-		B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKBeaconRangingTests.swift; sourceTree = "<group>"; };
+		B5CAB20E1CBBEE7200FDB39F /* NPBeaconRangingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconRangingTests.swift; sourceTree = "<group>"; };
 		B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatedContent.swift; sourceTree = "<group>"; };
 		B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconRange.swift; sourceTree = "<group>"; };
 		B5CAB2141CBC06C500FDB39F /* Beacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Beacon.swift; sourceTree = "<group>"; };
@@ -66,8 +66,8 @@
 		B5FA83AE1CB7D8290090E5CD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDK.swift; sourceTree = "<group>"; };
 		B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKTests.swift; sourceTree = "<group>"; };
-		B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKConfiguration.swift; sourceTree = "<group>"; };
-		B5FA83BA1CB8015A0090E5CD /* NPSDKConfigurationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKConfigurationTests.swift; sourceTree = "<group>"; };
+		B5FA83B61CB7E6F70090E5CD /* NPConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPConfiguration.swift; sourceTree = "<group>"; };
+		B5FA83BA1CB8015A0090E5CD /* NPConfigurationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPConfigurationTests.swift; sourceTree = "<group>"; };
 		B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THSDKDelegate.swift; sourceTree = "<group>"; };
 		CE3C9EDD70D630BDEA0A8A28 /* Pods-NMSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NMSDK.release.xcconfig"; path = "Pods/Target Support Files/Pods-NMSDK/Pods-NMSDK.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -183,8 +183,8 @@
 		B5FA83B41CB7E6D40090E5CD /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				B5FA83BA1CB8015A0090E5CD /* NPSDKConfigurationTests.swift */,
-				B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift */,
+				B5FA83BA1CB8015A0090E5CD /* NPConfigurationTests.swift */,
+				B5CAB20E1CBBEE7200FDB39F /* NPBeaconRangingTests.swift */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -193,7 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				B5CAB20C1CBBD89300FDB39F /* Helpers.swift */,
-				B5FA83B61CB7E6F70090E5CD /* NPSDKConfiguration.swift */,
+				B5FA83B61CB7E6F70090E5CD /* NPConfiguration.swift */,
 				B51621831CBCF1B7001F9D8B /* NPEvaluator.swift */,
 				B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */,
 			);
@@ -406,7 +406,7 @@
 				B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B51621841CBCF1B7001F9D8B /* NPEvaluator.swift in Sources */,
-				B5FA83B71CB7E6F70090E5CD /* NPSDKConfiguration.swift in Sources */,
+				B5FA83B71CB7E6F70090E5CD /* NPConfiguration.swift in Sources */,
 				B5CAB2151CBC06C500FDB39F /* Beacon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -419,9 +419,9 @@
 				B5D1FFF01CBCD6CB00136741 /* Helpers.swift in Sources */,
 				B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */,
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
-				B5CAB20F1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift in Sources */,
+				B5CAB20F1CBBEE7200FDB39F /* NPBeaconRangingTests.swift in Sources */,
 				B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */,
-				B5FA83BB1CB8015A0090E5CD /* NPSDKConfigurationTests.swift in Sources */,
+				B5FA83BB1CB8015A0090E5CD /* NPConfigurationTests.swift in Sources */,
 				B5CAB2171CBC15E700FDB39F /* THBeaconRange.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -69,7 +69,7 @@ class NPBeaconRange: StatefulPlugin, CLLocationManagerDelegate {
     func loadConfiguration() -> [String: NSUUID]? {
         // The SDK should have downloaded beacons' configuration with core plugin NPSDKConfiguration
         guard let
-            configuration = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-sdk-configuration", content: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))),
+            configuration = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-configuration", content: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))),
             beacons = configuration.content.dictionaryArray("objects.beacons") where beacons.count > 0 else {
                 return nil
         }

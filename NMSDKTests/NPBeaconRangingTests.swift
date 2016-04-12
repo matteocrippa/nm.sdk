@@ -1,5 +1,5 @@
 //
-//  NPSDKBeaconRangingTests.swift
+//  NPBeaconRangingTests.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 11/04/16.
@@ -12,7 +12,7 @@ import NMJSON
 import NMPlug
 @testable import NMSDK
 
-class NPSDKBeaconRangingTests: XCTestCase {
+class NPBeaconRangingTests: XCTestCase {
     var expectation: XCTestExpectation!
     let SDKDelegate = THSDKDelegate()
     

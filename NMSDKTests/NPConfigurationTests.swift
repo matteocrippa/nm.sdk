@@ -1,5 +1,5 @@
 //
-//  NPSDKConfigurationTests.swift
+//  NPConfigurationTests.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 08/04/16.
@@ -12,7 +12,7 @@ import NMJSON
 import NMPlug
 @testable import NMSDK
 
-class NPSDKConfigurationTests: XCTestCase {
+class NPConfigurationTests: XCTestCase {
     var expectation: XCTestExpectation!
     let SDKDelegate = THSDKDelegate()
     
@@ -40,7 +40,7 @@ class NPSDKConfigurationTests: XCTestCase {
             XCTAssertTrue(successfully)
             
             let beacons = NearSDK.plugins.run(
-                "com.nearit.plugin.np-sdk-configuration",
+                "com.nearit.plugin.np-configuration",
                 withArguments: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))
             
             XCTAssertEqual(beacons.status, PluginResponseStatus.OK)

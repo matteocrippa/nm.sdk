@@ -1,5 +1,5 @@
 //
-//  NPSDKConfiguration.swift
+//  NPConfiguration.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 08/04/16.
@@ -12,7 +12,7 @@ import NMNet
 import NMJSON
 import NMPlug
 
-class NPSDKConfiguration: Plugin {
+class NPConfiguration: Plugin {
     // MARK: In-memory cache
     private var rules = [String: ConfigurationRule]()
     private var beacons = [String: Beacon]()
@@ -20,7 +20,7 @@ class NPSDKConfiguration: Plugin {
     
     // MARK: Plugin - override
     override var name: String {
-        return "com.nearit.plugin.np-sdk-configuration"
+        return "com.nearit.plugin.np-configuration"
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("command") else {
