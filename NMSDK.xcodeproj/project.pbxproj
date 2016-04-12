@@ -56,6 +56,7 @@
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
+		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5CAB20C1CBBD89300FDB39F /* Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B5CAB20E1CBBEE7200FDB39F /* NPSDKBeaconRangingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSDKBeaconRangingTests.swift; sourceTree = "<group>"; };
 		B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluatedContent.swift; sourceTree = "<group>"; };
@@ -120,6 +121,7 @@
 				B52AF6FB1CB7BE9F00769ECE /* LICENSE */,
 				B52AF6FC1CB7BE9F00769ECE /* README.md */,
 				B5FA83AE1CB7D8290090E5CD /* Podfile */,
+				B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */,
 				B52AF6E31CB7BE4700769ECE /* NMSDK */,
 				B52AF6EF1CB7BE4700769ECE /* NMSDKTests */,
 				B52AF6E21CB7BE4700769ECE /* Products */,
