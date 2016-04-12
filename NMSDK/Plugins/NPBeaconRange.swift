@@ -11,22 +11,89 @@ import CoreLocation
 import NMJSON
 import NMPlug
 
-class NPBeaconRange: StatefulPlugin {
+class NPBeaconRange: StatefulPlugin, CLLocationManagerDelegate {
     // MARK: In-memory cache
-    private var rules = [String: ConfigurationRule]()
-    private var beacons = [String: Beacon]()
-    private var contents = [String: EvaluatedContent]()
+    private var locationManager = CLLocationManager()
     
     // MARK: Plugin - override
     override var name: String {
         return "com.nearit.plugin.np-beacon-range"
     }
+    override init() {
+        super.init()
+        
+        locationManager.delegate = self
+    }
     
     // MARK: StatefulPluggable - override
     override func start(arguments: JSON) -> Bool {
-        return true
+        // The plugin must not be in a running state and it should not be ranging any region
+        if isRunning || locationManager.rangedRegions.count > 0 {
+            return false
+        }
+        
+        // CLAuthorizationStatus must be .AuthorizedAlways or .AuthorizedWhenInUse
+        if ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(CLLocationManager.authorizationStatus()) {
+            return false
+        }
+        
+        // The configuration cannot be empty, otherwise no regions will be ranged
+        guard let rangedRegions = loadConfiguration() where rangedRegions.count > 0 else {
+            return false
+        }
+        
+        // Start ranging beacons in configured regions
+        for (identifier, uuid) in rangedRegions {
+            locationManager.startRangingBeaconsInRegion(CLBeaconRegion(proximityUUID: uuid, identifier: identifier))
+        }
+        
+        return super.start()
     }
     override func stop() -> Bool {
-        return true
+        // The plugin must be in a running and it should not be ranging any region
+        if !isRunning || locationManager.rangedRegions.count <= 0 {
+            super.stop()
+            return false
+        }
+        
+        // Stop ranging ranged regions
+        let rangedRegions = locationManager.rangedRegions
+        for region in rangedRegions {
+            locationManager.stopMonitoringForRegion(region)
+        }
+        
+        return super.stop()
+    }
+    
+    // MARK: Setup
+    func loadConfiguration() -> [String: NSUUID]? {
+        // The SDK should have downloaded beacons' configuration with core plugin NPSDKConfiguration
+        guard let
+            configuration = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-sdk-configuration", content: JSON(dictionary: ["command": "read configuration", "scope": "beacons"]))),
+            beacons = configuration.content.dictionaryArray("objects.beacons") where beacons.count > 0 else {
+                return nil
+        }
+        
+        // Get only "unique" regions, i.e. all configured unique identifiers
+        var rangedRegions = [String: NSUUID]()
+        for beacon in beacons {
+            if let object = Beacon(dictionary: beacon) {
+                rangedRegions["region-\(object.uuid.UUIDString)"] = object.uuid
+            }
+        }
+        
+        return rangedRegions
+    }
+    
+    // MARK: CLLocationManagerDelegate protocol methods
+    func locationManager(manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], inRegion region: CLBeaconRegion) {
+        if beacons.count <= 0 {
+            return
+        }
+        
+        let beacon = beacons[0]
+        let command = JSON(dictionary: ["command": "evaluate", "proximity_uuid": beacon.proximityUUID.UUIDString, "major": beacon.major.integerValue, "minor": beacon.minor.integerValue, "range": beacon.proximity.rawValue])
+        let evaluation = NearSDK.plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: command)
+        hub?.dispatch(event: PluginEvent(from: name, content: evaluation.content))
     }
 }

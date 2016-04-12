@@ -22,16 +22,12 @@ public class NearSDK: NSObject, Extensible {
     private var pluginHub: PluginHub!
     private var delegate: NearSDKDelegate?
     
-    private var corePlugins = SDKCorePluginsMap()
     private override init() {
         super.init()
         
         pluginHub = PluginHub(extendedObject: self)
-        plug(NPSDKConfiguration(), index: .SDKConfiguration)
-    }
-    private func plug(plugin: Pluggable, index: SDKCorePluginsMap.Index) {
-        pluginHub.plug(plugin)
-        corePlugins.update(index, pluginName: plugin.name)
+        pluginHub.plug(NPSDKConfiguration())
+        pluginHub.plug(NPBeaconRange())
     }
     private func resetAppInfo() {
         appToken = ""
@@ -111,19 +107,25 @@ public class NearSDK: NSObject, Extensible {
     /// This method starts the
     public class func sync() -> Bool {
         let args = JSON(dictionary: ["command": "sync", "app_token": appToken, "timeout_interval": apiTimeoutInterval])
-        let runResult = plugins.run(sharedSDK.corePlugins.map[.SDKConfiguration] ?? "", withArguments: args)
+        let runResult = plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: args)
         return runResult.status == .OK
+    }
+    
+    /// Starts beacons' plugins (ranging)
+    public class func start() -> Bool {
+        return plugins.start("com.nearit.plugin.np-beacon-range")
     }
     
     /// MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
-        guard let index = corePlugins[event.from] else {
-            return
-        }
-        
-        switch index {
-        case .SDKConfiguration:
+        switch event.from {
+        case "com.nearit.plugin.np-sdk-configuration":
             manageSDKConfigurationCommands(event)
+        case "com.nearit.plugin.np-beacon-range":
+            // TODO:
+            break
+        default:
+            break
         }
     }
     
