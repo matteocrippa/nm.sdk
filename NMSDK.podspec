@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
   s.requires_arc          = true
 
-  s.dependency              'NMPlug', '~> 0.5'
+  s.dependency              'NMPlug', '~> 0.6'
   s.dependency              'NMNet', '~> 0.1'
   s.dependency              'JWTDecode', '~> 1.0'
 
