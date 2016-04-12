@@ -58,11 +58,8 @@ class THStubs {
         }
     }
     
-    class func stubEvaluateBeacon() -> JSON {
-        return JSON(dictionary: ["command": "evaluate", "proximity_uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1, "range": CLProximity.Near.rawValue])
-    }
-    class func stubBeacon() -> CLBeacon {
-        return THBeacon(major: 1, minor: 1, proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, proximity: CLProximity.Near)
+    class func stubBeacon(major major: Int, minor: Int) -> CLBeacon {
+        return THBeacon(major: major, minor: minor, proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, proximity: CLProximity.Near)
     }
     class func stubBeaconRegion() -> CLBeaconRegion {
         return CLBeaconRegion(proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, identifier: "identifier")

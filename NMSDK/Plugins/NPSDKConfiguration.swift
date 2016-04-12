@@ -24,7 +24,7 @@ class NPSDKConfiguration: Plugin {
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("command") else {
-            return PluginResponse.error("\"command\" argument is required; allowed values: sync")
+            return PluginResponse.error("\"command\" argument is required; allowed values: \"sync\", \"read_configuration\"")
         }
         
         switch command {
@@ -35,75 +35,22 @@ class NPSDKConfiguration: Plugin {
             
             sync(appToken, timeoutInterval: (arguments.double("timeout_interval") ?? 10))
             return PluginResponse.ok()
-        case "evaluate":
-            var dictionary = arguments.dictionary
-            dictionary["id"] = "" // This is only a placeholder value - the key which will be used to get the rule
-            
-            guard let beacon = Beacon(dictionary: dictionary) else {
-                return PluginResponse.error(
-                    "\"evaluate\" command requires arguments \"proximity_uuid\", \"major\", \"minor\" and \"range\"; " +
-                    "\"proximity_uuid\" must be a valid UUID string, " +
-                    "\"major\" and \"minor\" must be integers, " +
-                    "\"range\" must be an integer representing a CLProximity value")
+        case "read_configuration":
+            guard let scope = arguments.string("scope") else {
+                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
             }
             
-            var responseBody = [String: AnyObject]()
-            let resources = evaluate(beacon: beacon.key)
-            for resource in resources {
-                guard var contents: [[String: AnyObject]] = responseBody["contents"] as? [[String: AnyObject]] else {
-                    responseBody["contents"] = [resource.json.dictionary]
-                    continue
-                }
-                
-                contents.append(resource.json.dictionary)
-                responseBody["contents"] = contents
+            switch scope {
+            case "beacons":
+                return PluginResponse.ok(CorePluginEvent.configurationBody(configuredBeacons(), command: command, scope: scope))
+            default:
+                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
             }
-            
-            hub?.dispatch(event: PluginEvent(from: name, content: eventWithCommand(command, args: responseBody)))
-            return PluginResponse.ok(eventWithCommand(command, args: responseBody))
-        case "read configuration":
-            guard let scope = arguments.string("scope") where scope == "beacons" else {
-                return PluginResponse.error("\"read configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
-            }
-            
-            var responseBody = [String: AnyObject]()
-            let resources = configuredBeacons()
-            for resource in resources {
-                guard var contents: [[String: AnyObject]] = responseBody["beacons"] as? [[String: AnyObject]] else {
-                    responseBody["beacons"] = [resource.json.dictionary]
-                    continue
-                }
-                
-                contents.append(resource.json.dictionary)
-                responseBody["beacons"] = contents
-            }
-            
-            return PluginResponse.ok(eventWithCommand("read configuration", args: ["scope": "beacons", "objects": responseBody]))
         default:
             break
         }
         
-        return PluginResponse.error("allowed \"command\" values: sync")
-    }
-    
-    // MARK: Common
-    private func eventWithCommand(command: String, args: [String: AnyObject]) -> JSON {
-        var dictionary = [String: AnyObject]()
-        for (k, v) in args {
-            dictionary[k] = v
-        }
-        
-        dictionary["command"] = command
-        return JSON(dictionary: dictionary)
-    }
-    private func merge(id: String, dictionary args: [String: AnyObject]) -> [String: AnyObject] {
-        var dictionary = [String: AnyObject]()
-        for (k, v) in args {
-            dictionary[k] = v
-        }
-        
-        dictionary["id"] = id
-        return dictionary
+        return PluginResponse.error("\"command\" argument is required; allowed values: \"sync\", \"read_configuration\"")
     }
     
     // MARK: Sync process
@@ -120,10 +67,10 @@ class NPSDKConfiguration: Plugin {
         syncRules()
     }
     private func syncDidFailWithError(error: String) {
-        hub?.dispatch(event: PluginEvent(from: name, content: eventWithCommand("sync", args: ["succeeded": false, "error": error])))
+        hub?.dispatch(event: PluginEvent(from: name, content: CorePluginEvent.createWithCommand("sync", args: ["succeeded": false, "error": error])))
     }
     private func syncDidSucceed() {
-        hub?.dispatch(event: PluginEvent(from: name, content: eventWithCommand("sync", args: ["succeeded": true])))
+        hub?.dispatch(event: PluginEvent(from: name, content: CorePluginEvent.createWithCommand("sync", args: ["succeeded": true])))
     }
     private func syncRules() {
         MatchRulesAPI.get { (resources, status) in
@@ -133,7 +80,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for rule in rules.resources {
-                if let ruleObject = ConfigurationRule(dictionary: self.merge(rule.id, dictionary: rule.attributes.dictionary)) {
+                if let ruleObject = ConfigurationRule(dictionary: CorePluginEvent.merge(rule.id, dictionary: rule.attributes.dictionary)) {
                     self.rules[rule.id] = ruleObject
                 }
             }
@@ -149,7 +96,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for beacon in beacons.resources {
-                if let beaconObject = Beacon(dictionary: self.merge(beacon.id, dictionary: beacon.attributes.dictionary)) {
+                if let beaconObject = Beacon(dictionary: CorePluginEvent.merge(beacon.id, dictionary: beacon.attributes.dictionary)) {
                     self.beacons[beacon.id] = beaconObject
                 }
             }
@@ -165,7 +112,7 @@ class NPSDKConfiguration: Plugin {
             }
             
             for content in contents.resources {
-                if let contentObject = EvaluatedContent(dictionary: self.merge(content.id, dictionary: content.attributes.dictionary)) {
+                if let contentObject = EvaluatedContent(dictionary: CorePluginEvent.merge(content.id, dictionary: content.attributes.dictionary)) {
                     self.contents[content.id] = contentObject
                 }
             }
@@ -201,56 +148,65 @@ class NPSDKConfiguration: Plugin {
             }
         }
         
+        var evaluations = [String: ConfigurationBeaconEvaluation]()
         for (beaconID, ruleIDs) in beaconToRules {
             if let key = beaconKeys[beaconID], evaluation = ConfigurationEvaluation(dictionary: ["id": key, "rules": ruleIDs, "detector": "beacon"]) {
+                var ruleToContentIdentifiers = [String: [String: String]]()
+                for id in ruleIDs {
+                    if let rule = rules[id], content = contents[rule.content_id] {
+                        ruleToContentIdentifiers[id] = ["rule_id": id, "content_id": content.id]
+                    }
+                }
+                
+                if let evaluation = ConfigurationBeaconEvaluation(dictionary: ["id": key, "rules_to_contents": Array(ruleToContentIdentifiers.values)]) {
+                    evaluations[key] = evaluation
+                }
+                
                 hub?.cache.store(evaluation, inCollection: Collections.Configuration.Evaluations.rawValue, forPlugin: self)
             }
+        }
+        
+        var evaluatorSyncCommand: [String: AnyObject] = ["command": "sync"]
+        add(contents, toCommand: &evaluatorSyncCommand, withKey: "contents")
+        add(evaluations, toCommand: &evaluatorSyncCommand, withKey: "beacon_evaluations")
+        
+        guard let response = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-evaluator", content: JSON(dictionary: evaluatorSyncCommand))) where response.status == .OK else {
+            clearInMemoryCache()
+            syncDidFailWithError("Cannot sync with plugin NPEvaluator")
+            return
         }
         
         clearInMemoryCache()
         syncDidSucceed()
     }
-    
-    // MARK: Content's evaluation
-    private func evaluate(beacon evaluationIdentifier: String) -> [EvaluatedContent] {
-        guard let
-            rawEvaluation = hub?.cache.resource(evaluationIdentifier, inCollection: Collections.Configuration.Evaluations.rawValue, forPlugin: self),
-            evaluation = ConfigurationEvaluation(dictionary: rawEvaluation.json.dictionary) else {
-                return []
-        }
-        
-        let rules = evaluation.rules
-        var contents = [EvaluatedContent]()
-        for ruleIdentifier in rules {
-            guard let
-                rawRule = hub?.cache.resource(ruleIdentifier, inCollection: Collections.Configuration.Rules.rawValue, forPlugin: self),
-                rule = ConfigurationRule(dictionary: merge(rawRule.id, dictionary: rawRule.json.dictionary)) else {
-                    continue
+    private func add(resources: [String: PluginResource], inout toCommand command: [String: AnyObject], withKey key: String) {
+        for v in resources.values {
+            guard var array = command[key] as? [[String: AnyObject]] else {
+                command[key] = [v.dictionary]
+                continue
             }
             
-            if let
-                rawContent = hub?.cache.resource(rule.content_id, inCollection: Collections.Common.Contents.rawValue, forPlugin: self),
-                content = EvaluatedContent(dictionary: merge(rawContent.id, dictionary: rawContent.json.dictionary)) {
-                    contents.append(content)
-            }
+            array.append(v.dictionary)
+            command[key] = array
         }
-        
-        return contents
     }
     
     // MARK: Read access to configuration
     private func configuredBeacons() -> [Beacon] {
-        guard let resources = hub?.cache.resourcesIn(collection: Collections.Common.Beacons.rawValue, forPlugin: self) where resources.count > 0 else {
+        return configuredResources(Collections.Common.Beacons.rawValue)
+    }
+    private func configuredResources<T: PluginResource>(collectionName: String) -> [T] {
+        guard let resources = hub?.cache.resourcesIn(collection: collectionName, forPlugin: self) where resources.count > 0 else {
             return []
         }
         
-        var beacons = [Beacon]()
+        var result = [T]()
         for resource in resources {
-            if let beacon = Beacon(dictionary: merge(resource.id, dictionary: resource.json.dictionary)) {
-                beacons.append(beacon)
+            if let object = T(dictionary: CorePluginEvent.merge(resource.id, dictionary: resource.json.dictionary)) {
+                result.append(object)
             }
         }
         
-        return beacons
+        return result
     }
 }

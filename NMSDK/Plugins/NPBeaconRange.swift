@@ -69,7 +69,7 @@ class NPBeaconRange: StatefulPlugin, CLLocationManagerDelegate {
     func loadConfiguration() -> [String: NSUUID]? {
         // The SDK should have downloaded beacons' configuration with core plugin NPSDKConfiguration
         guard let
-            configuration = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-sdk-configuration", content: JSON(dictionary: ["command": "read configuration", "scope": "beacons"]))),
+            configuration = hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-sdk-configuration", content: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))),
             beacons = configuration.content.dictionaryArray("objects.beacons") where beacons.count > 0 else {
                 return nil
         }
@@ -91,9 +91,11 @@ class NPBeaconRange: StatefulPlugin, CLLocationManagerDelegate {
             return
         }
         
-        let beacon = beacons[0]
-        let command = JSON(dictionary: ["command": "evaluate", "proximity_uuid": beacon.proximityUUID.UUIDString, "major": beacon.major.integerValue, "minor": beacon.minor.integerValue, "range": beacon.proximity.rawValue])
-        let evaluation = NearSDK.plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: command)
-        hub?.dispatch(event: PluginEvent(from: name, content: evaluation.content))
+        var keys = [String]()
+        for beacon in beacons {
+            keys.append("\(beacon.proximityUUID.UUIDString).\(beacon.major.integerValue).\(beacon.minor.integerValue).\(beacon.proximity.rawValue)")
+        }
+        
+        hub?.send(direct: PluginDirectMessage(from: name, to: "com.nearit.plugin.np-evaluator", content: JSON(dictionary: ["command": "evaluate", "beacon_keys": keys])))
     }
 }

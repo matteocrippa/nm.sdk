@@ -16,6 +16,7 @@ enum Collections {
     enum Configuration: String {
         case Rules = "Rules"
         case Evaluations = "Evaluations"
+        case BeaconEvaluations = "BeaconEvaluations"
     }
     enum Common: String {
         case Beacons = "Beacons"
@@ -47,5 +48,51 @@ class ConfigurationEvaluation: PluginResource {
         }
         
         super.init(dictionary: ["id": id, "rules": rules, "detector": detector])
+    }
+}
+class ConfigurationBeaconEvaluation: PluginResource {
+    var rules_to_contents: [[String: AnyObject]] { return json.dictionaryArray("rules_to_contents", emptyIfNil: true)! }
+    
+    required init?(dictionary object: [String: AnyObject]) {
+        let json = JSON(dictionary: object)
+        guard let id = json.string("id"), rtc = json.dictionaryArray("rules_to_contents", emptyIfNil: true) else {
+            return nil
+        }
+        
+        super.init(dictionary: ["id": id, "rules_to_contents": rtc])
+    }
+}
+class CorePluginEvent {
+    class func createWithCommand(command: String, args: [String: AnyObject]) -> JSON {
+        var dictionary = [String: AnyObject]()
+        for (k, v) in args {
+            dictionary[k] = v
+        }
+        
+        dictionary["command"] = command
+        return JSON(dictionary: dictionary)
+    }
+    class func merge(id: String, dictionary args: [String: AnyObject]) -> [String: AnyObject] {
+        var dictionary = [String: AnyObject]()
+        for (k, v) in args {
+            dictionary[k] = v
+        }
+        
+        dictionary["id"] = id
+        return dictionary
+    }
+    class func configurationBody(resources: [PluginResource], command: String, scope: String) -> JSON {
+        var responseBody = [String: AnyObject]()
+        for resource in resources {
+            guard var contents: [[String: AnyObject]] = responseBody[scope] as? [[String: AnyObject]] else {
+                responseBody[scope] = [resource.json.dictionary]
+                continue
+            }
+            
+            contents.append(resource.json.dictionary)
+            responseBody[scope] = contents
+        }
+        
+        return createWithCommand(command, args: ["scope": scope, "objects": responseBody])
     }
 }

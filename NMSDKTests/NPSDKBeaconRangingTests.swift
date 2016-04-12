@@ -48,32 +48,22 @@ class NPSDKBeaconRangingTests: XCTestCase {
         
         configure("did receive an event which is not related to beacon ranging or sync", expectationDescription: "test start SDK")
     }
-    func testEvaluateKnownBeacon() {
-        SDKDelegate.didReceiveEvaluatedContents = { (contents) -> Void in
-            XCTAssertEqual(contents.count, 1)
-            self.expectation.fulfill()
-        }
-        SDKDelegate.didSync = { (successfully) -> Void in
-            XCTAssertTrue(successfully)
-            
-            let evaluation = NearSDK.plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: THStubs.stubEvaluateBeacon())
-            XCTAssertEqual(evaluation.status, PluginResponseStatus.OK)
-        }
-        
-        configure("did receive an event which is not related to beacon ranging or sync", expectationDescription: "test evaluate known beacon")
-    }
     func testRangeKnownBeacon() {
         let rangePlugin = THBeaconRange(authorizationStatusStub: CLAuthorizationStatus.AuthorizedAlways)
         
         SDKDelegate.didReceiveEvaluatedContents = { (contents) -> Void in
-            XCTAssertEqual(contents.count, 1)
+            for content in contents {
+                print(content.dictionary)
+            }
+            
+            XCTAssertEqual(contents.count, 2)
             self.expectation.fulfill()
         }
         SDKDelegate.didSync = { (successfully) -> Void in
             XCTAssertTrue(successfully)
             
             NearSDK.plugins.plug(rangePlugin)
-            rangePlugin.locationManager(CLLocationManager(), didRangeBeacons: [THStubs.stubBeacon()], inRegion: THStubs.stubBeaconRegion())
+            rangePlugin.locationManager(CLLocationManager(), didRangeBeacons: [THStubs.stubBeacon(major: 1, minor: 1), THStubs.stubBeacon(major: 2, minor: 2)], inRegion: THStubs.stubBeaconRegion())
         }
         
         configure("did receive an event which is not related to beacon ranging or sync", expectationDescription: "test range known beacon")

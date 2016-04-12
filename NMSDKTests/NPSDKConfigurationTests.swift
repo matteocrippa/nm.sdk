@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import CoreLocation
 import NMJSON
 import NMPlug
 @testable import NMSDK
@@ -34,11 +35,14 @@ class NPSDKConfigurationTests: XCTestCase {
         
         configure("did receive an event which is not related to sync", expectationDescription: "test sync")
     }
-    func testReadConfiguration() {
+    func testReadBeaconsConfiguration() {
         SDKDelegate.didSync = { (successfully) -> Void in
             XCTAssertTrue(successfully)
             
-            let beacons = NearSDK.plugins.run("com.nearit.plugin.np-sdk-configuration", withArguments: JSON(dictionary: ["command": "read configuration", "scope": "beacons"]))
+            let beacons = NearSDK.plugins.run(
+                "com.nearit.plugin.np-sdk-configuration",
+                withArguments: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))
+            
             XCTAssertEqual(beacons.status, PluginResponseStatus.OK)
             XCTAssertEqual(beacons.content.dictionaryArray("objects.beacons", emptyIfNil: true)!.count, 3)
             self.expectation.fulfill()
