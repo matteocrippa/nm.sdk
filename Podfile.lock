@@ -12,7 +12,7 @@ PODS:
   - NMCache (0.2.1):
     - YapDatabase (~> 2.8)
   - NMJSON (1.1.1)
-  - NMNet (0.1.5):
+  - NMNet (0.2):
     - Alamofire (~> 3.0)
     - NMJSON (~> 1.0)
   - NMPlug (0.6):
@@ -79,7 +79,7 @@ PODS:
 
 DEPENDENCIES:
   - JWTDecode (~> 1.0)
-  - NMNet (~> 0.1)
+  - NMNet (~> 0.2)
   - NMPlug (~> 0.6)
   - OHHTTPStubs
   - OHHTTPStubs/Swift
@@ -90,7 +90,7 @@ SPEC CHECKSUMS:
   JWTDecode: d172edcb1607cc15aed85d58eceedcbb675a4534
   NMCache: 67e5ad7aaa81ffca9a00a9dc94204c158bbca55e
   NMJSON: fef15e5d1e783e666c1720ee92a4d739028018d3
-  NMNet: 6b6448a7d712b7baf21ddbdeb302579a5fafc1a0
+  NMNet: 19bebc716c7bc189fb194fb25a5de508fd18c047
   NMPlug: 8bdd9e442160a659ee50644d6ce6f8985c4e9e83
   OHHTTPStubs: a5d2e9eea07869d42ec03338325f398bc520e159
   YapDatabase: 15b6867a07ff30eac3af28794cd2262b4d0ca4ca
