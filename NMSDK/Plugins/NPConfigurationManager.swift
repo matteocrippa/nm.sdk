@@ -14,10 +14,7 @@ import NMCache
 
 class NPConfigurationManager {
     // MARK: In-memory cache
-    private var rules = [String: ConfigurationRule]()
-    private var beacons = [String: Beacon]()
-    private var contents = [String: EvaluatedContent]()
-    private var beaconForestNodes = [String: BeaconForestNode]()
+    private var beaconForestNodes = [String: APBeaconForestNode]()
     private (set) var plugin: Pluggable!
     
     // MARK: Sync process
@@ -27,12 +24,9 @@ class NPConfigurationManager {
         API.timeoutInterval = timeoutInterval
         
         clearInMemoryCache()
-        syncRules()
+        downloadBeaconForest()
     }
     private func clearInMemoryCache() {
-        rules = [: ]
-        beacons = [: ]
-        contents = [: ]
         beaconForestNodes = [: ]
     }
     private func syncDidFailWithError(error: String) {
@@ -41,122 +35,68 @@ class NPConfigurationManager {
     private func syncDidSucceed() {
         plugin.hub?.dispatch(event: PluginEvent(from: plugin.name, content: CorePluginEvent.createWithCommand("sync", args: ["succeeded": true])))
     }
-    private func syncRules() {
-        MatchRulesAPI.get { (resources, status) in
-            guard let rules = resources where status == .OK else {
-                self.syncDidFailWithError("Cannot download match rules")
-                return
-            }
-            
-            for rule in rules.resources {
-                if let ruleObject = ConfigurationRule(dictionary: CorePluginEvent.merge(rule.id, dictionary: rule.attributes.dictionary)) {
-                    self.rules[rule.id] = ruleObject
-                }
-            }
-            
-            self.syncBeacons()
-        }
-    }
-    private func syncBeacons() {
-        BeaconsAPI.get { (resources, status) in
-            guard let beacons = resources where status == .OK else {
+    
+    // MARK: nearit.com "BeaconForest" plugin integration
+    private func downloadBeaconForest() {
+        APBeaconForest.get { (resources, status) in
+            guard let forest = resources where status == .OK else {
                 self.syncDidFailWithError("Cannot download beacons' configuration")
                 return
             }
             
-            for beacon in beacons.resources {
-                if let beaconObject = Beacon(dictionary: CorePluginEvent.merge(beacon.id, dictionary: beacon.attributes.dictionary)) {
-                    self.beacons[beacon.id] = beaconObject
-                }
-            }
-            
-            self.syncContents()
-        }
-    }
-    private func syncContents() {
-        ContentsAPI.get { (resources, status) in
-            guard let contents = resources where status == .OK else {
-                self.syncDidFailWithError("Cannot download beacons' configuration - Ranging")
-                return
-            }
-            
-            for content in contents.resources {
-                if let contentObject = EvaluatedContent(dictionary: CorePluginEvent.merge(content.id, dictionary: content.attributes.dictionary)) {
-                    self.contents[content.id] = contentObject
-                }
-            }
+            var nodes = [String: APBeaconForestNode]()
+            self.parseBeaconForestNodes(forest.resources, storeInto: &nodes)
+            self.parseBeaconForestNodes(Array(forest.included.values), storeInto: &nodes, ignoredIdentifiers: Array(nodes.keys))
             
             self.completeSync()
         }
     }
+    private func parseBeaconForestNodes(collection: [APIResource], inout storeInto target: [String: APBeaconForestNode], ignoredIdentifiers: [String] = []) {
+        for resource in collection where !ignoredIdentifiers.contains(resource.id) {
+            guard let UUIDString = resource.attributes.string("uuid") where NSUUID(UUIDString: UUIDString) != nil else {
+                continue
+            }
+            
+            var dictionary: [String: AnyObject] = ["id": resource.id, "uuid": UUIDString]
+            if let major = resource.attributes.int("major"), minor = resource.attributes.int("minor") {
+                dictionary["major"] = major
+                dictionary["minor"] = minor
+            }
+            
+            var children = [String]()
+            if let childrenRelationship = resource.relationships["children"]?.resources {
+                for child in childrenRelationship where !children.contains(child.id) {
+                    children.append(child.id)
+                }
+            }
+            dictionary["children"] = children
+            
+            if let parentRelationship = resource.relationships["parent"]?.resources.first {
+                dictionary["parent"] = parentRelationship.id
+            }
+            
+            if let node = APBeaconForestNode(dictionary: dictionary) {
+                target[node.id] = node
+            }
+        }
+    }
+    
+    // MARK: Common
     private func completeSync() {
         plugin.hub?.cache.removeAllResourcesWithPlugin(plugin)
         
-        var beaconToRules: [String: [String]] = [: ]
-        var beaconKeys: [String: String] = [: ]
-        
-        for content in contents.values {
-            plugin.hub?.cache.store(content, inCollection: Collections.Common.Contents.rawValue, forPlugin: plugin)
-        }
-        
-        for beacon in beacons.values {
-            plugin.hub?.cache.store(beacon, inCollection: Collections.Common.Beacons.rawValue, forPlugin: plugin)
-            beaconKeys[beacon.id] = beacon.key
-        }
-        
-        for rule in rules.values {
-            plugin.hub?.cache.store(rule, inCollection: Collections.Configuration.Rules.rawValue, forPlugin: plugin)
-            guard var map = beaconToRules[rule.beacon_id] else {
-                beaconToRules[rule.beacon_id] = [rule.id]
-                continue
-            }
-            
-            if !map.contains(rule.id) {
-                map.append(rule.id)
-                beaconToRules[rule.beacon_id] = map
+        for (id, node) in beaconForestNodes {
+            if let resource = PluginResource(dictionary: ["id": id, "uuid": node.proximityUUID.UUIDString]) {
+                plugin.hub?.cache.store(resource, inCollection: "RangedRegions", forPlugin: plugin)
             }
         }
         
-        var evaluations = [String: ConfigurationBeaconEvaluation]()
-        for (beaconID, ruleIDs) in beaconToRules {
-            if let key = beaconKeys[beaconID], evaluation = ConfigurationEvaluation(dictionary: ["id": key, "rules": ruleIDs, "detector": "beacon"]) {
-                var ruleToContentIdentifiers = [String: [String: String]]()
-                for id in ruleIDs {
-                    if let rule = rules[id], content = contents[rule.content_id] {
-                        ruleToContentIdentifiers[id] = ["rule_id": id, "content_id": content.id]
-                    }
-                }
-                
-                if let evaluation = ConfigurationBeaconEvaluation(dictionary: ["id": key, "rules_to_contents": Array(ruleToContentIdentifiers.values)]) {
-                    evaluations[key] = evaluation
-                }
-                
-                plugin.hub?.cache.store(evaluation, inCollection: Collections.Configuration.Evaluations.rawValue, forPlugin: plugin)
+        for (id, node) in beaconForestNodes {
+            if let resource = PluginResource(dictionary: ["id": id, "uuid": node.proximityUUID.UUIDString, "region_identifier": node.identifier]) {
+                plugin.hub?.cache.store(resource, inCollection: "MonitoredRegions", forPlugin: plugin)
             }
         }
         
-        var evaluatorSyncCommand: [String: AnyObject] = ["command": "sync"]
-        add(contents, toCommand: &evaluatorSyncCommand, withKey: "contents")
-        add(evaluations, toCommand: &evaluatorSyncCommand, withKey: "beacon_evaluations")
-        
-        guard let response = plugin.hub?.send(direct: PluginDirectMessage(from: plugin.name, to: "com.nearit.plugin.np-evaluator", content: JSON(dictionary: evaluatorSyncCommand))) where response.status == .OK else {
-            clearInMemoryCache()
-            syncDidFailWithError("Cannot sync with plugin NPEvaluator")
-            return
-        }
-        
-        clearInMemoryCache()
         syncDidSucceed()
-    }
-    private func add(resources: [String: PluginResource], inout toCommand command: [String: AnyObject], withKey key: String) {
-        for v in resources.values {
-            guard var array = command[key] as? [[String: AnyObject]] else {
-                command[key] = [v.dictionary]
-                continue
-            }
-            
-            array.append(v.dictionary)
-            command[key] = array
-        }
     }
 }

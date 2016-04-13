@@ -77,8 +77,8 @@ class NPBeaconRange: StatefulPlugin, CLLocationManagerDelegate {
         // Get only "unique" regions, i.e. all configured unique identifiers
         var rangedRegions = [String: NSUUID]()
         for beacon in beacons {
-            if let object = Beacon(dictionary: beacon) {
-                rangedRegions["region-\(object.uuid.UUIDString)"] = object.uuid
+            if let object = PluginResource(dictionary: beacon), UUIDString = object.json.string("uuid"), UUID = NSUUID(UUIDString: UUIDString) {
+                rangedRegions["ranged-region-\(UUID.UUIDString)"] = UUID
             }
         }
         

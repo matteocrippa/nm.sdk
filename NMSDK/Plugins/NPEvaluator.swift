@@ -53,39 +53,8 @@ class NPEvaluator: Plugin {
     // MARK: Content's evaluation
     private func syncConfiguration(evaluations: [[String: AnyObject]], contents: [[String: AnyObject]]) {
         hub?.cache.removeAllResourcesWithPlugin(self)
-        
-        for evaluation in evaluations {
-            if let resource = ConfigurationBeaconEvaluation(dictionary: evaluation) {
-                hub?.cache.store(resource, inCollection: Collections.Configuration.BeaconEvaluations.rawValue, forPlugin: self)
-            }
-        }
-        
-        for content in contents {
-            if let resource = EvaluatedContent(dictionary: content) {
-                hub?.cache.store(resource, inCollection: Collections.Common.Contents.rawValue, forPlugin: self)
-            }
-        }
     }
     private func evaluateBeacons(keys: [String]) -> [EvaluatedContent] {
-        var contents = [String: EvaluatedContent]()
-        
-        for key in keys {
-            guard let
-                beaconEvaluation = hub?.cache.resource(key, inCollection: Collections.Configuration.BeaconEvaluations.rawValue, forPlugin: self),
-                map = beaconEvaluation.json.dictionaryArray("rules_to_contents") else {
-                    continue
-            }
-            
-            for kv in map {
-                if let
-                    cid = kv["content_id"] as? String,
-                    resource = hub?.cache.resource(cid, inCollection: Collections.Common.Contents.rawValue, forPlugin: self),
-                    content = EvaluatedContent(dictionary: resource.json.dictionary) {
-                        contents[cid] = content
-                }
-            }
-        }
-        
-        return Array(contents.values)
+        return []
     }
 }

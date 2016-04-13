@@ -76,9 +76,7 @@ class NPBeaconRangingTests: XCTestCase {
             self.expectation.fulfill()
         }
         
-        THStubs.stubBeacons()
-        THStubs.stubContents()
-        THStubs.stubMatchRules()
+        THStubs.stubConfigurationAPIResponse()
         
         expectation = expectationWithDescription(expectationDescription)
         XCTAssertTrue(NearSDK.sync())

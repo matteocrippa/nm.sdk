@@ -34,14 +34,16 @@ class NPConfiguration: Plugin {
             return PluginResponse.ok()
         case "read_configuration":
             guard let scope = arguments.string("scope") else {
-                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
+                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"ranged_beacon_regions\" or \"monitored_beacon_regions\"")
             }
             
             switch scope {
-            case "beacons":
-                return PluginResponse.ok(CorePluginEvent.configurationBody(NPConfigurationReader.configuredBeacons(self), command: command, scope: scope))
+            case "ranged_beacon_regions":
+                return PluginResponse.ok(CorePluginEvent.configurationBody(hub?.cache.resourcesIn(collection: "RangedRegions", forPlugin: self) ?? [], command: command, scope: scope))
+            case "monitored_beacon_regions":
+                return PluginResponse.ok(CorePluginEvent.configurationBody(hub?.cache.resourcesIn(collection: "MonitoredRegions", forPlugin: self) ?? [], command: command, scope: scope))
             default:
-                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"beacons\"")
+                return PluginResponse.error("\"read_configuration\" command requires argument \"scope\" to be equal to \"ranged_beacon_regions\" or \"monitored_beacon_regions\"")
             }
         default:
             break
