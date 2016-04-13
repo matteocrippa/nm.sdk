@@ -10,6 +10,8 @@
 		A7CDA9114DC2E337268AA49D /* Pods_NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21A5FD9B31901D7F8EB1F372 /* Pods_NMSDK.framework */; };
 		B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50BCB741CBBD2DE005F7E86 /* THStubs.swift */; };
 		B51621841CBCF1B7001F9D8B /* NPEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51621831CBCF1B7001F9D8B /* NPEvaluator.swift */; };
+		B527D5F31CBE2C4F00CE7660 /* NPConfigurationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B527D5F21CBE2C4F00CE7660 /* NPConfigurationManager.swift */; };
+		B527D5F51CBE2E1000CE7660 /* NPConfigurationReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B527D5F41CBE2E1000CE7660 /* NPConfigurationReader.swift */; };
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
@@ -47,6 +49,8 @@
 		AEC1310B8820100AA9AE6EB4 /* Pods-NMSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NMSDKTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NMSDKTests/Pods-NMSDKTests.release.xcconfig"; sourceTree = "<group>"; };
 		B50BCB741CBBD2DE005F7E86 /* THStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THStubs.swift; sourceTree = "<group>"; };
 		B51621831CBCF1B7001F9D8B /* NPEvaluator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPEvaluator.swift; sourceTree = "<group>"; };
+		B527D5F21CBE2C4F00CE7660 /* NPConfigurationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPConfigurationManager.swift; sourceTree = "<group>"; };
+		B527D5F41CBE2E1000CE7660 /* NPConfigurationReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPConfigurationReader.swift; sourceTree = "<group>"; };
 		B52AF6E11CB7BE4700769ECE /* NMSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NMSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52AF6E41CB7BE4700769ECE /* NMSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NMSDK.h; sourceTree = "<group>"; };
 		B52AF6E61CB7BE4700769ECE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -170,9 +174,27 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
+		B5FA6CB31CBD6E94005F270D /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				B5FA83B61CB7E6F70090E5CD /* NPConfiguration.swift */,
+				B527D5F41CBE2E1000CE7660 /* NPConfigurationReader.swift */,
+				B527D5F21CBE2C4F00CE7660 /* NPConfigurationManager.swift */,
+			);
+			name = Configuration;
+			sourceTree = "<group>";
+		};
+		B5FA6CB61CBD71A6005F270D /* APIPlugins */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = APIPlugins;
+			sourceTree = "<group>";
+		};
 		B5FA83AF1CB7DCFC0090E5CD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				B5FA6CB61CBD71A6005F270D /* APIPlugins */,
 				B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */,
 				B5CAB2101CBBF8CC00FDB39F /* EvaluatedContent.swift */,
 				B5CAB2141CBC06C500FDB39F /* Beacon.swift */,
@@ -192,8 +214,8 @@
 		B5FA83B51CB7E6DE0090E5CD /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				B5FA6CB31CBD6E94005F270D /* Configuration */,
 				B5CAB20C1CBBD89300FDB39F /* Helpers.swift */,
-				B5FA83B61CB7E6F70090E5CD /* NPConfiguration.swift */,
 				B51621831CBCF1B7001F9D8B /* NPEvaluator.swift */,
 				B5CAB2121CBC05EA00FDB39F /* NPBeaconRange.swift */,
 			);
@@ -401,6 +423,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5CAB20D1CBBD89300FDB39F /* Helpers.swift in Sources */,
+				B527D5F51CBE2E1000CE7660 /* NPConfigurationReader.swift in Sources */,
+				B527D5F31CBE2C4F00CE7660 /* NPConfigurationManager.swift in Sources */,
 				B5CAB2181CBC165800FDB39F /* NPBeaconRange.swift in Sources */,
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CAB2111CBBF8CC00FDB39F /* EvaluatedContent.swift in Sources */,
