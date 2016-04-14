@@ -15,46 +15,72 @@ class THStubs {
     class func clear() {
         OHHTTPStubs.removeAllStubs()
     }
-    class func stubBeacons() {
-        stub(isHost("api.nearit.com") && isPath("/detectors/beacons")) { (response) -> OHHTTPStubsResponse in
-            var beacons = [APIResource]()
-            for i in 1...3 {
-                let attributes = JSON(dictionary: [
-                    "name": "beacon \(i)",
-                    "major": i,
-                    "minor": i,
-                    "proximity_uuid": "00000000-0000-0000-0000-000000000000",
-                    "range": CLProximity.Near.rawValue])
-                beacons.append(APIResource(type: "beacons", id: "beacon_\(i)", attributes: attributes, relationships: [: ]))
-            }
-            
-            return OHHTTPStubsResponse(JSONObject: APIResourceCollection(resources: beacons).json(), statusCode: 200, headers: nil)
+    
+    class func stubConfigurationAPIResponse() {
+        stubAPBeaconForestResponse()
+        stubAPRecipesResponse()
+    }
+    
+    private class func stubAPBeaconForestResponse() {
+        let root1 = [
+            "id": "PARENT-1", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1],
+            "relationships": [
+                "parent": ["data": NSNull()],
+                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"]]]]]
+        let root2 = [
+            "id": "PARENT-2", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 2],
+            "relationships": [
+                "parent": ["data": NSNull()],
+                "children": ["data": [["id": "CHILD-1.PARENT-2", "type": "beacons"], ["id": "CHILD-2.PARENT-2", "type": "beacons"]]]]]
+        
+        let included1 = [
+            "id": "CHILD-1.PARENT-1", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 10, "minor": 1],
+            "relationships": [
+                "parent": ["data": ["id": "PARENT-1", "type": "beacons"]],
+                "children": ["data": []]]]
+        let included2 = [
+            "id": "CHILD-2.PARENT-1", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 10, "minor": 2],
+            "relationships": [
+                "parent": ["data": ["id": "PARENT-1", "type": "beacons"]],
+                "children": ["data": []]]]
+        let included3 = [
+            "id": "CHILD-1.PARENT-2", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 20, "minor": 1],
+            "relationships": [
+                "parent": ["data": ["id": "PARENT-2", "type": "beacons"]],
+                "children": ["data": []]]]
+        let included4 = [
+            "id": "CHILD-2.PARENT-2", "type": "beacons",
+            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 20, "minor": 2],
+            "relationships": [
+                "parent": ["data": ["id": "PARENT-2", "type": "beacons"]],
+                "children": ["data": []]]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/beacons")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [root1, root2], "included": [included1, included2, included3, included4]], statusCode: 200, headers: nil)
         }
     }
-    class func stubContents() {
-        stub(isHost("api.nearit.com") && isPath("/contents")) { (response) -> OHHTTPStubsResponse in
-            var contents = [APIResource]()
-            for i in 1...3 {
-                let attributes = JSON(dictionary: [
-                    "app_id": "app id",
-                    "title": "content \(i)",
-                    "short_description": "short \(i)",
-                    "long_description": "long description \(1)"])
-                contents.append(APIResource(type: "contents", id: "content_\(i)", attributes: attributes, relationships: [: ]))
-            }
-            
-            return OHHTTPStubsResponse(JSONObject: APIResourceCollection(resources: contents).json(), statusCode: 200, headers: nil)
-        }
-    }
-    class func stubMatchRules() {
-        stub(isHost("api.nearit.com") && isPath("/matchings")) { (response) -> OHHTTPStubsResponse in
-            var rules = [APIResource]()
-            for i in 1...3 {
-                let attributes = JSON(dictionary: ["content_id": "content_\(i)", "app_id": "app id", "beacon_id": "beacon_\(i)"])
-                rules.append(APIResource(type: "matchings", id: "rule_\(i)", attributes: attributes, relationships: [: ]))
-            }
-            
-            return OHHTTPStubsResponse(JSONObject: APIResourceCollection(resources: rules).json(), statusCode: 200, headers: nil)
+    private class func stubAPRecipesResponse() {
+        let recipe1 = [
+            "id": "RECIPE-1", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 1 name",
+                "pulse_ingredient_id": "beacon-forest",                                     // The name of the plugin (server-side) which produced the information which triggers the recipe
+                "pulse_slice_id": "00000000-0000-0000-0000-000000000000.1.1",               // The identifier of the object which triggers the recipe
+                
+                "reaction_ingredient_id": "content",                                        // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
+                "reaction_slice_id": "CONTENT-1"                                            // The identifier of the information which is produced upon triggering the recipe
+            ],
+            "relationships": [
+                "pulse_flavor": ["data": ["id": "enter_region", "type": "pulse_flavors"]]]  // The action which triggers the recipe
+        ]
+        
+        stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1]], statusCode: 200, headers: nil)
         }
     }
     

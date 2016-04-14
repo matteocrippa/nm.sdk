@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.requires_arc          = true
 
   s.dependency              'NMPlug', '~> 0.6'
-  s.dependency              'NMNet', '~> 0.1'
+  s.dependency              'NMNet', '~> 0.2'
   s.dependency              'JWTDecode', '~> 1.0'
 
 end
