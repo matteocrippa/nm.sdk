@@ -40,31 +40,17 @@ class NPRecipes: Plugin {
         API.authorizationToken = appToken
         API.timeoutInterval = timeoutInterval ?? 10.0
         
-        APRecipes.get { (resources, status) in
-            self.parseResources(resources, status: status)
-        }
-    }
-    private func parseResources(resources: APIResourceCollection?, status: HTTPStatusCode) {
-        guard let recipes = resources where status == .OK else {
-            return
-        }
-        
-        hub?.cache.removeAllResourcesWithPlugin(self)
-        for recipe in recipes.resources {
-            guard let
-                inType = recipe.attributes.string("pulse_ingredient_id"),
-                inIdentifier = recipe.attributes.string("pulse_slice_id"),
-                outType = recipe.attributes.string("reaction_ingredient_id"),
-                outIdentifier = recipe.attributes.string("reaction_slice_id") else {
-                    continue
+        APRecipes.get { (recipes, status) in
+            if status != .OK {
+                return
             }
             
-            if let resource = APRecipe(dictionary: ["id": "\(inType).\(inIdentifier)", "out-type": outType, "out-identifier": outIdentifier]) {
-                hub?.cache.store(resource, inCollection: "Recipes", forPlugin: self)
+            self.hub?.cache.removeAllResourcesWithPlugin(self)
+            for recipe in recipes {
+                self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
             }
+            
+            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
-        
-        hub?.dispatch(event: PluginEvent(from: name, content: JSON(dictionary: ["operation": "sync"])))
     }
 }
-
