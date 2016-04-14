@@ -29,7 +29,7 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [NPBeaconForest()]
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
@@ -127,11 +127,12 @@ public class NearSDK: NSObject, Extensible {
     /// MARK: Management of core plugins used by the SDK
     /// Starts the SDK
     public class func start() -> Bool {
-        for name in corePluginNames where plugins.run(name, withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status != .OK  {
-            return false
-        }
+        var result = true
         
-        return true
+        result = result && (plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK)
+        result = result && (plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK)
+        
+        return result
     }
     
     /// MARK: NMPlug.Extensible

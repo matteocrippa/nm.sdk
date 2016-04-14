@@ -46,6 +46,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         parseBeaconForestNodes(forest.resources, storeInto: &nodes)
         parseBeaconForestNodes(Array(forest.included.values), storeInto: &nodes, ignoredIdentifiers: Array(nodes.keys))
         
+        hub?.cache.removeAllResourcesWithPlugin(self)
         for node in nodes.values {
             hub?.cache.store(node, inCollection: "Regions", forPlugin: self)
         }

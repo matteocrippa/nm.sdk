@@ -65,14 +65,14 @@ class THStubs {
         }
     }
     private class func stubAPRecipesResponse() {
-        let recipe1 = [
+        let beaconForestRecipe = [
             "id": "RECIPE-1", "type": "recipes",
             "attributes": [
                 "name": "Recipe 1 name",
                 "pulse_ingredient_id": "beacon-forest",                                     // The name of the plugin (server-side) which produced the information which triggers the recipe
                 "pulse_slice_id": "00000000-0000-0000-0000-000000000000.1.1",               // The identifier of the object which triggers the recipe
                 
-                "reaction_ingredient_id": "content",                                        // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
+                "reaction_ingredient_id": "content-notification",                           // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
                 "reaction_slice_id": "CONTENT-1"                                            // The identifier of the information which is produced upon triggering the recipe
             ],
             "relationships": [
@@ -80,7 +80,7 @@ class THStubs {
         ]
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [beaconForestRecipe]], statusCode: 200, headers: nil)
         }
     }
     
