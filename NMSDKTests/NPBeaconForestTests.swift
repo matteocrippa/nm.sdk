@@ -1,5 +1,5 @@
 //
-//  NPConfigurationTests.swift
+//  NPBeaconForestTests.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 08/04/16.
@@ -12,7 +12,7 @@ import NMJSON
 import NMPlug
 @testable import NMSDK
 
-class NPConfigurationTests: XCTestCase {
+class NPBeaconForestTests: XCTestCase {
     var expectation: XCTestExpectation!
     let SDKDelegate = THSDKDelegate()
     
@@ -28,47 +28,36 @@ class NPConfigurationTests: XCTestCase {
     }
     
     func testSync() {
-        SDKDelegate.didSync = { (successfully) -> Void in
-            XCTAssertTrue(successfully)
-            self.expectation.fulfill()
+        var pluginsLeft = [String: Bool]()
+        for name in NearSDK.corePluginNames {
+            pluginsLeft[name] = true
+        }
+        
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginsLeft.removeValueForKey(event.from)
+            
+            if pluginsLeft.count <= 0 {
+                self.expectation.fulfill()
+            }
         }
         
         configure("did receive an event which is not related to sync", expectationDescription: "test sync")
-    }
-    func testReadBeaconsConfiguration() {
-        SDKDelegate.didSync = { (successfully) -> Void in
-            XCTAssertTrue(successfully)
-            
-            let beacons = NearSDK.plugins.run(
-                "com.nearit.plugin.np-configuration",
-                withArguments: JSON(dictionary: ["command": "read_configuration", "scope": "beacons"]))
-            
-            XCTAssertEqual(beacons.status, PluginResponseStatus.OK)
-            XCTAssertEqual(beacons.content.dictionaryArray("objects.beacons", emptyIfNil: true)!.count, 3)
-            self.expectation.fulfill()
-        }
-        
-        configure("did receive an event which is not related to sync", expectationDescription: "test read configuration")
+        XCTAssertTrue(NearSDK.start())
     }
     
     // MARK: Helper functions
     private func configure(failMessage: String, expectationDescription: String) {
-        SDKDelegate.didReceiveEvent = { (event) -> Void in
-            XCTFail(failMessage)
-            self.expectation.fulfill()
-        }
-        
         THStubs.stubConfigurationAPIResponse()
         
         expectation = expectationWithDescription(expectationDescription)
-        XCTAssertTrue(NearSDK.sync())
+        XCTAssertTrue(NearSDK.start())
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     private func reset(appToken: String = "") {
         SDKDelegate.didReceiveEvaluatedContents = nil
         SDKDelegate.didReceiveEvent = nil
-        SDKDelegate.didSync = nil
+        NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         NearSDK.appToken = appToken
         THStubs.clear()

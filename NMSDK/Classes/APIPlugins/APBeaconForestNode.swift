@@ -18,15 +18,6 @@ class APBeaconForestNode: PluginResource {
     var isRoot: Bool { return parent != nil }
     var children: [String] { return json.stringArray("children", emptyIfNil: true)! }
     
-    var identifier: String {
-        var identifier = "\(proximityUUID.UUIDString)"
-        if let maj = major, min = minor {
-            identifier = "\(identifier).\(maj).\(min)"
-        }
-        
-        return identifier
-    }
-    
     required init?(dictionary object: [String : AnyObject]) {
         let json = JSON(dictionary: object)
         guard let id = json.string("id"), UUIDString = json.string("uuid") where NSUUID(UUIDString: UUIDString) != nil else {

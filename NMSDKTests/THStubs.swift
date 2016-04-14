@@ -17,10 +17,11 @@ class THStubs {
     }
     
     class func stubConfigurationAPIResponse() {
-        stubBeaconForest()
+        stubAPBeaconForestResponse()
+        stubAPRecipesResponse()
     }
     
-    private class func stubBeaconForest() {
+    private class func stubAPBeaconForestResponse() {
         let root1 = [
             "id": "PARENT-1", "type": "beacons",
             "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1],
@@ -61,6 +62,25 @@ class THStubs {
         
         stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/beacons")) { (response) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [root1, root2], "included": [included1, included2, included3, included4]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipesResponse() {
+        let recipe1 = [
+            "id": "RECIPE-1", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 1 name",
+                "pulse_ingredient_id": "beacon-forest",                                     // The name of the plugin (server-side) which produced the information which triggers the recipe
+                "pulse_slice_id": "00000000-0000-0000-0000-000000000000.1.1",               // The identifier of the object which triggers the recipe
+                
+                "reaction_ingredient_id": "content",                                        // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
+                "reaction_slice_id": "CONTENT-1"                                            // The identifier of the information which is produced upon triggering the recipe
+            ],
+            "relationships": [
+                "pulse_flavor": ["data": ["id": "enter_region", "type": "pulse_flavors"]]]  // The action which triggers the recipe
+        ]
+        
+        stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1]], statusCode: 200, headers: nil)
         }
     }
     
