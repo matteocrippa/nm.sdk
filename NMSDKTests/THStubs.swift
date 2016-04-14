@@ -19,6 +19,9 @@ class THStubs {
     class func stubConfigurationAPIResponse() {
         stubAPBeaconForestResponse()
         stubAPRecipesResponse()
+        stubAPRecipeSimpleNotificationReactions()
+        stubAPRecipeContentReactions()
+        stubAPRecipePollReactions()
     }
     
     private class func stubAPBeaconForestResponse() {
@@ -65,14 +68,14 @@ class THStubs {
         }
     }
     private class func stubAPRecipesResponse() {
-        let recipe1 = [
+        let beaconForestRecipe = [
             "id": "RECIPE-1", "type": "recipes",
             "attributes": [
                 "name": "Recipe 1 name",
                 "pulse_ingredient_id": "beacon-forest",                                     // The name of the plugin (server-side) which produced the information which triggers the recipe
                 "pulse_slice_id": "00000000-0000-0000-0000-000000000000.1.1",               // The identifier of the object which triggers the recipe
                 
-                "reaction_ingredient_id": "content",                                        // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
+                "reaction_ingredient_id": "content-notification",                           // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
                 "reaction_slice_id": "CONTENT-1"                                            // The identifier of the information which is produced upon triggering the recipe
             ],
             "relationships": [
@@ -80,7 +83,31 @@ class THStubs {
         ]
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [beaconForestRecipe]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipeContentReactions() {
+        let content1 = ["id": "CONTENT-1", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
+        let content2 = ["id": "CONTENT-2", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull()]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipeSimpleNotificationReactions() {
+        let notification1 = ["id": "NOTIFICATION-1", "type": "notifications", "attributes": ["text": "<notification's text>"]]
+        let notification2 = ["id": "NOTIFICATION-2", "type": "notifications", "attributes": ["text": "<notification's text>"]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/simple-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [notification1, notification2]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipePollReactions() {
+        let poll1 = ["id": "POLL-1", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        let poll2 = ["id": "POLL-2", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [poll1, poll2]], statusCode: 200, headers: nil)
         }
     }
     

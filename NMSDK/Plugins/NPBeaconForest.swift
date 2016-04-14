@@ -33,55 +33,25 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         API.authorizationToken = appToken
         API.timeoutInterval = timeoutInterval ?? 10.0
         
-        APBeaconForest.get { (resources, status) in
-            self.parseResources(resources, status: status)
-        }
-    }
-    private func parseResources(resources: APIResourceCollection?, status: HTTPStatusCode) {
-        guard let forest = resources where status == .OK else {
-            return
-        }
-        
-        var nodes = [String: APBeaconForestNode]()
-        parseBeaconForestNodes(forest.resources, storeInto: &nodes)
-        parseBeaconForestNodes(Array(forest.included.values), storeInto: &nodes, ignoredIdentifiers: Array(nodes.keys))
-        
-        for node in nodes.values {
-            hub?.cache.store(node, inCollection: "Regions", forPlugin: self)
-        }
-        
-        hub?.dispatch(event: PluginEvent(from: name, content: JSON(dictionary: ["operation": "sync"])))
-    }
-    private func parseBeaconForestNodes(collection: [APIResource], inout storeInto target: [String: APBeaconForestNode], ignoredIdentifiers: [String] = []) {
-        for resource in collection where !ignoredIdentifiers.contains(resource.id) {
-            guard let UUIDString = resource.attributes.string("uuid") where NSUUID(UUIDString: UUIDString) != nil else {
-                continue
+        APBeaconForest.get { (nodes, status) in
+            if status != .OK {
+                return
             }
             
-            var dictionary: [String: AnyObject] = ["id": resource.id, "uuid": UUIDString]
-            if let major = resource.attributes.int("major"), minor = resource.attributes.int("minor") {
-                dictionary["major"] = major
-                dictionary["minor"] = minor
+            self.hub?.cache.removeAllResourcesWithPlugin(self)
+            for node in nodes {
+                self.hub?.cache.store(node, inCollection: "Regions", forPlugin: self)
             }
             
-            var children = [String]()
-            if let childrenRelationship = resource.relationships["children"]?.resources {
-                for child in childrenRelationship where !children.contains(child.id) {
-                    children.append(child.id)
-                }
-            }
-            dictionary["children"] = children
-            
-            if let parentRelationship = resource.relationships["parent"]?.resources.first {
-                dictionary["parent"] = parentRelationship.id
-            }
-            
-            if let node = APBeaconForestNode(dictionary: dictionary) {
-                target[node.id] = node
-            }
+            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
     }
     
-    // MARK: Start monitoring
-    
+    // MARK: Region monitoring
+    private func startMonitoringRegions() {
+        // TODO: must be implemented
+    }
+    private func stopMonitoringRegions() {
+        // TODO: must be implemented
+    }
 }
