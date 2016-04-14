@@ -15,6 +15,9 @@
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */; };
 		B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */; };
+		B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */; };
+		B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */; };
+		B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */; };
 		B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */; };
 		B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */; };
 		B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */; };
@@ -50,6 +53,9 @@
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForest.swift; sourceTree = "<group>"; };
 		B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipes.swift; sourceTree = "<group>"; };
+		B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionContent.swift; sourceTree = "<group>"; };
+		B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionSimpleNotification.swift; sourceTree = "<group>"; };
+		B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionPoll.swift; sourceTree = "<group>"; };
 		B5FA83AE1CB7D8290090E5CD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDK.swift; sourceTree = "<group>"; };
 		B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKTests.swift; sourceTree = "<group>"; };
@@ -174,6 +180,9 @@
 			children = (
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
+				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
+				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
+				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -379,6 +388,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
+				B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */,
+				B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */,
+				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */,
 				B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */,

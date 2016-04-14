@@ -46,15 +46,11 @@ class NearSDKTests: XCTestCase {
         XCTAssertEqualWithAccuracy(NearSDK.apiTimeoutInterval, 10.0, accuracy: DBL_EPSILON)
     }
     func testStart() {
-        var pluginsLeft = [String: Bool]()
-        for name in NearSDK.corePluginNames {
-            pluginsLeft[name] = true
-        }
+        var pluginsLeft = NearSDK.corePluginNames.count
         
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginsLeft.removeValueForKey(event.from)
-            
-            if pluginsLeft.count <= 0 {
+            pluginsLeft -= 1
+            if pluginsLeft <= 0 {
                 self.expectation.fulfill()
             }
         }

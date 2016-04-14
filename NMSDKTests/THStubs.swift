@@ -19,6 +19,9 @@ class THStubs {
     class func stubConfigurationAPIResponse() {
         stubAPBeaconForestResponse()
         stubAPRecipesResponse()
+        stubAPRecipeSimpleNotificationReactions()
+        stubAPRecipeContentReactions()
+        stubAPRecipePollReactions()
     }
     
     private class func stubAPBeaconForestResponse() {
@@ -81,6 +84,30 @@ class THStubs {
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [beaconForestRecipe]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipeContentReactions() {
+        let content1 = ["id": "CONTENT-1", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
+        let content2 = ["id": "CONTENT-2", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull()]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipeSimpleNotificationReactions() {
+        let notification1 = ["id": "NOTIFICATION-1", "type": "notifications", "attributes": ["text": "<notification's text>"]]
+        let notification2 = ["id": "NOTIFICATION-2", "type": "notifications", "attributes": ["text": "<notification's text>"]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/simple-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [notification1, notification2]], statusCode: 200, headers: nil)
+        }
+    }
+    private class func stubAPRecipePollReactions() {
+        let poll1 = ["id": "POLL-1", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        let poll2 = ["id": "POLL-2", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [poll1, poll2]], statusCode: 200, headers: nil)
         }
     }
     

@@ -29,7 +29,13 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes()]
+        let plugins: [Pluggable] = [
+            NPBeaconForest(),
+            NPRecipes(),
+            NPRecipeReactionSimpleNotification(),
+            NPRecipeReactionContent(),
+            NPRecipeReactionPoll()]
+        
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
@@ -129,8 +135,26 @@ public class NearSDK: NSObject, Extensible {
     public class func start() -> Bool {
         var result = true
         
-        result = result && (plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK)
-        result = result && (plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK)
+        result = result &&
+            plugins.run("com.nearit.sdk.plugin.np-beacon-monitor",
+                        withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
+        result = result &&
+            plugins.run("com.nearit.sdk.plugin.np-recipes",
+                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
+        result = result &&
+            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-content",
+                withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
+        result = result &&
+            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
+                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
+        result = result &&
+            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-poll",
+                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
         
         return result
     }
