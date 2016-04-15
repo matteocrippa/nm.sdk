@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import OHHTTPStubs
 import NMJSON
+@testable import NMSDK
 
 class THStubs {
     class func clear() {
@@ -23,6 +24,14 @@ class THStubs {
         stubAPRecipeContentReactions()
         stubAPRecipePollReactions()
     }
+    class func corePluginNames() -> Set<String> {
+        var set = Set<String>()
+        for name in NearSDK.corePluginNames {
+            set.insert(name)
+        }
+        
+        return set
+    }
     
     private class func stubAPBeaconForestResponse() {
         let root1 = [
@@ -30,7 +39,7 @@ class THStubs {
             "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1],
             "relationships": [
                 "parent": ["data": NSNull()],
-                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"]]]]]
+                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"], ["id": "CHILD-3.PARENT-1", "type": "beacons"]]]]]
         let root2 = [
             "id": "PARENT-2", "type": "beacons",
             "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 2],
@@ -68,30 +77,53 @@ class THStubs {
         }
     }
     private class func stubAPRecipesResponse() {
-        let beaconForestRecipe = [
+        let recipe1 = [
             "id": "RECIPE-1", "type": "recipes",
             "attributes": [
-                "name": "Recipe 1 name",
-                "pulse_ingredient_id": "beacon-forest",                                     // The name of the plugin (server-side) which produced the information which triggers the recipe
-                "pulse_slice_id": "00000000-0000-0000-0000-000000000000.1.1",               // The identifier of the object which triggers the recipe
-                
-                "reaction_ingredient_id": "content-notification",                           // The name of the plugin (server-side) which produced the information which is produced upon triggering the recipe
-                "reaction_slice_id": "CONTENT-1"                                            // The identifier of the information which is produced upon triggering the recipe
-            ],
-            "relationships": [
-                "pulse_flavor": ["data": ["id": "enter_region", "type": "pulse_flavors"]]]  // The action which triggers the recipe
+                "name": "Recipe 1 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-1",
+                "reaction_ingredient_id": "content-notification", "reaction_slice_id": "CONTENT-1"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
+        ]
+        let recipe2 = [
+            "id": "RECIPE-2", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 2 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-2.PARENT-1",
+                "reaction_ingredient_id": "simple-notification", "reaction_slice_id": "NOTIFICATION-1"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-2", "type": "pulse_flavors"]]]
+        ]
+        let recipe3 = [
+            "id": "RECIPE-3", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 3 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-2",
+                "reaction_ingredient_id": "poll-notification", "reaction_slice_id": "POLL-1"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-3", "type": "pulse_flavors"]]]
+        ]
+        let recipe4 = [
+            "id": "RECIPE-4", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 4 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-1",
+                "reaction_ingredient_id": "unknown", "reaction_slice_id": "UNKNOWN"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
+        ]
+        let recipe5 = [
+            "id": "RECIPE-5", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 5 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-3.PARENT-1",
+                "reaction_ingredient_id": "unknown", "reaction_slice_id": "CONTENT-1"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
         ]
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [beaconForestRecipe]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeContentReactions() {
         let content1 = ["id": "CONTENT-1", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
-        let content2 = ["id": "CONTENT-2", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull()]]
+        let content2 = ["id": "CONTENT-2", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
+        let content3 = ["id": "CONTENT-3", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull()]]
         
         stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/notifications")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2, content3]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeSimpleNotificationReactions() {

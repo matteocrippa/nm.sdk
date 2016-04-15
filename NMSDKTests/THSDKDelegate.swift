@@ -8,12 +8,13 @@
 
 import Foundation
 import NMSDK
-import NMJSON
 import NMPlug
 
 class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
-    var didReceiveEvaluatedContents: ((contents: [JSON]) -> Void)?
+    var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
+    var didReceiveContents: ((contents: [Content]) -> Void)?
+    var didReceivePolls: ((polls: [Poll]) -> Void)?
     
     override init() {
         super.init()
@@ -22,7 +23,13 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
     }
-    func nearSDKDidEvaluateContents(contents: [JSON]) {
-        didReceiveEvaluatedContents?(contents: contents)
+    func nearSDKDidEvaluate(polls collection: [Poll]) {
+        didReceivePolls?(polls: collection)
+    }
+    func nearSDKDidEvaluate(contents collection: [Content]) {
+        didReceiveContents?(contents: collection)
+    }
+    func nearSDKDidEvaluate(notifications collection: [Notification]) {
+        didReceiveNotifications?(notifications: collection)
     }
 }
