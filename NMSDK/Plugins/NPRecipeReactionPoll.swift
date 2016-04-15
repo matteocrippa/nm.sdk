@@ -47,7 +47,7 @@ class NPRecipeReactionPoll: Plugin {
             
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for poll in polls {
-                self.hub?.cache.store(poll, inCollection: "Reaction", forPlugin: self)
+                self.hub?.cache.store(poll, inCollection: "Reactions", forPlugin: self)
             }
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))

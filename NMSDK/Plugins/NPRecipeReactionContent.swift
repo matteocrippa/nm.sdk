@@ -28,6 +28,16 @@ class NPRecipeReactionContent: Plugin {
             }
             
             sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
+        case "read":
+            guard let id = arguments.string("content") else {
+                return PluginResponse.error("\"read\" requires \"content\" parameter")
+            }
+            
+            guard let reaction = content(id) else {
+                return PluginResponse.error("Content \"\(id)\" not found")
+            }
+            
+            return PluginResponse.ok(reaction.json)
         default:
             return PluginResponse.error("\"do\" parameter must be \"sync\" or \"evaluate\"")
         }
@@ -47,10 +57,19 @@ class NPRecipeReactionContent: Plugin {
             
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for content in contents {
-                self.hub?.cache.store(content, inCollection: "Reaction", forPlugin: self)
+                self.hub?.cache.store(content, inCollection: "Reactions", forPlugin: self)
             }
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
+    }
+    private func content(id: String) -> APRecipeContent? {
+        guard let
+            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
+            reaction = APRecipeContent(dictionary: resource.dictionary) else {
+                return nil
+        }
+        
+        return reaction
     }
 }

@@ -47,7 +47,7 @@ class NPRecipeReactionSimpleNotification: Plugin {
             
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for notification in notification {
-                self.hub?.cache.store(notification, inCollection: "Reaction", forPlugin: self)
+                self.hub?.cache.store(notification, inCollection: "Reactions", forPlugin: self)
             }
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))

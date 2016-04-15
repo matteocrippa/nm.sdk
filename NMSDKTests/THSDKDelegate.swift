@@ -8,12 +8,13 @@
 
 import Foundation
 import NMSDK
+import NMNet
 import NMJSON
 import NMPlug
 
 class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
-    var didReceiveEvaluatedContents: ((contents: [JSON]) -> Void)?
+    var didReceiveEvaluatedContents: ((contents: [APRecipeContent]) -> Void)?
     
     override init() {
         super.init()
@@ -22,7 +23,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
     }
-    func nearSDKDidEvaluateContents(contents: [JSON]) {
-        didReceiveEvaluatedContents?(contents: contents)
+    func nearSDKDidEvaluate(contents collection: [APRecipeContent]) {
+        didReceiveEvaluatedContents?(contents: collection)
     }
 }

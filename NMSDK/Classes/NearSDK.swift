@@ -8,6 +8,7 @@
 
 import Foundation
 import JWTDecode
+import NMNet
 import NMJSON
 import NMPlug
 
@@ -136,24 +137,29 @@ public class NearSDK: NSObject, Extensible {
         var result = true
         
         result = result &&
-            plugins.run("com.nearit.sdk.plugin.np-beacon-monitor",
-                        withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+            plugins.run(
+                "com.nearit.sdk.plugin.np-beacon-monitor",
+                withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
         
         result = result &&
-            plugins.run("com.nearit.sdk.plugin.np-recipes",
-                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
-        
-        result = result &&
-            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-content",
+            plugins.run(
+                "com.nearit.sdk.plugin.np-recipes",
                 withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
         
         result = result &&
-            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
-                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+            plugins.run(
+                "com.nearit.sdk.plugin.np-recipe-reaction-content",
+                withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
         
         result = result &&
-            plugins.run("com.nearit.sdk.plugin.np-recipe-reaction-poll",
-                        withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+            plugins.run(
+                "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
+                withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+        
+        result = result &&
+            plugins.run(
+                "com.nearit.sdk.plugin.np-recipe-reaction-poll",
+                withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
         
         
         return result
@@ -161,6 +167,32 @@ public class NearSDK: NSObject, Extensible {
     
     /// MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
+        manageRecipeReaction(event)
+        manageCoreEventForwarding(event)
+    }
+    private func manageRecipeReaction(event: PluginEvent) {
+        switch event.from {
+        case "com.nearit.sdk.plugin.np-recipes":
+            guard let content = event.content.json("content"), type = event.content.string("type") else {
+                return
+            }
+            
+            manageReaction(content, type: type)
+        default:
+            break
+        }
+    }
+    private func manageReaction(content: JSON, type: String) {
+        switch type {
+        case "content-notification":
+            if let object = APRecipeContent(dictionary: content.dictionary) {
+                delegate?.nearSDKDidEvaluate?(contents: [object])
+            }
+        default:
+            break
+        }
+    }
+    private func manageCoreEventForwarding(event: PluginEvent) {
         if corePluginNames.contains(event.from) && !forwardCoreEvents {
             return
         }

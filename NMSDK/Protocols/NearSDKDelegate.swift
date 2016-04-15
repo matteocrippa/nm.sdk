@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import NMNet
 import NMPlug
 import NMJSON
 
@@ -17,6 +18,6 @@ public protocol NearSDKDelegate {
     /// If implemented, this method will be invoked whenever NearSDK receives an event
     optional func nearSDKDidReceiveEvent(event: PluginEvent)
     
-    /// If implemented, this method will be invoked whenever NearSDK evaluates a content
-    optional func nearSDKDidEvaluateContents(contents: [JSON])
+    /// If implemented, this method will be invoked whenever NearSDK evaluates one or more contents
+    optional func nearSDKDidEvaluate(contents collection: [APRecipeContent])
 }

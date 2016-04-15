@@ -10,7 +10,6 @@ import XCTest
 @testable import NMSDK
 
 class NearSDKTests: XCTestCase {
-    var expectation: XCTestExpectation!
     let SDKDelegate = THSDKDelegate()
     
     override func setUp() {
@@ -46,28 +45,22 @@ class NearSDKTests: XCTestCase {
         XCTAssertEqualWithAccuracy(NearSDK.apiTimeoutInterval, 10.0, accuracy: DBL_EPSILON)
     }
     func testStart() {
-        var pluginsLeft = NearSDK.corePluginNames.count
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test NearSDK.start")
         
+        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginsLeft -= 1
-            if pluginsLeft <= 0 {
-                self.expectation.fulfill()
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                expectation.fulfill()
             }
         }
         
-        configure("test NearSDK.start")
         XCTAssertTrue(NearSDK.start())
+        waitForExpectationsWithTimeout(1, handler: nil)
     }
     
     // MARK: Helper functions
-    private func configure(expectationDescription: String) {
-        THStubs.stubConfigurationAPIResponse()
-        
-        expectation = expectationWithDescription(expectationDescription)
-        XCTAssertTrue(NearSDK.start())
-        
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
     private func reset(appToken: String = "") {
         SDKDelegate.didReceiveEvaluatedContents = nil
         SDKDelegate.didReceiveEvent = nil
