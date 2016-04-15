@@ -23,4 +23,7 @@ public protocol NearSDKDelegate {
     
     /// If implemented, this method will be invoked whenever NearSDK evaluates one or more contents
     optional func nearSDKDidEvaluate(contents collection: [APRecipeContent])
+    
+    /// If implemented, this method will be invoked whenever NearSDK evaluates one or more polls
+    optional func nearSDKDidEvaluate(polls collection: [APRecipePoll])
 }

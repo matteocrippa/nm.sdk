@@ -192,6 +192,10 @@ public class NearSDK: NSObject, Extensible {
             if let object = APRecipeNotification(dictionary: content.dictionary) {
                 delegate?.nearSDKDidEvaluate?(notifications: [object])
             }
+        case "poll-notification":
+            if let object = APRecipePoll(dictionary: content.dictionary) {
+                delegate?.nearSDKDidEvaluate?(polls: [object])
+            }
         default:
             break
         }

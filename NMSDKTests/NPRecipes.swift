@@ -67,11 +67,33 @@ class NPRecipes: XCTestCase {
         XCTAssertTrue(NearSDK.start())
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testEvaluateBeaconForestPollReaction() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test evaluate poll reaction with NPRecipes")
+        
+        var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "CHILD-1.PARENT-2", "trigger": "FLAVOR-3"])
+                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                XCTAssertEqual(response.status, PluginResponseStatus.OK)
+            }
+        }
+        SDKDelegate.didReceivePolls = { (polls) -> Void in
+            XCTAssertEqual(polls.count, 1)
+            expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start())
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     
     // MARK: Helper functions
     private func reset(appToken: String = "") {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
+        SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate

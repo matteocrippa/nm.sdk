@@ -86,6 +86,8 @@ class NPRecipes: Plugin {
             return "com.nearit.sdk.plugin.np-recipe-reaction-content"
         case "simple-notification":
             return "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification"
+        case "poll-notification":
+            return "com.nearit.sdk.plugin.np-recipe-reaction-poll"
         default:
             return nil
         }

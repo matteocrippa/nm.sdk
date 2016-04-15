@@ -16,6 +16,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
     var didReceiveNotifications: ((notifications: [APRecipeNotification]) -> Void)?
     var didReceiveContents: ((contents: [APRecipeContent]) -> Void)?
+    var didReceivePolls: ((polls: [APRecipePoll]) -> Void)?
     
     override init() {
         super.init()
@@ -23,6 +24,9 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
+    }
+    func nearSDKDidEvaluate(polls collection: [APRecipePoll]) {
+        didReceivePolls?(polls: collection)
     }
     func nearSDKDidEvaluate(contents collection: [APRecipeContent]) {
         didReceiveContents?(contents: collection)

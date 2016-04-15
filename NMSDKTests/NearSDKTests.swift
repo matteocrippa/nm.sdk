@@ -64,6 +64,7 @@ class NearSDKTests: XCTestCase {
     private func reset(appToken: String = "") {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
+        SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate

@@ -33,7 +33,7 @@ class NPRecipeReactionSimpleNotification: Plugin {
                 return PluginResponse.error("\"read\" requires \"content\" parameter")
             }
             
-            guard let reaction = content(id) else {
+            guard let reaction = notification(id) else {
                 return PluginResponse.error("Content \"\(id)\" not found")
             }
             
@@ -63,7 +63,7 @@ class NPRecipeReactionSimpleNotification: Plugin {
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
     }
-    private func content(id: String) -> APRecipeNotification? {
+    private func notification(id: String) -> APRecipeNotification? {
         guard let
             resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
             reaction = APRecipeNotification(dictionary: resource.dictionary) else {
