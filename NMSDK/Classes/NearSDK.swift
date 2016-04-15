@@ -188,6 +188,10 @@ public class NearSDK: NSObject, Extensible {
             if let object = APRecipeContent(dictionary: content.dictionary) {
                 delegate?.nearSDKDidEvaluate?(contents: [object])
             }
+        case "simple-notification":
+            if let object = APRecipeNotification(dictionary: content.dictionary) {
+                delegate?.nearSDKDidEvaluate?(notifications: [object])
+            }
         default:
             break
         }

@@ -88,14 +88,14 @@ class THStubs {
             "id": "RECIPE-2", "type": "recipes",
             "attributes": [
                 "name": "Recipe 2 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-2.PARENT-1",
-                "reaction_ingredient_id": "simple-notification", "reaction_slice_id": "CONTENT-2"],
+                "reaction_ingredient_id": "simple-notification", "reaction_slice_id": "NOTIFICATION-1"],
             "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-2", "type": "pulse_flavors"]]]
         ]
         let recipe3 = [
             "id": "RECIPE-3", "type": "recipes",
             "attributes": [
                 "name": "Recipe 3 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-2",
-                "reaction_ingredient_id": "poll-notification", "reaction_slice_id": "CONTENT-1"],
+                "reaction_ingredient_id": "poll-notification", "reaction_slice_id": "POLL-1"],
             "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-3", "type": "pulse_flavors"]]]
         ]
         

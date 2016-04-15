@@ -84,6 +84,8 @@ class NPRecipes: Plugin {
         switch recipe.outCase {
         case "content-notification":
             return "com.nearit.sdk.plugin.np-recipe-reaction-content"
+        case "simple-notification":
+            return "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification"
         default:
             return nil
         }
