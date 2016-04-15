@@ -186,15 +186,15 @@ public class NearSDK: NSObject, Extensible {
         switch type {
         case "content-notification":
             if let object = APRecipeContent(dictionary: content.dictionary) {
-                delegate?.nearSDKDidEvaluate?(contents: [object])
+                delegate?.nearSDKDidEvaluate?(contents: [Content(content: object)])
             }
         case "simple-notification":
             if let object = APRecipeNotification(dictionary: content.dictionary) {
-                delegate?.nearSDKDidEvaluate?(notifications: [object])
+                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: object)])
             }
         case "poll-notification":
             if let object = APRecipePoll(dictionary: content.dictionary) {
-                delegate?.nearSDKDidEvaluate?(polls: [object])
+                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: object)])
             }
         default:
             break
