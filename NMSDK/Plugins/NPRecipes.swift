@@ -54,31 +54,55 @@ class NPRecipes: Plugin {
                 return
             }
             
-            self.hub?.cache.removeAllResourcesWithPlugin(self)
-            for recipe in recipes {
-                self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
-            }
-            
+            self.buildCache(recipes)
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
+        }
+    }
+    private func buildCache(recipes: [APRecipe]) {
+        hub?.cache.removeAllResourcesWithPlugin(self)
+        
+        var recipesMap = [String: [String]]()
+        for recipe in recipes {
+            hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
+            
+            let evaluationKey = APRecipe.evaluationKey(inCase: recipe.inCase, inTarget: recipe.inTarget, trigger: recipe.trigger)
+            var map = recipesMap[evaluationKey] ?? []
+            if !map.contains(recipe.id) {
+                map.append(recipe.id)
+                recipesMap[evaluationKey] = map
+            }
+        }
+        
+        for (key, identifiers) in recipesMap {
+            if let resource = PluginResource(dictionary: ["id": key, "recipes": identifiers]) {
+                hub?.cache.store(resource, inCollection: "RecipesMaps", forPlugin: self)
+            }
         }
     }
     
     // MARK: Evaluate
-    private func evaluate(recipeIdentifier: String) -> Bool {
+    private func evaluate(key: String) -> Bool {
         guard let
-            resource = hub?.cache.resource(recipeIdentifier, inCollection: "Recipes", forPlugin: self),
-            recipe = APRecipe(dictionary: resource.dictionary),
-            message = evaluatorMessage(recipe),
-            response = hub?.send(direct: message) else {
+            pluginHub = hub,
+            recipesMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self),
+            identifiers = JSON(dictionary: recipesMap.dictionary).stringArray("recipes") else {
                 return false
         }
         
-        guard let pluginHub = hub else {
-            return false
+        for id in identifiers {
+            guard let
+                resource = hub?.cache.resource(id, inCollection: "Recipes", forPlugin: self),
+                recipe = APRecipe(dictionary: resource.dictionary),
+                message = evaluatorMessage(recipe),
+                response = hub?.send(direct: message) where response.status == .OK else {
+                    continue
+            }
+            
+            let content = JSON(dictionary: ["content": response.content.dictionary, "type": recipe.outCase])
+            return pluginHub.dispatch(event: PluginEvent(from: name, content: content))
         }
         
-        let content = JSON(dictionary: ["content": response.content.dictionary, "type": recipe.outCase])
-        return pluginHub.dispatch(event: PluginEvent(from: name, content: content))
+        return false
     }
     private func evaluatorName(recipe: APRecipe) -> String? {
         switch recipe.outCase {

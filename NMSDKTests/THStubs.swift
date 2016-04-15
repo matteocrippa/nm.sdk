@@ -39,7 +39,7 @@ class THStubs {
             "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1],
             "relationships": [
                 "parent": ["data": NSNull()],
-                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"]]]]]
+                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"], ["id": "CHILD-3.PARENT-1", "type": "beacons"]]]]]
         let root2 = [
             "id": "PARENT-2", "type": "beacons",
             "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 2],
@@ -98,9 +98,23 @@ class THStubs {
                 "reaction_ingredient_id": "poll-notification", "reaction_slice_id": "POLL-1"],
             "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-3", "type": "pulse_flavors"]]]
         ]
+        let recipe4 = [
+            "id": "RECIPE-4", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 4 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-1",
+                "reaction_ingredient_id": "unknown", "reaction_slice_id": "UNKNOWN"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
+        ]
+        let recipe5 = [
+            "id": "RECIPE-5", "type": "recipes",
+            "attributes": [
+                "name": "Recipe 5 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-3.PARENT-1",
+                "reaction_ingredient_id": "unknown", "reaction_slice_id": "CONTENT-1"],
+            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
+        ]
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeContentReactions() {

@@ -25,6 +25,7 @@ class NPRecipes: XCTestCase {
         super.tearDown()
     }
     
+    // MARK: Successful evaluations
     func testEvaluateBeaconForestNotificationReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate notification reaction with NPRecipes")
@@ -44,7 +45,7 @@ class NPRecipes: XCTestCase {
         }
         
         XCTAssertTrue(NearSDK.start())
-        waitForExpectationsWithTimeout(1000, handler: nil)
+        waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateBeaconForestContentReaction() {
         THStubs.stubConfigurationAPIResponse()
@@ -83,6 +84,46 @@ class NPRecipes: XCTestCase {
         SDKDelegate.didReceivePolls = { (polls) -> Void in
             XCTAssertEqual(polls.count, 1)
             expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start())
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Unsuccessful evaluations
+    func testRecipeNotFound() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test recipe not found")
+        
+        var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "CHILD-0.PARENT-0", "trigger": "FLAVOR-X"])
+                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                
+                XCTAssertEqual(response.status, PluginResponseStatus.Error)
+                expectation.fulfill()
+            }
+        }
+        
+        XCTAssertTrue(NearSDK.start())
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testUnprocessableRecipe() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test unprocessable recipe - unknown content type")
+        
+        var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "CHILD-3.PARENT-1", "trigger": "FLAVOR-X"])
+                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                
+                XCTAssertEqual(response.status, PluginResponseStatus.Error)
+                expectation.fulfill()
+            }
         }
         
         XCTAssertTrue(NearSDK.start())
