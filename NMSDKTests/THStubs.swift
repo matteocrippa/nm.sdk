@@ -34,84 +34,71 @@ class THStubs {
     }
     
     private class func stubAPBeaconForestResponse() {
-        let root1 = [
-            "id": "PARENT-1", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 1],
-            "relationships": [
-                "parent": ["data": NSNull()],
-                "children": ["data": [["id": "CHILD-1.PARENT-1", "type": "beacons"], ["id": "CHILD-2.PARENT-1", "type": "beacons"], ["id": "CHILD-3.PARENT-1", "type": "beacons"]]]]]
-        let root2 = [
-            "id": "PARENT-2", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 1, "minor": 2],
-            "relationships": [
-                "parent": ["data": NSNull()],
-                "children": ["data": [["id": "CHILD-1.PARENT-2", "type": "beacons"], ["id": "CHILD-2.PARENT-2", "type": "beacons"]]]]]
+        func attributes(major major: Int, minor: Int) -> [String: AnyObject] {
+            return ["uuid": "00000000-0000-0000-0000-000000000000", "major": major, "minor": minor]
+        }
+        func parent(id: String?) -> [String: AnyObject] {
+            guard let parentID = id else {
+                return ["data": NSNull()]
+            }
+            
+            return ["data": ["id": parentID, "type": "beacons"]]
+        }
+        func children(identifiers: [String]) -> [String: AnyObject] {
+            var result = [String: AnyObject]()
+            
+            for id in identifiers {
+                guard var data = result["data"] as? [[String: AnyObject]] else {
+                    result["data"] = [["id": id, "type": "beacons"]]
+                    continue
+                }
+                
+                data.append(["id": id, "type": "beacons"])
+                result["data"] = data
+            }
+            
+            return result
+        }
+        func node(id: String, major: Int, minor: Int, parent parentIdentifier: String? = nil, children childrenIdentifiers: [String] = []) -> [String: AnyObject] {
+            return ["id": id, "type": "beacons", "attributes": attributes(major: major, minor: minor), "relationships": ["parent": parent(parentIdentifier), "children": children(childrenIdentifiers)]]
+        }
         
-        let included1 = [
-            "id": "CHILD-1.PARENT-1", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 10, "minor": 1],
-            "relationships": [
-                "parent": ["data": ["id": "PARENT-1", "type": "beacons"]],
-                "children": ["data": []]]]
-        let included2 = [
-            "id": "CHILD-2.PARENT-1", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 10, "minor": 2],
-            "relationships": [
-                "parent": ["data": ["id": "PARENT-1", "type": "beacons"]],
-                "children": ["data": []]]]
-        let included3 = [
-            "id": "CHILD-1.PARENT-2", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 20, "minor": 1],
-            "relationships": [
-                "parent": ["data": ["id": "PARENT-2", "type": "beacons"]],
-                "children": ["data": []]]]
-        let included4 = [
-            "id": "CHILD-2.PARENT-2", "type": "beacons",
-            "attributes": ["uuid": "00000000-0000-0000-0000-000000000000", "major": 20, "minor": 2],
-            "relationships": [
-                "parent": ["data": ["id": "PARENT-2", "type": "beacons"]],
-                "children": ["data": []]]]
+        let R1_1    = node("R1_1",    major: 1,    minor: 1,                   children: ["C10_1",  "C10_2"])
+        let R1_2    = node("R1_2",    major: 2,    minor: 1,                   children: ["C20_1",  "C20_2"])
+        
+        let C10_1   = node("C10_1",   major: 10,   minor: 1, parent: "R1_1",   children: ["C101_1", "C101_2"])
+        let C10_2   = node("C10_2",   major: 10,   minor: 2, parent: "R1_1")
+        let C20_1   = node("C20_1",   major: 20,   minor: 1, parent: "R1_2")
+        let C20_2   = node("C20_2",   major: 20,   minor: 2, parent: "R1_2")
+        
+        let C101_1  = node("C101_1",  major: 101,  minor: 1, parent: "C10_1",  children: ["C1000_1"])
+        let C101_2  = node("C101_2",  major: 101,  minor: 2, parent: "C10_1")
+        
+        let C1000_1 = node("C1000_1", major: 1000, minor: 1, parent: "C101_1")
         
         stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/beacons")) { (response) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [root1, root2], "included": [included1, included2, included3, included4]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(
+                JSONObject: ["data": [R1_1, R1_2], "included": [C10_1, C10_2, C20_1, C20_2, C101_1, C101_2, C1000_1]],
+                statusCode: 200,
+                headers: nil)
         }
     }
     private class func stubAPRecipesResponse() {
-        let recipe1 = [
-            "id": "RECIPE-1", "type": "recipes",
-            "attributes": [
-                "name": "Recipe 1 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-1",
-                "reaction_ingredient_id": "content-notification", "reaction_slice_id": "CONTENT-1"],
-            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
-        ]
-        let recipe2 = [
-            "id": "RECIPE-2", "type": "recipes",
-            "attributes": [
-                "name": "Recipe 2 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-2.PARENT-1",
-                "reaction_ingredient_id": "simple-notification", "reaction_slice_id": "NOTIFICATION-1"],
-            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-2", "type": "pulse_flavors"]]]
-        ]
-        let recipe3 = [
-            "id": "RECIPE-3", "type": "recipes",
-            "attributes": [
-                "name": "Recipe 3 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-2",
-                "reaction_ingredient_id": "poll-notification", "reaction_slice_id": "POLL-1"],
-            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-3", "type": "pulse_flavors"]]]
-        ]
-        let recipe4 = [
-            "id": "RECIPE-4", "type": "recipes",
-            "attributes": [
-                "name": "Recipe 4 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-1.PARENT-1",
-                "reaction_ingredient_id": "unknown", "reaction_slice_id": "UNKNOWN"],
-            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
-        ]
-        let recipe5 = [
-            "id": "RECIPE-5", "type": "recipes",
-            "attributes": [
-                "name": "Recipe 5 name", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": "CHILD-3.PARENT-1",
-                "reaction_ingredient_id": "unknown", "reaction_slice_id": "CONTENT-1"],
-            "relationships": ["pulse_flavor": ["data": ["id": "FLAVOR-1", "type": "pulse_flavors"]]]
-        ]
+        func recipe(id: String, nodeIdentifier: String, contentIdentifier: String, contentType: String, trigger: String) -> [String: AnyObject] {
+            return [
+                "id": id, "type": "recipes",
+                "attributes": [
+                    "name": "Recipe \(id)", "pulse_ingredient_id": "beacon-forest", "pulse_slice_id": nodeIdentifier,
+                    "reaction_ingredient_id": contentType, "reaction_slice_id": contentIdentifier],
+                "relationships": ["pulse_flavor": ["data": ["id": trigger, "type": "pulse_flavors"]]]
+            ]
+        }
+        
+        let recipe1 = recipe("R1", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT-1",      contentType: "content-notification", trigger: "enter_region")
+        let recipe2 = recipe("R2", nodeIdentifier: "C10_2",   contentIdentifier: "NOTIFICATION-1", contentType: "simple-notification",  trigger: "FLAVOR-2")
+        let recipe3 = recipe("R3", nodeIdentifier: "C20_1",   contentIdentifier: "POLL-1",         contentType: "poll-notification",    trigger: "FLAVOR-3")
+        let recipe4 = recipe("R4", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "FLAVOR-1")
+        let recipe5 = recipe("R5", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "FLAVOR-1")
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)

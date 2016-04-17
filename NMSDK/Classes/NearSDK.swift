@@ -139,7 +139,7 @@ public class NearSDK: NSObject, Extensible {
         result = result &&
             plugins.run(
                 "com.nearit.sdk.plugin.np-beacon-monitor",
-                withArguments: JSON(dictionary: ["app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
+                withArguments: JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": apiTimeoutInterval])).status == .OK
         
         result = result &&
             plugins.run(

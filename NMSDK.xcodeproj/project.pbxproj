@@ -8,13 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		A7CDA9114DC2E337268AA49D /* Pods_NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21A5FD9B31901D7F8EB1F372 /* Pods_NMSDK.framework */; };
+		B50100D91CC3C3C1003231F9 /* NPBeaconForestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50100D81CC3C3C1003231F9 /* NPBeaconForestTests.swift */; };
+		B50100DD1CC3DC6B003231F9 /* THRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50100DC1CC3DC6B003231F9 /* THRegion.swift */; };
 		B503AD021CC11FB70081A581 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD011CC11FB70081A581 /* Notification.swift */; };
 		B503AD041CC120730081A581 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD031CC120730081A581 /* Content.swift */; };
 		B503AD061CC1210D0081A581 /* Poll.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD051CC1210D0081A581 /* Poll.swift */; };
+		B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */; };
 		B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50BCB741CBBD2DE005F7E86 /* THStubs.swift */; };
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
-		B52F0DA11CC0D14800EE91AC /* NPRecipes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipes.swift */; };
+		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */; };
@@ -44,9 +47,12 @@
 		3C00F881ED049B67CB57E815 /* Pods-NMSDKTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NMSDKTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NMSDKTests/Pods-NMSDKTests.debug.xcconfig"; sourceTree = "<group>"; };
 		A0974FDF1B02E790CAD89D6F /* Pods_NMSDKTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NMSDKTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEC1310B8820100AA9AE6EB4 /* Pods-NMSDKTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NMSDKTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-NMSDKTests/Pods-NMSDKTests.release.xcconfig"; sourceTree = "<group>"; };
+		B50100D81CC3C3C1003231F9 /* NPBeaconForestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestTests.swift; sourceTree = "<group>"; };
+		B50100DC1CC3DC6B003231F9 /* THRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THRegion.swift; sourceTree = "<group>"; };
 		B503AD011CC11FB70081A581 /* Notification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		B503AD031CC120730081A581 /* Content.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Content.swift; sourceTree = "<group>"; };
 		B503AD051CC1210D0081A581 /* Poll.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Poll.swift; sourceTree = "<group>"; };
+		B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestNavigator.swift; sourceTree = "<group>"; };
 		B50BCB741CBBD2DE005F7E86 /* THStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THStubs.swift; sourceTree = "<group>"; };
 		B52AF6E11CB7BE4700769ECE /* NMSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NMSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52AF6E41CB7BE4700769ECE /* NMSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NMSDK.h; sourceTree = "<group>"; };
@@ -55,7 +61,7 @@
 		B52AF6F21CB7BE4700769ECE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B52AF6FB1CB7BE9F00769ECE /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		B52F0DA01CC0D14800EE91AC /* NPRecipes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipes.swift; sourceTree = "<group>"; };
+		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
@@ -117,6 +123,7 @@
 			isa = PBXGroup;
 			children = (
 				B50BCB741CBBD2DE005F7E86 /* THStubs.swift */,
+				B50100DC1CC3DC6B003231F9 /* THRegion.swift */,
 				B548FE921CBCEDAA006DCC02 /* THBeacon.swift */,
 				B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */,
 			);
@@ -190,7 +197,8 @@
 		B5FA83B41CB7E6D40090E5CD /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				B52F0DA01CC0D14800EE91AC /* NPRecipes.swift */,
+				B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */,
+				B50100D81CC3C3C1003231F9 /* NPBeaconForestTests.swift */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -199,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
+				B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
@@ -411,6 +420,7 @@
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */,
 				B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */,
+				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
 				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B503AD021CC11FB70081A581 /* Notification.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
@@ -424,10 +434,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B50100D91CC3C3C1003231F9 /* NPBeaconForestTests.swift in Sources */,
 				B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */,
 				B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */,
+				B50100DD1CC3DC6B003231F9 /* THRegion.swift in Sources */,
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
-				B52F0DA11CC0D14800EE91AC /* NPRecipes.swift in Sources */,
+				B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */,
 				B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
