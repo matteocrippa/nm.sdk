@@ -16,9 +16,12 @@ public protocol NearSDKDelegate {
     /// If implemented, this method will be invoked whenever NearSDK receives an event
     optional func nearSDKDidReceiveEvent(event: PluginEvent)
     
-    /// If implemented, this method will be invoked whenever NearSDK evaluates a content
-    optional func nearSDKDidEvaluateContents(contents: [EvaluatedContent])
+    /// If implemented, this method will be invoked whenever NearSDK evaluates one or more notifications
+    optional func nearSDKDidEvaluate(notifications collection: [Notification])
     
-    /// If implemented, this method will be invoked whenever NearSDK completes the synchronization process
-    optional func nearSDKDidSync(successfully: Bool)
+    /// If implemented, this method will be invoked whenever NearSDK evaluates one or more contents
+    optional func nearSDKDidEvaluate(contents collection: [Content])
+    
+    /// If implemented, this method will be invoked whenever NearSDK evaluates one or more polls
+    optional func nearSDKDidEvaluate(polls collection: [Poll])
 }
