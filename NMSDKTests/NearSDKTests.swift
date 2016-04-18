@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import NMJSON
 @testable import NMSDK
 
 class NearSDKTests: XCTestCase {
@@ -59,6 +60,68 @@ class NearSDKTests: XCTestCase {
         XCTAssertTrue(NearSDK.start())
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testDownloadImages() {
+        THStubs.stubImages()
+        THStubs.stubImageData()
+        
+        let expectation = expectationWithDescription("test get images")
+        NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
+            XCTAssertEqual(images.count, 2)
+            XCTAssertEqual(downloaded.count, 2)
+            XCTAssertEqual(notFound.count, 0)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testPartiallyCachedImages() {
+        THStubs.stubImages()
+        THStubs.stubImageData()
+        
+        let expectation = expectationWithDescription("test get images")
+        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
+            XCTAssertEqual(images.count, 2)
+            XCTAssertEqual(downloaded.count, 1)
+            XCTAssertEqual(notFound.count, 0)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testCachedImages() {
+        let expectation = expectationWithDescription("test get images")
+        let arguments = JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()], ["id": "image_2", "image": THStubs.sampleImage()]]])
+        
+        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: arguments)
+        NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
+            XCTAssertEqual(images.count, 2)
+            XCTAssertEqual(downloaded.count, 0)
+            XCTAssertEqual(notFound.count, 0)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testPartiallyCachedAndMissingImages() {
+        THStubs.stubImages(excluded: ["image_4"])
+        THStubs.stubImageData(excluded: ["image_3"])
+        
+        let expectation = expectationWithDescription("test get images")
+        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.imagesWithIdentifiers(["image_1", "image_2", "image_3", "image_4"]) { (images, downloaded, notFound) in
+            XCTAssertEqual(images.count, 2)
+            XCTAssertEqual(downloaded.count, 1)
+            XCTAssertEqual(notFound.count, 2)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     
     // MARK: Helper functions
     private func reset(appToken: String = "") {
@@ -66,6 +129,7 @@ class NearSDKTests: XCTestCase {
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
+        NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         NearSDK.appToken = appToken

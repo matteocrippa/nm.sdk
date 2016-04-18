@@ -177,6 +177,7 @@ class NPBeaconForestTests: XCTestCase {
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
+        SDKDelegate.didReceiveError = nil
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         NearSDK.appToken = appToken

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import JWTDecode
 import NMNet
 import NMJSON
@@ -35,7 +36,8 @@ public class NearSDK: NSObject, Extensible {
             NPRecipes(),
             NPRecipeReactionSimpleNotification(),
             NPRecipeReactionContent(),
-            NPRecipeReactionPoll()]
+            NPRecipeReactionPoll(),
+            NPImageCache()]
         
         for plugin in plugins {
             pluginHub.plug(plugin)
@@ -165,6 +167,62 @@ public class NearSDK: NSObject, Extensible {
         return result
     }
     
+    /// Returns some images for a given array of image identifiers
+    /// Images which cannot be found will be downloaded and cached
+    public class func imagesWithIdentifiers(identifiers: [String], didFetchImages: ((images: [String: UIImage], downloaded: [String], notFound: [String]) -> Void)?) {
+        var fetched = [String: UIImage]()
+        var notFound = Set<String>()
+        
+        if !images(identifiers, storeInto: &fetched, notFound: &notFound) {
+            didFetchImages?(images: fetched, downloaded: [], notFound: identifiers)
+            return
+        }
+        
+        if notFound.count <= 0 {
+            didFetchImages?(images: fetched, downloaded: [], notFound: [])
+            return
+        }
+        
+        download(notFound, found: fetched) { (images, downloaded, notFound) in
+            didFetchImages?(images: images, downloaded: downloaded, notFound: notFound)
+        }
+    }
+    private class func images(identifiers: [String], inout storeInto target: [String: UIImage], inout notFound: Set<String>) -> Bool {
+        let response = plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
+        guard let images = response.content.dictionary("images") where response.status == .OK else {
+            target.removeAll()
+            notFound = Set(identifiers)
+            return false
+        }
+        
+        notFound = Set(identifiers)
+        for (id, image) in images {
+            guard let imageInstance = image as? UIImage else {
+                continue
+            }
+            
+            notFound.remove(id)
+            target[id] = imageInstance
+        }
+        
+        return true
+    }
+    private class func download(notFound: Set<String>, found: [String: UIImage], completionHandler: ((images: [String: UIImage], downloaded: [String], notFound: [String]) -> Void)?) {
+        MediaAPI.getImages(Array(notFound)) { (images, identifiersNotFound, status) in
+            var result = images
+            for (id, image) in found {
+                result[id] = image
+            }
+            
+            completionHandler?(images: result, downloaded: Array(images.keys), notFound: identifiersNotFound)
+        }
+    }
+    
+    /// Clears images' cache
+    public class func clearImageCache() -> Bool {
+        return (plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
+    }
+    
     /// MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
         manageRecipeReaction(event)
@@ -201,10 +259,25 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {
+        // Errors should be examined first
+        if manageError(event) {
+            return
+        }
+        
+        // Non-error events may be discarded
         if corePluginNames.contains(event.from) && !forwardCoreEvents {
             return
         }
         
+        // Non-blocked events will be forwarded to delegate
         delegate?.nearSDKDidReceiveEvent?(event)
+    }
+    private func manageError(event: PluginEvent) -> Bool {
+        if let errorValue = event.content.int("error"), error = SDKError(rawValue: errorValue), message = event.content.string("message") {
+            delegate?.nearSDKDidFail?(error: error, message: message)
+            return true
+        }
+        
+        return false
     }
 }
