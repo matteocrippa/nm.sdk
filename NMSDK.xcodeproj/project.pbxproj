@@ -15,6 +15,8 @@
 		B503AD061CC1210D0081A581 /* Poll.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD051CC1210D0081A581 /* Poll.swift */; };
 		B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */; };
 		B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50BCB741CBBD2DE005F7E86 /* THStubs.swift */; };
+		B510AAA81CC4C88400E022A8 /* SDKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA71CC4C88400E022A8 /* SDKError.swift */; };
+		B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */; };
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
@@ -54,6 +56,8 @@
 		B503AD051CC1210D0081A581 /* Poll.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Poll.swift; sourceTree = "<group>"; };
 		B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestNavigator.swift; sourceTree = "<group>"; };
 		B50BCB741CBBD2DE005F7E86 /* THStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THStubs.swift; sourceTree = "<group>"; };
+		B510AAA71CC4C88400E022A8 /* SDKError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SDKError.swift; sourceTree = "<group>"; };
+		B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPImageCache.swift; sourceTree = "<group>"; };
 		B52AF6E11CB7BE4700769ECE /* NMSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NMSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52AF6E41CB7BE4700769ECE /* NMSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NMSDK.h; sourceTree = "<group>"; };
 		B52AF6E61CB7BE4700769ECE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -130,6 +134,14 @@
 			name = PluginHelpers;
 			sourceTree = "<group>";
 		};
+		B510AAA61CC4C53E00E022A8 /* Enums */ = {
+			isa = PBXGroup;
+			children = (
+				B510AAA71CC4C88400E022A8 /* SDKError.swift */,
+			);
+			path = Enums;
+			sourceTree = "<group>";
+		};
 		B52AF6D71CB7BE4700769ECE = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FA83AF1CB7DCFC0090E5CD /* Classes */,
+				B510AAA61CC4C53E00E022A8 /* Enums */,
 				B58C48371CB816C2008714DC /* Protocols */,
 				B5FA83B51CB7E6DE0090E5CD /* Plugins */,
 				B52AF6E41CB7BE4700769ECE /* NMSDK.h */,
@@ -212,6 +225,7 @@
 				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
 				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
+				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -425,8 +439,10 @@
 				B503AD021CC11FB70081A581 /* Notification.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
+				B510AAA81CC4C88400E022A8 /* SDKError.swift in Sources */,
 				B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */,
 				B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */,
+				B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

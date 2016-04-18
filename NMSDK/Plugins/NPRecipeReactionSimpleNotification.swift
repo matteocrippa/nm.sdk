@@ -52,6 +52,7 @@ class NPRecipeReactionSimpleNotification: Plugin {
         
         APRecipeReactions.getSimpleNotifications { (notification, status) in
             if status != .OK {
+                self.hub?.dispatch(event: SDKError.CannotDownloadNotificationReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             

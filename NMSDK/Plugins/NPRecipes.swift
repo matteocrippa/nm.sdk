@@ -51,6 +51,7 @@ class NPRecipes: Plugin {
         
         APRecipes.get { (recipes, status) in
             if status != .OK {
+                self.hub?.dispatch(event: SDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             
@@ -86,6 +87,7 @@ class NPRecipes: Plugin {
             pluginHub = hub,
             recipesMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self),
             identifiers = JSON(dictionary: recipesMap.dictionary).stringArray("recipes") else {
+                self.hub?.dispatch(event: SDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found"))
                 return false
         }
         
@@ -102,6 +104,7 @@ class NPRecipes: Plugin {
             return pluginHub.dispatch(event: PluginEvent(from: name, content: content))
         }
         
+        self.hub?.dispatch(event: SDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" cannot be evaluated"))
         return false
     }
     private func evaluatorName(recipe: APRecipe) -> String? {

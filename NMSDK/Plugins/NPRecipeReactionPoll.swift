@@ -52,6 +52,7 @@ class NPRecipeReactionPoll: Plugin {
         
         APRecipeReactions.getPollNotifications { (polls, status) in
             if status != .OK {
+                self.hub?.dispatch(event: SDKError.CannotDownloadPollReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             
