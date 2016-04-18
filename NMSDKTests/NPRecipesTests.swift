@@ -96,6 +96,11 @@ class NPRecipesTests: XCTestCase {
         let expectation = expectationWithDescription("test recipe not found")
         
         var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didReceiveError = { (error, message) -> Void in
+            if error == SDKError.CannotEvaluateRecipe {
+                expectation.fulfill()
+            }
+        }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
@@ -103,7 +108,6 @@ class NPRecipesTests: XCTestCase {
                 let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)
-                expectation.fulfill()
             }
         }
         
@@ -115,6 +119,11 @@ class NPRecipesTests: XCTestCase {
         let expectation = expectationWithDescription("test unprocessable recipe - unknown content type")
         
         var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didReceiveError = { (error, message) -> Void in
+            if error == SDKError.CannotEvaluateRecipe {
+                expectation.fulfill()
+            }
+        }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
@@ -122,7 +131,6 @@ class NPRecipesTests: XCTestCase {
                 let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)
-                expectation.fulfill()
             }
         }
         
@@ -136,6 +144,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
+        SDKDelegate.didReceiveError = nil
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         NearSDK.appToken = appToken

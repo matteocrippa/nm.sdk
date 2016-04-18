@@ -65,6 +65,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
+                self.hub?.dispatch(event: SDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             
@@ -103,9 +104,10 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nil
     }
     private func triggerEnterEventWithRegion(region: CLRegion) {
-        NearSDK.plugins.run(
-            "com.nearit.sdk.plugin.np-recipes",
-            withArguments: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"]))
+        hub?.send(direct: PluginDirectMessage(
+            from: name,
+            to: "com.nearit.sdk.plugin.np-recipes",
+            content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
     }
     
     // MARK: CoreLocation
@@ -123,6 +125,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Region monitoring
     func startMonitoring() {
+        if CLLocationManager.authorizationStatus() != CLAuthorizationStatus.AuthorizedAlways {
+            hub?.dispatch(event: SDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways"))
+            return
+        }
+        
         let monitoredRegions = locationManager.monitoredRegions
         for region in  monitoredRegions {
             locationManager.stopMonitoringForRegion(region)
@@ -130,7 +137,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         let regions = navigator.identifiersToRegions(navigator.defaultRegionIdentifiers)
         if regions.count <= 0 {
-            // TODO: discussion - should the plugin send an event about monitoring failures?
+            hub?.dispatch(event: SDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)"))
             return
         }
         

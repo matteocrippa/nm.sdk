@@ -201,10 +201,25 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {
+        // Errors should be examined first
+        if manageError(event) {
+            return
+        }
+        
+        // Non-error events may be discarded
         if corePluginNames.contains(event.from) && !forwardCoreEvents {
             return
         }
         
+        // Non-blocked events will be forwarded to delegate
         delegate?.nearSDKDidReceiveEvent?(event)
+    }
+    private func manageError(event: PluginEvent) -> Bool {
+        if let errorValue = event.content.int("error"), error = SDKError(rawValue: errorValue), message = event.content.string("message") {
+            delegate?.nearSDKDidFail?(error: error, message: message)
+            return true
+        }
+        
+        return false
     }
 }
