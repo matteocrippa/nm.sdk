@@ -21,7 +21,6 @@ public class NearSDK: NSObject, Extensible {
     private var token = ""
     private var appID: String?
     private var timeoutInterval: NSTimeInterval = 10
-    private var tokenInAppConfiguration = true
     private var pluginHub: PluginHub!
     private var delegate: NearSDKDelegate?
     private var forwardCoreEvents = false
@@ -134,37 +133,30 @@ public class NearSDK: NSObject, Extensible {
         return sharedSDK.corePluginNames
     }
     
-    /// If true, the NearSDK.token must be set in app's Info.plist, and will be red from NearSDKKey key.
-    /// If the programmer does not want to use app's Info.plist file,
-    /// this flag must be false and NearSDK.token must be set before calling NearSDK.start()
-    /// The default value of this flag is true
-    public class var tokenInAppConfiguration: Bool {
-        get {
-            return sharedSDK.tokenInAppConfiguration
-        }
-        set(newFlag) {
-            sharedSDK.tokenInAppConfiguration = newFlag
-        }
-    }
-    
     /// MARK: Management of core plugins used by the SDK
     /// Starts the SDK
-    /// If NearSDK.tokenInAppConfiguration is set to true,
-    /// the SDK will try to set the value of NearSDK.token
-    /// by reading the value of NearSDKToken key defined in app's Info.plist file;
-    /// if such key is not defined, this method will return false and NearSDK will not start
-    public class func start() -> Bool {
-        if NearSDK.tokenInAppConfiguration {
-            guard let configuredToken = NSBundle.mainBundle().objectForInfoDictionaryKey("NearSDKToken") as? String else {
-                delegate?.nearSDKDidFail?(
-                    error: NearSDKError.TokenNotFoundInAppConfiguration,
-                    message: "A valid token must be configured in app's Info.plist for key \"NearSDKToken\": it must be linked to an app registered on nearit.com")
-                return false
-            }
-            
-            NearSDK.token = configuredToken
+    /// If token is defined, it will be used by the SDK
+    /// If token is not defined, a token must be configured in app's
+    /// Info.plist for key NearSDKToken, otherwise this method will fail (NearSDK will not start)
+    public class func start(token token: String? = nil) -> Bool {
+        // token is defined
+        if let aToken = token {
+            NearSDK.token = aToken
+            return startCorePlugins()
         }
         
+        // token is not defined (nil): use value NearSDKToken configured in app's Info.plist
+        guard let aToken = NSBundle.mainBundle().objectForInfoDictionaryKey("NearSDKToken") as? String else {
+            delegate?.nearSDKDidFail?(
+                error: NearSDKError.TokenNotFoundInAppConfiguration,
+                message: "A valid token must be configured in app's Info.plist for key \"NearSDKToken\": it must be linked to an app registered on nearit.com")
+            return false
+        }
+        
+        NearSDK.token = aToken
+        return startCorePlugins()
+    }
+    private class func startCorePlugins() -> Bool {
         var result = true
         result = result &&
             plugins.run(

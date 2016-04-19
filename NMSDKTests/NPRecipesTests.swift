@@ -17,7 +17,7 @@ class NPRecipesTests: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        reset("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4")
+        reset()
     }
     override func tearDown() {
         reset()
@@ -44,7 +44,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateBeaconForestContentReaction() {
@@ -65,7 +65,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateBeaconForestPollReaction() {
@@ -86,7 +86,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -111,7 +111,7 @@ class NPRecipesTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testUnprocessableRecipe() {
@@ -134,21 +134,19 @@ class NPRecipesTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
     // MARK: Helper functions
-    private func reset(token: String = "") {
+    private func reset() {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         SDKDelegate.didReceiveError = nil
-        NearSDK.tokenInAppConfiguration = false
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
-        NearSDK.token = token
         THStubs.clear()
     }
 }

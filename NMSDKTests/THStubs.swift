@@ -13,6 +13,9 @@ import NMJSON
 @testable import NMSDK
 
 class THStubs {
+    class var SDKToken: String {
+        return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
+    }
     class func clear() {
         OHHTTPStubs.removeAllStubs()
     }
