@@ -17,12 +17,16 @@ class NPImageCache: Plugin {
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
+            Console.error(NPImageCache.self, text: "Cannot run")
+            Console.errorLine("\"do\" parameter is required, must be \"store\", \"read\" or \"clear\"")
             return PluginResponse.error("\"do\" parameter is required, must be \"store\", \"read\" or \"clear\"")
         }
         
         switch command {
         case "store":
             guard let dictionaries = arguments.dictionaryArray("images") else {
+                Console.error(NPImageCache.self, text: "Cannot run \"store\" command")
+                Console.errorLine("\"images\" parameter is required, it must be an array of dictionaries like [\"id\": <String>, \"image\": <UIImage>]")
                 return PluginResponse.error("\"images\" parameter is required, it must be an array of dictionaries like [\"id\": <String>, \"image\": <UIImage>]")
             }
             
@@ -37,6 +41,8 @@ class NPImageCache: Plugin {
             return PluginResponse.ok()
         case "read":
             guard let identifiers = arguments.stringArray("identifiers") else {
+                Console.error(NPImageCache.self, text: "Cannot run \"read\" command")
+                Console.errorLine("\"identifiers\" parameter is required, it must be an array of String identifiers")
                 return PluginResponse.error("\"identifiers\" parameter is required, it must be an array of String identifiers")
             }
             
@@ -45,6 +51,8 @@ class NPImageCache: Plugin {
             clear()
             return PluginResponse.ok()
         default:
+            Console.error(NPImageCache.self, text: "Cannot run")
+            Console.errorLine("\"do\" parameter is required, must be \"store\", \"read\" or \"clear\"")
             return PluginResponse.error("\"do\" parameter is required, must be \"store\", \"read\" or \"clear\"")
         }
     }
