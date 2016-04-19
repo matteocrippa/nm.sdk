@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Foundation
 import NMJSON
 @testable import NMSDK
 
@@ -25,25 +26,25 @@ class NearSDKTests: XCTestCase {
     }
     
     func testAssignAppToken() {
-        let appToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
-        NearSDK.appToken = appToken
+        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
+        NearSDK.token = token
         
-        XCTAssertEqual(NearSDK.appToken, appToken)
-        XCTAssertEqual(NearSDK.appIdentifier, "identifier")
+        XCTAssertEqual(NearSDK.token, token)
+        XCTAssertEqual(NearSDK.appID, "identifier")
         
-        NearSDK.appToken = "invalid app token"
-        XCTAssertTrue(NearSDK.appToken.isEmpty)
-        XCTAssertNil(NearSDK.appIdentifier)
+        NearSDK.token = "invalid app token"
+        XCTAssertTrue(NearSDK.token.isEmpty)
+        XCTAssertNil(NearSDK.appID)
     }
     func testAssignAPITimeoutInterval() {
-        NearSDK.apiTimeoutInterval = 15
-        XCTAssertEqualWithAccuracy(NearSDK.apiTimeoutInterval, 15.0, accuracy: DBL_EPSILON)
+        NearSDK.timeoutInterval = 15
+        XCTAssertEqualWithAccuracy(NearSDK.timeoutInterval, 15.0, accuracy: DBL_EPSILON)
         
-        NearSDK.apiTimeoutInterval = 0
-        XCTAssertEqualWithAccuracy(NearSDK.apiTimeoutInterval, 10.0, accuracy: DBL_EPSILON)
+        NearSDK.timeoutInterval = 0
+        XCTAssertEqualWithAccuracy(NearSDK.timeoutInterval, 10.0, accuracy: DBL_EPSILON)
         
-        NearSDK.apiTimeoutInterval = -1
-        XCTAssertEqualWithAccuracy(NearSDK.apiTimeoutInterval, 10.0, accuracy: DBL_EPSILON)
+        NearSDK.timeoutInterval = -1
+        XCTAssertEqualWithAccuracy(NearSDK.timeoutInterval, 10.0, accuracy: DBL_EPSILON)
     }
     func testStart() {
         THStubs.stubConfigurationAPIResponse()
@@ -60,6 +61,18 @@ class NearSDKTests: XCTestCase {
         XCTAssertTrue(NearSDK.start())
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testStartFail() {
+        let expectation = expectationWithDescription("test NearSDK.start fail")
+        SDKDelegate.didReceiveError = { (error, message) -> Void in
+            XCTAssertEqual(error, NearSDKError.TokenNotFoundInAppConfiguration)
+            expectation.fulfill()
+        }
+        
+        NearSDK.tokenInAppConfiguration = true
+        XCTAssertFalse(NearSDK.start())
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     func testDownloadImages() {
         THStubs.stubImages()
         THStubs.stubImageData()
@@ -124,15 +137,16 @@ class NearSDKTests: XCTestCase {
     }
     
     // MARK: Helper functions
-    private func reset(appToken: String = "") {
+    private func reset(token: String = "") {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         NearSDK.clearImageCache()
+        NearSDK.tokenInAppConfiguration = false
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
-        NearSDK.appToken = appToken
+        NearSDK.token = token
         THStubs.clear()
     }
 }

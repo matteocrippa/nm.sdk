@@ -65,7 +65,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
-                self.hub?.dispatch(event: SDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             
@@ -126,7 +126,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     // MARK: Region monitoring
     func startMonitoring() {
         if CLLocationManager.authorizationStatus() != CLAuthorizationStatus.AuthorizedAlways {
-            hub?.dispatch(event: SDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways"))
+            hub?.dispatch(event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways"))
             return
         }
         
@@ -137,7 +137,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         let regions = navigator.identifiersToRegions(navigator.defaultRegionIdentifiers)
         if regions.count <= 0 {
-            hub?.dispatch(event: SDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)"))
+            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)"))
             return
         }
         

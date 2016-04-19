@@ -26,5 +26,5 @@ public protocol NearSDKDelegate {
     optional func nearSDKDidEvaluate(polls collection: [Poll])
     
     /// If implemented, this method will be invoked whenever NearSDK will detect an error
-    optional func nearSDKDidFail(error error: SDKError, message: String)
+    optional func nearSDKDidFail(error error: NearSDKError, message: String)
 }
