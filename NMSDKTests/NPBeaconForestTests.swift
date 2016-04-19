@@ -172,15 +172,16 @@ class NPBeaconForestTests: XCTestCase {
     }
     
     // MARK: Helper functions
-    private func reset(appToken: String = "") {
+    private func reset(token: String = "") {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         SDKDelegate.didReceiveError = nil
+        NearSDK.tokenInAppConfiguration = false
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
-        NearSDK.appToken = appToken
+        NearSDK.token = token
         THStubs.clear()
     }
 }

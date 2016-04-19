@@ -1,5 +1,5 @@
 //
-//  SDKError.swift
+//  NearSDKError.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 18/04/16.
@@ -12,7 +12,13 @@ import NMJSON
 
 /// Error of the SDK
 @objc
-public enum SDKError: Int, CustomStringConvertible {
+public enum NearSDKError: Int, CustomStringConvertible {
+    // MARK: Common
+    /// This error happens when NearSDK.tokenInAppConfiguration is true
+    /// and app's Info.plist file does not include key NearSDKToken, which must be a valid JWT
+    /// token issued for an app registered on nearit.com
+    case TokenNotFoundInAppConfiguration = 1
+    
     // MARK: Region monitoring
     /// This error happens when the SDK is started,
     /// but the configuration of BeaconForest cannot be downloaded
@@ -61,6 +67,8 @@ public enum SDKError: Int, CustomStringConvertible {
     /// SDKError description
     public var description: String {
         switch self {
+        case TokenNotFoundInAppConfiguration:
+            return "Token not found in app configuration"
         case .CannotDownloadRegionMonitoringConfiguration:
             return "Cannot download region monitoring configuration"
         case .RegionMonitoringIsNotAuthorized:
@@ -83,21 +91,23 @@ public enum SDKError: Int, CustomStringConvertible {
     /// Initializes a value of SDKError
     public init?(rawValue: Int) {
         switch rawValue {
-        case SDKError.CannotDownloadRegionMonitoringConfiguration.rawValue:
+        case NearSDKError.TokenNotFoundInAppConfiguration.rawValue:
+            self = .TokenNotFoundInAppConfiguration
+        case NearSDKError.CannotDownloadRegionMonitoringConfiguration.rawValue:
             self = .CannotDownloadRegionMonitoringConfiguration
-        case SDKError.RegionMonitoringIsNotAuthorized.rawValue:
+        case NearSDKError.RegionMonitoringIsNotAuthorized.rawValue:
             self = .RegionMonitoringIsNotAuthorized
-        case SDKError.NoRegionsToMonitor.rawValue:
+        case NearSDKError.NoRegionsToMonitor.rawValue:
             self = .NoRegionsToMonitor
-        case SDKError.CannotDownloadRecipes.rawValue:
+        case NearSDKError.CannotDownloadRecipes.rawValue:
             self = .CannotDownloadRecipes
-        case SDKError.CannotEvaluateRecipe.rawValue:
+        case NearSDKError.CannotEvaluateRecipe.rawValue:
             self = .CannotEvaluateRecipe
-        case SDKError.CannotDownloadNotificationReactions.rawValue:
+        case NearSDKError.CannotDownloadNotificationReactions.rawValue:
             self = .CannotDownloadNotificationReactions
-        case SDKError.CannotDownloadContentReactions.rawValue:
+        case NearSDKError.CannotDownloadContentReactions.rawValue:
             self = .CannotDownloadContentReactions
-        case SDKError.CannotDownloadPollReactions.rawValue:
+        case NearSDKError.CannotDownloadPollReactions.rawValue:
             self = .CannotDownloadPollReactions
         default:
             return nil

@@ -15,7 +15,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
     var didReceiveContents: ((contents: [Content]) -> Void)?
     var didReceivePolls: ((polls: [Poll]) -> Void)?
-    var didReceiveError: ((error: SDKError, message: String) -> Void)?
+    var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     
     override init() {
         super.init()
@@ -33,7 +33,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func nearSDKDidEvaluate(notifications collection: [Notification]) {
         didReceiveNotifications?(notifications: collection)
     }
-    func nearSDKDidFail(error error: SDKError, message: String) {
+    func nearSDKDidFail(error error: NearSDKError, message: String) {
         didReceiveError?(error: error, message: message)
     }
 }
