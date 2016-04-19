@@ -17,7 +17,7 @@ class NearSDKTests: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        reset("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4")
+        reset()
     }
     override func tearDown() {
         reset()
@@ -58,7 +58,7 @@ class NearSDKTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start())
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testStartFail() {
@@ -68,7 +68,6 @@ class NearSDKTests: XCTestCase {
             expectation.fulfill()
         }
         
-        NearSDK.tokenInAppConfiguration = true
         XCTAssertFalse(NearSDK.start())
         waitForExpectationsWithTimeout(1, handler: nil)
     }
@@ -137,16 +136,14 @@ class NearSDKTests: XCTestCase {
     }
     
     // MARK: Helper functions
-    private func reset(token: String = "") {
+    private func reset() {
         SDKDelegate.didReceiveNotifications = nil
         SDKDelegate.didReceiveContents = nil
         SDKDelegate.didReceivePolls = nil
         SDKDelegate.didReceiveEvent = nil
         NearSDK.clearImageCache()
-        NearSDK.tokenInAppConfiguration = false
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
-        NearSDK.token = token
         THStubs.clear()
     }
 }
