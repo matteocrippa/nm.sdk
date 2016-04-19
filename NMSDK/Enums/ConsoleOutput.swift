@@ -16,11 +16,11 @@ enum ConsoleOutput {
     var char: String {
         switch self {
         case .Information:
-            return "\u{2139}"
+            return "ℹ️"
         case .Warning:
-            return "\u{26A0}"
+            return "⚠️"
         case .Error:
-            return "\u{2757}"
+            return "⛔️"
         }
     }
 }

@@ -46,6 +46,10 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private func resetAppInfo() {
+        Console.error(NearSDK.self, text: "Invalid token")
+        Console.errorLine("NearSDK.token will be set to \"\"")
+        Console.errorLine("NearSDK.appID will be set to nil")
+        
         token = ""
         appID = nil
     }
@@ -160,6 +164,10 @@ public class NearSDK: NSObject, Extensible {
             delegate?.nearSDKDidFail?(
                 error: NearSDKError.TokenNotFoundInAppConfiguration,
                 message: "A valid token must be configured in app's Info.plist for key \"NearSDKToken\": it must be linked to an app registered on nearit.com")
+            
+            Console.error(NearSDK.self, text: "Cannot start NearSDK")
+            Console.errorLine("NearSDKToken key not found in app's Info.plist")
+            Console.errorLine("Add NearSDKToken key to app's Info.plist or start NearSDK by calling NearSDK(token:)")
             return false
         }
         
@@ -168,30 +176,25 @@ public class NearSDK: NSObject, Extensible {
     }
     private class func startCorePlugins() -> Bool {
         var result = true
-        result = result &&
-            plugins.run(
-                "com.nearit.sdk.plugin.np-beacon-monitor",
-                withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])).status == .OK
         
-        result = result &&
-            plugins.run(
-                "com.nearit.sdk.plugin.np-recipes",
-                withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])).status == .OK
+        let pluginsToRun = [
+            "com.nearit.sdk.plugin.np-beacon-monitor",
+            "com.nearit.sdk.plugin.np-recipes",
+            "com.nearit.sdk.plugin.np-recipe-reaction-content",
+            "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
+            "com.nearit.sdk.plugin.np-recipe-reaction-poll",
+        ]
+        let arguments = JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])
         
-        result = result &&
-            plugins.run(
-                "com.nearit.sdk.plugin.np-recipe-reaction-content",
-                withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])).status == .OK
-        
-        result = result &&
-            plugins.run(
-                "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
-                withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])).status == .OK
-        
-        result = result &&
-            plugins.run(
-                "com.nearit.sdk.plugin.np-recipe-reaction-poll",
-                withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])).status == .OK
+        for plugin in pluginsToRun {
+            result = result && (plugins.run(plugin, withArguments: arguments).status == .OK)
+            
+            if !result {
+                Console.error(NearSDK.self, text: "An error occurred while starting NearSDK")
+                Console.errorLine("NearSDK core plugin failed to run")
+                Console.errorLine("plugin: \(plugin)")
+            }
+        }
         
         return result
     }
@@ -204,15 +207,18 @@ public class NearSDK: NSObject, Extensible {
         var notFound = Set<String>()
         
         if !images(identifiers, storeInto: &fetched, notFound: &notFound) {
+            Console.error(NearSDK.self, text: "Cannot find images")
             didFetchImages?(images: fetched, downloaded: [], notFound: identifiers)
             return
         }
         
         if notFound.count <= 0 {
+            Console.info(NearSDK.self, text: "Images found (\(fetched.count))")
             didFetchImages?(images: fetched, downloaded: [], notFound: [])
             return
         }
         
+        Console.warning(NearSDK.self, text: "Some images cannot be found (\(notFound.count)) ")
         download(notFound, found: fetched) { (images, downloaded, notFound) in
             didFetchImages?(images: images, downloaded: downloaded, notFound: notFound)
         }
@@ -228,6 +234,7 @@ public class NearSDK: NSObject, Extensible {
         notFound = Set(identifiers)
         for (id, image) in images {
             guard let imageInstance = image as? UIImage else {
+                
                 continue
             }
             
@@ -238,12 +245,15 @@ public class NearSDK: NSObject, Extensible {
         return true
     }
     private class func download(notFound: Set<String>, found: [String: UIImage], completionHandler: ((images: [String: UIImage], downloaded: [String], notFound: [String]) -> Void)?) {
+        Console.info(NearSDK.self, text: "Downloading images (\(notFound.count))...")
         MediaAPI.getImages(Array(notFound)) { (images, identifiersNotFound, status) in
             var result = images
             for (id, image) in found {
                 result[id] = image
             }
             
+            Console.infoLine("downloaded: (\(images.keys.count))")
+            Console.infoLine(" not found: (\(identifiersNotFound.count))")
             completionHandler?(images: result, downloaded: Array(images.keys), notFound: identifiersNotFound)
         }
     }
@@ -251,7 +261,13 @@ public class NearSDK: NSObject, Extensible {
     /// Clears images' cache
     /// All subsequent calls to NearSDK.imagesWithIdentifiers(_:didFetchImages:) may download images again
     public class func clearImageCache() -> Bool {
-        return (plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
+        let didClearImageCache = (plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
+        
+        if !didClearImageCache {
+            Console.error(NearSDK.self, text: "Cannot clear images' cache")
+        }
+        
+        return didClearImageCache
     }
     
     /// MARK: NMPlug.Extensible

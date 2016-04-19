@@ -32,14 +32,14 @@ class Console {
     
     private class func log(sourceClass: AnyClass, text: String, type: ConsoleOutput = .Information, symbol: ConsoleSymbol = .Space) {
         if NearSDK.consoleOutput {
-            print("NearItSDK")
-            print(". \(type.char) \(NSStringFromClass(sourceClass))")
-            print(".   \(symbol.char) \(text)")
+            print("\n\(type.char)NearSDK")
+            print("◻️\(NSStringFromClass(sourceClass))")
+            print("  \(symbol.char)\(text)")
         }
     }
     private class func log(line: String, type: ConsoleOutput = .Information, symbol: ConsoleSymbol = .Space) {
         if NearSDK.consoleOutput {
-            print(".   \(symbol.char) \(line)")
+            print("  \(symbol.char)\(line)")
         }
     }
 }

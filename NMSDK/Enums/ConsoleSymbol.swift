@@ -12,15 +12,18 @@ enum ConsoleSymbol {
     case Space
     case Add
     case To
+    case Download
     
     var char: String {
         switch self {
         case .Space:
-            return " "
+            return "🔹"
         case .Add:
-            return "\u{2795}"
+            return "➕"
         case .To:
-            return "\u{279E}"
+            return "➡️"
+        case .Download:
+            return "⬇️"
         }
     }
 }
