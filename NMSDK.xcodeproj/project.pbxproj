@@ -22,6 +22,7 @@
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
+		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */; };
 		B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */; };
@@ -71,6 +72,7 @@
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
+		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleOutput.swift; sourceTree = "<group>"; };
@@ -119,14 +121,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		B503AD001CC11F920081A581 /* Reactions */ = {
+		B503AD001CC11F920081A581 /* ContentTypes */ = {
 			isa = PBXGroup;
 			children = (
-				B503AD011CC11FB70081A581 /* Notification.swift */,
 				B503AD031CC120730081A581 /* Content.swift */,
+				B503AD011CC11FB70081A581 /* Notification.swift */,
 				B503AD051CC1210D0081A581 /* Poll.swift */,
 			);
-			path = Reactions;
+			path = ContentTypes;
 			sourceTree = "<group>";
 		};
 		B50BCB731CBBD2AD005F7E86 /* PluginHelpers */ = {
@@ -198,10 +200,18 @@
 			path = NMSDKTests;
 			sourceTree = "<group>";
 		};
+		B54EB5981CC77C8000A80B04 /* UserActions */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = UserActions;
+			sourceTree = "<group>";
+		};
 		B58C48371CB816C2008714DC /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
 				B58C48381CB816EC008714DC /* NearSDKDelegate.swift */,
+				B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -209,7 +219,8 @@
 		B5FA83AF1CB7DCFC0090E5CD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				B503AD001CC11F920081A581 /* Reactions */,
+				B54EB5981CC77C8000A80B04 /* UserActions */,
+				B503AD001CC11F920081A581 /* ContentTypes */,
 				B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */,
 				B5028A331CC643E100DA6381 /* Console.swift */,
 			);
@@ -445,6 +456,7 @@
 				B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */,
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
+				B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */,
 				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,
 				B503AD021CC11FB70081A581 /* Notification.swift in Sources */,

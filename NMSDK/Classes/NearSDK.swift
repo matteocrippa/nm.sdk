@@ -18,6 +18,7 @@ import NMPlug
 public class NearSDK: NSObject, Extensible {
     private static let sharedSDK = NearSDK()
     
+    // MARK: Properties
     private var token = ""
     private var appID: String?
     private var timeoutInterval: NSTimeInterval = 10
@@ -27,6 +28,7 @@ public class NearSDK: NSObject, Extensible {
     private var pluginHub: PluginHub!
     private var delegate: NearSDKDelegate?
     
+    // MARK: Core - Private
     private override init() {
         super.init()
         
@@ -54,6 +56,7 @@ public class NearSDK: NSObject, Extensible {
         appID = nil
     }
     
+    // MARK: Class properties
     /// The delegate object which will receive SDK's events
     /// The SDK will produce easy to process events
     /// whenever a core plugin will produce an event
@@ -147,7 +150,7 @@ public class NearSDK: NSObject, Extensible {
         return sharedSDK.corePluginNames
     }
     
-    /// MARK: Management of core plugins used by the SDK
+    // MARK: Management of core plugins used by the SDK
     /// Starts the SDK
     /// If token is defined, it will be used by the SDK
     /// If token is not defined, a token must be configured in app's
@@ -270,7 +273,12 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
-    /// MARK: NMPlug.Extensible
+    // MARK: Actions
+    public func sendAction(object: JSON) {
+        
+    }
+    
+    // MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
         manageRecipeReaction(event)
         manageCoreEventForwarding(event)
