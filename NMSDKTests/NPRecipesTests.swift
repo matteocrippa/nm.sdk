@@ -8,6 +8,7 @@
 
 import XCTest
 import NMJSON
+import NMNet
 import NMPlug
 @testable import NMSDK
 
@@ -138,13 +139,33 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Send events
+    func testSendPollAnswer() {
+        THStubs.stubConfigurationAPIResponse()
+        THStubs.stubAPRecipePostPollAnswer(.Answer1, pollID: "poll_id")
+        let expectation = expectationWithDescription("test send poll answer")
+        
+        var pluginNames = THStubs.corePluginNames()
+        SDKDelegate.didSendPollAnswer = { (answer, pollID, success) -> Void in
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                let response = NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1))
+                XCTAssertEqual(response.status, PluginResponseStatus.Error)
+            }
+        }
+        
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     // MARK: Helper functions
     private func reset() {
-        SDKDelegate.didReceiveNotifications = nil
-        SDKDelegate.didReceiveContents = nil
-        SDKDelegate.didReceivePolls = nil
-        SDKDelegate.didReceiveEvent = nil
-        SDKDelegate.didReceiveError = nil
+        SDKDelegate.clearHandlers()
+        NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

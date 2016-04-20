@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import OHHTTPStubs
 import NMJSON
+import NMNet
 @testable import NMSDK
 
 class THStubs {
@@ -160,6 +161,19 @@ class THStubs {
         }
     }
     
+    class func stubAPRecipePostPollAnswer(answer: APRecipePollAnswer, pollID: String) {
+        stub(isHost("api.nearit.com") && pathStartsWith("/plugins/poll-notification/notifications")) { (request) -> OHHTTPStubsResponse in
+            let responseResource = [
+                "data": [
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "type": "answers",
+                    "attributes": ["answer": answer.rawValue],
+                    "relationships":["notification": ["data": ["id": pollID, "type":"notifications"]]]]
+            ]
+            
+            return OHHTTPStubsResponse(JSONObject: responseResource, statusCode: 201, headers: nil)
+        }
+    }
     class func stubBeacon(major major: Int, minor: Int) -> CLBeacon {
         return THBeacon(major: major, minor: minor, proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, proximity: CLProximity.Near)
     }

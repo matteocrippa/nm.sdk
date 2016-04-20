@@ -173,11 +173,8 @@ class NPBeaconForestTests: XCTestCase {
     
     // MARK: Helper functions
     private func reset() {
-        SDKDelegate.didReceiveNotifications = nil
-        SDKDelegate.didReceiveContents = nil
-        SDKDelegate.didReceivePolls = nil
-        SDKDelegate.didReceiveEvent = nil
-        SDKDelegate.didReceiveError = nil
+        SDKDelegate.clearHandlers()
+        NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

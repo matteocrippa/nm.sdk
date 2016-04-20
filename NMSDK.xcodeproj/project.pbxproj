@@ -24,6 +24,7 @@
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
+		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */; };
 		B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */; };
@@ -75,6 +76,7 @@
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
+		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleOutput.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 		B54EB5981CC77C8000A80B04 /* UserActions */ = {
 			isa = PBXGroup;
 			children = (
+				B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */,
 			);
 			path = UserActions;
 			sourceTree = "<group>";
@@ -463,6 +466,7 @@
 				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,
 				B503AD021CC11FB70081A581 /* Notification.swift in Sources */,
+				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
