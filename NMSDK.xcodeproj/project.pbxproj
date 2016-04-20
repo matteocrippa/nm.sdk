@@ -23,6 +23,7 @@
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
+		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */; };
 		B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */; };
@@ -73,6 +74,7 @@
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
+		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleOutput.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 			isa = PBXGroup;
 			children = (
 				B510AAA71CC4C88400E022A8 /* NearSDKError.swift */,
+				B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */,
 				B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */,
 				B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */,
 			);
@@ -241,11 +244,11 @@
 			children = (
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
 				B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */,
+				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
 				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
-				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -466,6 +469,7 @@
 				B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */,
 				B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */,
 				B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */,
+				B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */,
 				B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

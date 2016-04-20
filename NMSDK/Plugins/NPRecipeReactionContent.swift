@@ -14,7 +14,7 @@ import NMNet
 class NPRecipeReactionContent: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-recipe-reaction-content"
+        return CorePlugin.Contents.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {

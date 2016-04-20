@@ -14,7 +14,7 @@ import NMNet
 class NPRecipes: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-recipes"
+        return CorePlugin.Recipes.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -142,12 +142,12 @@ class NPRecipes: Plugin {
     }
     private func evaluatorName(recipe: APRecipe) -> String? {
         switch recipe.outCase {
-        case "content-notification":
-            return "com.nearit.sdk.plugin.np-recipe-reaction-content"
-        case "simple-notification":
-            return "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification"
         case "poll-notification":
-            return "com.nearit.sdk.plugin.np-recipe-reaction-poll"
+            return CorePlugin.Polls.name
+        case "content-notification":
+            return CorePlugin.Contents.name
+        case "simple-notification":
+            return CorePlugin.Notifications.name
         default:
             return nil
         }

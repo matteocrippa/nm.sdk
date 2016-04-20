@@ -180,17 +180,11 @@ public class NearSDK: NSObject, Extensible {
     private class func startCorePlugins() -> Bool {
         var result = true
         
-        let pluginsToRun = [
-            "com.nearit.sdk.plugin.np-beacon-monitor",
-            "com.nearit.sdk.plugin.np-recipes",
-            "com.nearit.sdk.plugin.np-recipe-reaction-content",
-            "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
-            "com.nearit.sdk.plugin.np-recipe-reaction-poll",
-        ]
+        let pluginsToRun = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
         let arguments = JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])
         
         for plugin in pluginsToRun {
-            result = result && (plugins.run(plugin, withArguments: arguments).status == .OK)
+            result = result && (plugins.run(plugin.name, withArguments: arguments).status == .OK)
             
             if !result {
                 Console.error(NearSDK.self, text: "An error occurred while starting NearSDK")
@@ -227,7 +221,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private class func images(identifiers: [String], inout storeInto target: [String: UIImage], inout notFound: Set<String>) -> Bool {
-        let response = plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
+        let response = plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
         guard let images = response.content.dictionary("images") where response.status == .OK else {
             target.removeAll()
             notFound = Set(identifiers)
@@ -264,7 +258,7 @@ public class NearSDK: NSObject, Extensible {
     /// Clears images' cache
     /// All subsequent calls to NearSDK.imagesWithIdentifiers(_:didFetchImages:) may download images again
     public class func clearImageCache() -> Bool {
-        let didClearImageCache = (plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
+        let didClearImageCache = (plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
         
         if !didClearImageCache {
             Console.error(NearSDK.self, text: "Cannot clear images' cache")
@@ -285,7 +279,7 @@ public class NearSDK: NSObject, Extensible {
     }
     private func manageRecipeReaction(event: PluginEvent) {
         switch event.from {
-        case "com.nearit.sdk.plugin.np-recipes":
+        case CorePlugin.Recipes.name:
             guard let content = event.content.json("content"), type = event.content.string("type") else {
                 return
             }

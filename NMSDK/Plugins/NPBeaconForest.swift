@@ -20,7 +20,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-beacon-monitor"
+        return CorePlugin.BeaconForest.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -127,10 +127,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nil
     }
     private func triggerEnterEventWithRegion(region: CLRegion) {
-        hub?.send(direct: PluginDirectMessage(
-            from: name,
-            to: "com.nearit.sdk.plugin.np-recipes",
-            content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
+        hub?.send(direct: PluginDirectMessage(from: name, to: CorePlugin.Recipes.name, content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
     }
     
     // MARK: CoreLocation

@@ -14,7 +14,7 @@ import NMNet
 class NPRecipeReactionPoll: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-recipe-reaction-poll"
+        return CorePlugin.Polls.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {

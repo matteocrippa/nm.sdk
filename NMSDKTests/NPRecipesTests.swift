@@ -35,7 +35,7 @@ class NPRecipesTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_2", "trigger": "FLAVOR-2"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
             }
         }
@@ -56,7 +56,7 @@ class NPRecipesTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_1", "trigger": "enter_region"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
             }
         }
@@ -77,7 +77,7 @@ class NPRecipesTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C20_1", "trigger": "FLAVOR-3"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
             }
         }
@@ -105,7 +105,7 @@ class NPRecipesTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C0_0", "trigger": "FLAVOR-X"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)
             }
@@ -128,7 +128,7 @@ class NPRecipesTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "FLAVOR-1"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-recipes", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)
             }

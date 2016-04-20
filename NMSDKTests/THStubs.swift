@@ -33,7 +33,7 @@ class THStubs {
             set.insert(name)
         }
         
-        set.remove("com.nearit.sdk.plugin.np-image-cache")
+        set.remove(CorePlugin.ImageCache.name)
         return set
     }
     class func stubImages(excluded exclude: [String] = []) {
