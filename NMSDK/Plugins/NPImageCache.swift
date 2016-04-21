@@ -13,7 +13,7 @@ import NMPlug
 class NPImageCache: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-image-cache"
+        return CorePlugin.ImageCache.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -60,7 +60,7 @@ class NPImageCache: Plugin {
     // MARK: Images' management
     private func store(images: [String: UIImage]) {
         for (id, image) in images {
-            if let resource = PluginResource(dictionary: ["id": id, "image": image]) {
+            if let resource = ContentImage(json: JSON(dictionary: ["id": id, "image": image])) {
                 hub?.cache.store(resource, inCollection: "Images", forPlugin: self)
             }
         }
@@ -70,9 +70,9 @@ class NPImageCache: Plugin {
     }
     private func read(identifiers: [String]) -> [String: AnyObject] {
         var images = [String: AnyObject]()
-        if let resources = hub?.cache.resourcesIn(collection: "Images", forPlugin: self) {
+        if let resources: [ContentImage] = hub?.cache.resourcesIn(collection: "Images", forPlugin: self) {
             for resource in resources where identifiers.contains(resource.id) {
-                if let image = resource.dictionary["image"] as? UIImage {
+                if let image = resource.image {
                     images[resource.id] = image
                 }
             }

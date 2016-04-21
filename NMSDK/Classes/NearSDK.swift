@@ -18,6 +18,7 @@ import NMPlug
 public class NearSDK: NSObject, Extensible {
     private static let sharedSDK = NearSDK()
     
+    // MARK: Properties
     private var token = ""
     private var appID: String?
     private var timeoutInterval: NSTimeInterval = 10
@@ -27,6 +28,7 @@ public class NearSDK: NSObject, Extensible {
     private var pluginHub: PluginHub!
     private var delegate: NearSDKDelegate?
     
+    // MARK: Core - Private
     private override init() {
         super.init()
         
@@ -54,6 +56,7 @@ public class NearSDK: NSObject, Extensible {
         appID = nil
     }
     
+    // MARK: Class properties
     /// The delegate object which will receive SDK's events
     /// The SDK will produce easy to process events
     /// whenever a core plugin will produce an event
@@ -147,7 +150,7 @@ public class NearSDK: NSObject, Extensible {
         return sharedSDK.corePluginNames
     }
     
-    /// MARK: Management of core plugins used by the SDK
+    // MARK: Management of core plugins used by the SDK
     /// Starts the SDK
     /// If token is defined, it will be used by the SDK
     /// If token is not defined, a token must be configured in app's
@@ -177,17 +180,11 @@ public class NearSDK: NSObject, Extensible {
     private class func startCorePlugins() -> Bool {
         var result = true
         
-        let pluginsToRun = [
-            "com.nearit.sdk.plugin.np-beacon-monitor",
-            "com.nearit.sdk.plugin.np-recipes",
-            "com.nearit.sdk.plugin.np-recipe-reaction-content",
-            "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification",
-            "com.nearit.sdk.plugin.np-recipe-reaction-poll",
-        ]
+        let pluginsToRun = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
         let arguments = JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])
         
         for plugin in pluginsToRun {
-            result = result && (plugins.run(plugin, withArguments: arguments).status == .OK)
+            result = result && (plugins.run(plugin.name, withArguments: arguments).status == .OK)
             
             if !result {
                 Console.error(NearSDK.self, text: "An error occurred while starting NearSDK")
@@ -224,7 +221,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private class func images(identifiers: [String], inout storeInto target: [String: UIImage], inout notFound: Set<String>) -> Bool {
-        let response = plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
+        let response = plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
         guard let images = response.content.dictionary("images") where response.status == .OK else {
             target.removeAll()
             notFound = Set(identifiers)
@@ -261,7 +258,7 @@ public class NearSDK: NSObject, Extensible {
     /// Clears images' cache
     /// All subsequent calls to NearSDK.imagesWithIdentifiers(_:didFetchImages:) may download images again
     public class func clearImageCache() -> Bool {
-        let didClearImageCache = (plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
+        let didClearImageCache = (plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
         
         if !didClearImageCache {
             Console.error(NearSDK.self, text: "Cannot clear images' cache")
@@ -270,14 +267,21 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
-    /// MARK: NMPlug.Extensible
+    // MARK: Actions
+    public class func sendEvent(event: EventSerializable, response handler: ((response: PluginResponse, status: HTTPStatusCode) -> Void)?) {
+        plugins.sendNetworkRequestWithPluginNamed(event.pluginName, arguments: event.body) { (response, HTTPCode) in
+            handler?(response: response, status: HTTPStatusCode(rawValue: HTTPCode))
+        }
+    }
+    
+    // MARK: NMPlug.Extensible
     public func didReceivePluginEvent(event: PluginEvent) {
         manageRecipeReaction(event)
         manageCoreEventForwarding(event)
     }
     private func manageRecipeReaction(event: PluginEvent) {
         switch event.from {
-        case "com.nearit.sdk.plugin.np-recipes":
+        case CorePlugin.Recipes.name:
             guard let content = event.content.json("content"), type = event.content.string("type") else {
                 return
             }
@@ -290,15 +294,15 @@ public class NearSDK: NSObject, Extensible {
     private func manageReaction(content: JSON, type: String) {
         switch type {
         case "content-notification":
-            if let object = APRecipeContent(dictionary: content.dictionary) {
+            if let object = APRecipeContent(json: JSON(dictionary: content.dictionary)) {
                 delegate?.nearSDKDidEvaluate?(contents: [Content(content: object)])
             }
         case "simple-notification":
-            if let object = APRecipeNotification(dictionary: content.dictionary) {
+            if let object = APRecipeNotification(json: JSON(dictionary: content.dictionary)) {
                 delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: object)])
             }
         case "poll-notification":
-            if let object = APRecipePoll(dictionary: content.dictionary) {
+            if let object = APRecipePoll(json: JSON(dictionary: content.dictionary)) {
                 delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: object)])
             }
         default:

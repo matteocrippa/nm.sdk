@@ -92,7 +92,7 @@ class NearSDKTests: XCTestCase {
         THStubs.stubImageData()
         
         let expectation = expectationWithDescription("test get images")
-        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
         NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 1)
@@ -107,7 +107,7 @@ class NearSDKTests: XCTestCase {
         let expectation = expectationWithDescription("test get images")
         let arguments = JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()], ["id": "image_2", "image": THStubs.sampleImage()]]])
         
-        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: arguments)
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: arguments)
         NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 0)
@@ -123,7 +123,7 @@ class NearSDKTests: XCTestCase {
         THStubs.stubImageData(excluded: ["image_3"])
         
         let expectation = expectationWithDescription("test get images")
-        NearSDK.plugins.run("com.nearit.sdk.plugin.np-image-cache", withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
         NearSDK.imagesWithIdentifiers(["image_1", "image_2", "image_3", "image_4"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 1)
@@ -137,10 +137,7 @@ class NearSDKTests: XCTestCase {
     
     // MARK: Helper functions
     private func reset() {
-        SDKDelegate.didReceiveNotifications = nil
-        SDKDelegate.didReceiveContents = nil
-        SDKDelegate.didReceivePolls = nil
-        SDKDelegate.didReceiveEvent = nil
+        SDKDelegate.clearHandlers()
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate

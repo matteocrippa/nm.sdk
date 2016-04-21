@@ -10,6 +10,7 @@ import Foundation
 import CoreLocation
 import OHHTTPStubs
 import NMJSON
+import NMNet
 @testable import NMSDK
 
 class THStubs {
@@ -33,25 +34,25 @@ class THStubs {
             set.insert(name)
         }
         
-        set.remove("com.nearit.sdk.plugin.np-image-cache")
+        set.remove(CorePlugin.ImageCache.name)
         return set
     }
     class func stubImages(excluded exclude: [String] = []) {
-        stub(isHost("api.nearit.com") && pathStartsWith("/media/images")) { (response) -> OHHTTPStubsResponse in
-            let excluded = response.URL!.lastPathComponent!.stringByReplacingOccurrencesOfString(".png", withString: "")
+        stub(isHost("api.nearit.com") && pathStartsWith("/media/images")) { (request) -> OHHTTPStubsResponse in
+            let excluded = request.URL!.lastPathComponent!.stringByReplacingOccurrencesOfString(".png", withString: "")
             if exclude.contains(excluded) {
                 return OHHTTPStubsResponse(data: NSData(), statusCode: 404, headers: nil)
             }
             
-            let id = response.URL!.absoluteString.componentsSeparatedByString("/").last!
+            let id = request.URL!.absoluteString.componentsSeparatedByString("/").last!
             let image = ["id": id, "type": "images", "attributes": ["image": ["url": "https://sample.com/images/\(id).png"]], "relationships": []]
             
             return OHHTTPStubsResponse(JSONObject: ["data": image], statusCode: 200, headers: nil)
         }
     }
     class func stubImageData(excluded exclude: [String] = []) {
-        stub(isHost("sample.com") && pathStartsWith("/images")) { (response) -> OHHTTPStubsResponse in
-            let excluded = response.URL!.lastPathComponent!.stringByReplacingOccurrencesOfString(".png", withString: "")
+        stub(isHost("sample.com") && pathStartsWith("/images")) { (request) -> OHHTTPStubsResponse in
+            let excluded = request.URL!.lastPathComponent!.stringByReplacingOccurrencesOfString(".png", withString: "")
             return OHHTTPStubsResponse(data: (exclude.contains(excluded) ? NSData() : sampleImageData()), statusCode: 200, headers: nil)
         }
     }
@@ -130,7 +131,7 @@ class THStubs {
         let recipe4 = recipe("R4", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "FLAVOR-1")
         let recipe5 = recipe("R5", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "FLAVOR-1")
         
-        stub(isHost("api.nearit.com") && isPath("/recipes")) { (response) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/recipes")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)
         }
     }
@@ -139,7 +140,7 @@ class THStubs {
         let content2 = ["id": "CONTENT-2", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
         let content3 = ["id": "CONTENT-3", "type": "notifications", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull()]]
         
-        stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/notifications")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2, content3]], statusCode: 200, headers: nil)
         }
     }
@@ -147,7 +148,7 @@ class THStubs {
         let notification1 = ["id": "NOTIFICATION-1", "type": "notifications", "attributes": ["text": "<notification's text>"]]
         let notification2 = ["id": "NOTIFICATION-2", "type": "notifications", "attributes": ["text": "<notification's text>"]]
         
-        stub(isHost("api.nearit.com") && isPath("/plugins/simple-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/plugins/simple-notification/notifications")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [notification1, notification2]], statusCode: 200, headers: nil)
         }
     }
@@ -155,11 +156,24 @@ class THStubs {
         let poll1 = ["id": "POLL-1", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
         let poll2 = ["id": "POLL-2", "type": "notifications", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
         
-        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications")) { (response) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [poll1, poll2]], statusCode: 200, headers: nil)
         }
     }
     
+    class func stubAPRecipePostPollAnswer(answer: APRecipePollAnswer, pollID: String) {
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications/\(pollID)/answers")) { (request) -> OHHTTPStubsResponse in
+            let responseResource = [
+                "data": [
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "type": "answers",
+                    "attributes": ["answer": answer.rawValue],
+                    "relationships":["notification": ["data": ["id": pollID, "type":"notifications"]]]]
+            ]
+            
+            return OHHTTPStubsResponse(JSONObject: responseResource, statusCode: 201, headers: nil)
+        }
+    }
     class func stubBeacon(major major: Int, minor: Int) -> CLBeacon {
         return THBeacon(major: major, minor: minor, proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, proximity: CLProximity.Near)
     }

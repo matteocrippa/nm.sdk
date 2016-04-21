@@ -14,7 +14,7 @@ import NMNet
 class NPRecipeReactionSimpleNotification: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-recipe-reaction-simple-notification"
+        return CorePlugin.Notifications.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -81,12 +81,10 @@ class NPRecipeReactionSimpleNotification: Plugin {
         }
     }
     private func notification(id: String) -> APRecipeNotification? {
-        guard let
-            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
-            reaction = APRecipeNotification(dictionary: resource.dictionary) else {
-                return nil
+        guard let resource: APRecipeNotification = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
+            return nil
         }
         
-        return reaction
+        return resource
     }
 }
