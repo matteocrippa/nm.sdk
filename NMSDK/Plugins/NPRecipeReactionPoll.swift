@@ -64,26 +64,8 @@ class NPRecipeReactionPoll: Plugin {
             return
         }
         
-        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (resource, status) in
-            if status.codeClass == .Successful {
-                guard let responseBody = resource else {
-                    handler?(response: PluginResponse.ok(), HTTPCode: status.rawValue)
-                    return
-                }
-                
-                var responseDictionary = [String: AnyObject]()
-                if let answerValue = responseBody.attributes.int("answer") {
-                    responseDictionary["answer"] = answerValue
-                }
-                if let notificationID = responseBody.relationships["notification"]?.resources.first?.id {
-                    responseDictionary["poll-id"] = notificationID
-                }
-                
-                handler?(response: PluginResponse.ok(JSON(dictionary: responseDictionary)), HTTPCode: status.rawValue)
-                return
-            }
-            
-            handler?(response: PluginResponse.error("Cannot send answer \(answerValue) for poll \(pollID))"), HTTPCode: status.rawValue)
+        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (status) in
+            handler?(response: (status == .Created ? PluginResponse.ok() : PluginResponse.error("Cannot send answer \(answerValue) for poll \(pollID))")), HTTPCode: status.rawValue)
         }
     }
     

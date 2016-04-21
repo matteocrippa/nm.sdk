@@ -132,6 +132,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
+        APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier))
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")

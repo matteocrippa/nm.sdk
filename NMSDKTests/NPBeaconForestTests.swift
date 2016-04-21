@@ -10,6 +10,7 @@ import XCTest
 import NMJSON
 import NMPlug
 import CoreLocation
+import OHHTTPStubs
 @testable import NMSDK
 
 class NPBeaconForestTests: XCTestCase {
@@ -145,7 +146,7 @@ class NPBeaconForestTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
-    // MARK: Contents, polls, notifications
+    // MARK: Contents, polls, notifications, events
     func testEnterRegionReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
@@ -155,6 +156,31 @@ class NPBeaconForestTests: XCTestCase {
             XCTAssertEqual(contents.count, 1)
             expectation.fulfill()
         }
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+                    XCTFail("sdk plugin NPBeaconForest cannot be found")
+                    return
+                }
+                
+                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+            }
+        }
+        
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testSendBeaconDetected() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test send beacon detected")
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/trackings")) { (request) -> OHHTTPStubsResponse in
+            expectation.fulfill()
+            return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
+        }
+        
+        var pluginNames = (THStubs.corePluginNames())
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
