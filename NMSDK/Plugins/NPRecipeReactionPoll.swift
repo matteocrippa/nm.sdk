@@ -45,16 +45,6 @@ class NPRecipeReactionPoll: Plugin {
             }
             
             return PluginResponse.ok(reaction.json)
-        case "send-event":
-            guard let event = arguments.json("event") else {
-                Console.error(NPRecipeReactionPoll.self, text: "Cannot run \"send-event\"")
-                Console.errorLine("\"send-event\" requires \"event\" parameter")
-                return PluginResponse.error("\"send-event\" requires \"event\" parameter")
-            }
-            
-            return sendAnswer(event) ?
-                PluginResponse.ok() :
-                PluginResponse.error("Cannot send event: it must contain a valid answer value (\"answer\" field) and a poll identifier (\"notification_id\" field)")
         default:
             Console.error(NPRecipeReactionPoll.self, text: "Cannot run")
             Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
@@ -62,6 +52,39 @@ class NPRecipeReactionPoll: Plugin {
         }
         
         return PluginResponse.ok()
+    }
+    func sendNetworkRequest(arguments: JSON, sender: String?, handler: ((response: PluginResponse, HTTPCode: Int) -> Void)?) {
+        guard let pollID = arguments.string("notification_id"), answerValue = arguments.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
+            Console.error(NPRecipeReactionPoll.self, text: "Cannot send event")
+            Console.errorLine("answer field is required")
+            Console.errorLine("notification_id field is required")
+            Console.errorLine("event received: \(arguments.dictionary)")
+            
+            handler?(response: PluginResponse.error("Cannot send event: it must contain a valid answer value (\"answer\" field) and a poll identifier (\"notification_id\" field)"), HTTPCode: -1)
+            return
+        }
+        
+        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (resource, status) in
+            if status.codeClass == .Successful {
+                guard let responseBody = resource else {
+                    handler?(response: PluginResponse.ok(), HTTPCode: status.rawValue)
+                    return
+                }
+                
+                var responseDictionary = [String: AnyObject]()
+                if let answerValue = responseBody.attributes.int("answer") {
+                    responseDictionary["answer"] = answerValue
+                }
+                if let notificationID = responseBody.relationships["notification"]?.resources.first?.id {
+                    responseDictionary["poll-id"] = notificationID
+                }
+                
+                handler?(response: PluginResponse.ok(JSON(dictionary: responseDictionary)), HTTPCode: status.rawValue)
+                return
+            }
+            
+            handler?(response: PluginResponse.error("Cannot send answer \(answerValue) for poll \(pollID))"), HTTPCode: status.rawValue)
+        }
     }
     
     // MARK: Sync
@@ -96,22 +119,5 @@ class NPRecipeReactionPoll: Plugin {
         }
         
         return resource
-    }
-    
-    // MARK: Send answer
-    private func sendAnswer(json: JSON) -> Bool {
-        guard let pollID = json.string("notification_id"), answerValue = json.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
-            Console.error(NPRecipeReactionPoll.self, text: "Cannot send event")
-            Console.errorLine("answer field is required")
-            Console.errorLine("notification_id field is required")
-            Console.errorLine("event received: \(json.dictionary)")
-            return false
-        }
-        
-        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (resource, status) in
-            
-        }
-        
-        return true
     }
 }

@@ -17,7 +17,6 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
     var didReceiveContents: ((contents: [Content]) -> Void)?
     var didReceivePolls: ((polls: [Poll]) -> Void)?
-    var didSendPollAnswer: ((answer: APRecipePollAnswer, pollID: String, success: Bool) -> Void)?
     
     override init() {
         super.init()
@@ -29,7 +28,6 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceiveNotifications = nil
         didReceiveContents = nil
         didReceivePolls = nil
-        didSendPollAnswer = nil
     }
     
     func nearSDKDidReceiveEvent(event: PluginEvent) {
@@ -46,8 +44,5 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     }
     func nearSDKDidEvaluate(notifications collection: [Notification]) {
         didReceiveNotifications?(notifications: collection)
-    }
-    func nearSDKDidSendPollAnswer(answer: APRecipePollAnswer, pollID: String, success: Bool) {
-        didSendPollAnswer?(answer: answer, pollID: pollID, success: success)
     }
 }

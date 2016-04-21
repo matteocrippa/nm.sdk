@@ -162,7 +162,7 @@ class THStubs {
     }
     
     class func stubAPRecipePostPollAnswer(answer: APRecipePollAnswer, pollID: String) {
-        stub(isHost("api.nearit.com") && pathStartsWith("/plugins/poll-notification/notifications")) { (request) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/notifications/\(pollID)/answers")) { (request) -> OHHTTPStubsResponse in
             let responseResource = [
                 "data": [
                     "id": "00000000-0000-0000-0000-000000000000",

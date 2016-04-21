@@ -268,8 +268,10 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Actions
-    public class func sendEvent(event: EventSerializable) -> PluginResponse {
-        return plugins.run(event.pluginName, withArguments: JSON(dictionary: ["do": "send-event", "event": event.body.dictionary]))
+    public class func sendEvent(event: EventSerializable, response handler: ((response: PluginResponse, status: HTTPStatusCode) -> Void)?) {
+        plugins.sendNetworkRequestWithPluginNamed(event.pluginName, arguments: event.body) { (response, HTTPCode) in
+            handler?(response: response, status: HTTPStatusCode(rawValue: HTTPCode))
+        }
     }
     
     // MARK: NMPlug.Extensible

@@ -146,15 +146,14 @@ class NPRecipesTests: XCTestCase {
         let expectation = expectationWithDescription("test send poll answer")
         
         var pluginNames = THStubs.corePluginNames()
-        SDKDelegate.didSendPollAnswer = { (answer, pollID, success) -> Void in
-            XCTAssertTrue(success)
-            expectation.fulfill()
-        }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
-                let response = NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1))
-                XCTAssertEqual(response.status, PluginResponseStatus.Error)
+                NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1), response: { (response, status) in
+                    XCTAssertEqual(response.status, PluginResponseStatus.OK)
+                    XCTAssertEqual(status.codeClass, HTTPStatusCodeClass.Successful)
+                    expectation.fulfill()
+                })
             }
         }
         
