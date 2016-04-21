@@ -58,71 +58,53 @@ class NPRecipes: Plugin {
         API.timeoutInterval = timeoutInterval ?? 10.0
         
         Console.info(NPRecipes.self, text: "Downloading recipes...", symbol: .Download)
-        APRecipes.get { (recipes, status) in
+        APRecipes.get { (recipes, recipeMaps, status) in
             if status != .OK {
                 Console.error(NPRecipes.self, text: "Cannot download recipes")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
                 return
             }
             
-            self.buildCache(recipes)
+            Console.info(NPRecipes.self, text: "Saving recipes...")
+            self.hub?.cache.removeAllResourcesWithPlugin(self)
+            for recipe in recipes {
+                self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
+                
+                Console.infoLine(recipe.id, symbol: .Add)
+                Console.infoLine("trigger: \(recipe.trigger)", symbol: .Space)
+                Console.infoLine("     in: case \(recipe.inCase), target \(recipe.inTarget)", symbol: .Space)
+                Console.infoLine("    out: case \(recipe.outCase), target \(recipe.outTarget)", symbol: .Space)
+            }
+            Console.infoLine("recipes saved: \(recipes.count)")
+            
+            Console.info(NPRecipes.self, text: "Saving events-to-recipes mappings...")
+            for map in recipeMaps {
+                Console.infoLine("  event: \(map.id)", symbol: .To)
+                Console.infoLine("maps to: \(map.recipes.joinWithSeparator(", "))")
+                
+                self.hub?.cache.store(map, inCollection: "RecipesMaps", forPlugin: self)
+            }
+            Console.infoLine("mappings saved: \(recipes.count)")
+            
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
-    }
-    private func buildCache(recipes: [APRecipe]) {
-        Console.info(NPRecipes.self, text: "Saving recipes...")
-        hub?.cache.removeAllResourcesWithPlugin(self)
         
-        var recipesMap = [String: [String]]()
-        for recipe in recipes {
-            hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
-            
-            let evaluationKey = APRecipe.evaluationKey(inCase: recipe.inCase, inTarget: recipe.inTarget, trigger: recipe.trigger)
-            
-            Console.infoLine(recipe.id, symbol: .Add)
-            Console.infoLine("trigger: \(recipe.trigger)", symbol: .Space)
-            Console.infoLine("     in: case \(recipe.inCase), target \(recipe.inTarget)", symbol: .Space)
-            Console.infoLine("    out: case \(recipe.outCase), target \(recipe.outTarget)", symbol: .Space)
-            
-            var map = recipesMap[evaluationKey] ?? []
-            if !map.contains(recipe.id) {
-                map.append(recipe.id)
-                recipesMap[evaluationKey] = map
-            }
-        }
-        
-        Console.infoLine("recipes saved: \(recipes.count)")
-        Console.info(NPRecipes.self, text: "Events-to-recipes mappings")
-        for (key, identifiers) in recipesMap {
-            if let resource = PluginResource(dictionary: ["id": key, "recipes": identifiers]) {
-                Console.infoLine("  event: \(key)", symbol: .To)
-                Console.infoLine("maps to: \(identifiers.joinWithSeparator(", "))")
-                
-                hub?.cache.store(resource, inCollection: "RecipesMaps", forPlugin: self)
-            }
-        }
-        
-        Console.infoLine("mappings saved: \(recipes.count)")
     }
     
     // MARK: Evaluate
     private func evaluate(key: String) -> Bool {
         Console.info(NPRecipes.self, text: "Will evaluate recipe \(key)")
         
-        guard let
-            pluginHub = hub,
-            recipesMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self),
-            identifiers = JSON(dictionary: recipesMap.dictionary).stringArray("recipes") else {
-                Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
-                Console.warningLine("recipe not found", symbol: .Space)
-                self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found"))
-                return false
+        guard let pluginHub = hub, recipeMap: APRecipeMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self) else {
+            Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
+            Console.warningLine("recipe not found", symbol: .Space)
+            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found"))
+            return false
         }
         
-        for id in identifiers {
+        for id in recipeMap.recipes {
             guard let
-                resource = hub?.cache.resource(id, inCollection: "Recipes", forPlugin: self),
-                recipe = APRecipe(dictionary: resource.dictionary),
+                recipe: APRecipe = hub?.cache.resource(id, inCollection: "Recipes", forPlugin: self),
                 message = evaluatorMessage(recipe),
                 response = hub?.send(direct: message) where response.status == .OK else {
                     continue

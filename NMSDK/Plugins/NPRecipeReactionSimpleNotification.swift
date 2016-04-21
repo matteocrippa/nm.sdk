@@ -81,12 +81,10 @@ class NPRecipeReactionSimpleNotification: Plugin {
         }
     }
     private func notification(id: String) -> APRecipeNotification? {
-        guard let
-            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
-            reaction = APRecipeNotification(dictionary: resource.dictionary) else {
-                return nil
+        guard let resource: APRecipeNotification = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
+            return nil
         }
         
-        return reaction
+        return resource
     }
 }

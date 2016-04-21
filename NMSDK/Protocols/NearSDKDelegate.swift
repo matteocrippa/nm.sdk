@@ -30,6 +30,4 @@ public protocol NearSDKDelegate {
     
     /// If implemented, this method will be invoked whenever NearSDK evaluates one or more polls
     optional func nearSDKDidEvaluate(polls collection: [Poll])
-    /// If implemented, this method will be invoked whenever NearSDK sends a poll answer to nearit.com
-    optional func nearSDKDidSendPollAnswer(answer: APRecipePollAnswer, pollID: String, success: Bool)
 }

@@ -80,12 +80,10 @@ class NPRecipeReactionContent: Plugin {
         }
     }
     private func content(id: String) -> APRecipeContent? {
-        guard let
-            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
-            reaction = APRecipeContent(dictionary: resource.dictionary) else {
-                return nil
+        guard let resource: APRecipeContent = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
+            return nil
         }
         
-        return reaction
+        return resource
     }
 }

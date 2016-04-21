@@ -19,8 +19,8 @@ class NPRecipeReactionPoll: Plugin {
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPRecipeReactionPoll.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"read\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\" or \"read\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
         }
         
         switch command {
@@ -45,10 +45,20 @@ class NPRecipeReactionPoll: Plugin {
             }
             
             return PluginResponse.ok(reaction.json)
+        case "send-event":
+            guard let event = arguments.json("event") else {
+                Console.error(NPRecipeReactionPoll.self, text: "Cannot run \"send-event\"")
+                Console.errorLine("\"send-event\" requires \"event\" parameter")
+                return PluginResponse.error("\"send-event\" requires \"event\" parameter")
+            }
+            
+            return sendAnswer(event) ?
+                PluginResponse.ok() :
+                PluginResponse.error("Cannot send event: it must contain a valid answer value (\"answer\" field) and a poll identifier (\"notification_id\" field)")
         default:
             Console.error(NPRecipeReactionPoll.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"read\"")
-            return PluginResponse.error("\"do\" parameter must be \"sync\" or \"read\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
         }
         
         return PluginResponse.ok()
@@ -78,13 +88,30 @@ class NPRecipeReactionPoll: Plugin {
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
     }
+    
+    // MARK: Read
     private func poll(id: String) -> APRecipePoll? {
-        guard let
-            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
-            reaction = APRecipePoll(dictionary: resource.dictionary) else {
-                return nil
+        guard let resource: APRecipePoll = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
+            return nil
         }
         
-        return reaction
+        return resource
+    }
+    
+    // MARK: Send answer
+    private func sendAnswer(json: JSON) -> Bool {
+        guard let pollID = json.string("notification_id"), answerValue = json.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
+            Console.error(NPRecipeReactionPoll.self, text: "Cannot send event")
+            Console.errorLine("answer field is required")
+            Console.errorLine("notification_id field is required")
+            Console.errorLine("event received: \(json.dictionary)")
+            return false
+        }
+        
+        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (resource, status) in
+            
+        }
+        
+        return true
     }
 }

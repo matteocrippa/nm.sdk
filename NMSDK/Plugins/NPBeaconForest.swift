@@ -108,7 +108,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Read configuration
     private func nodes() -> [[String: AnyObject]] {
-        let resources = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
+        let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
         var nodes = [[String: AnyObject]]()
         for resource in resources {
@@ -118,7 +118,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nodes
     }
     private func node(id: String) -> [String: AnyObject]? {
-        let resources = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
+        let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
         for resource in resources where resource.id == id {
             return ["id": resource.id, "parent": resource.json.string("parent", fallback: "-")!, "children": resource.json.stringArray("children", emptyIfNil: true)!]

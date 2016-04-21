@@ -18,6 +18,7 @@
 		B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50BCB741CBBD2DE005F7E86 /* THStubs.swift */; };
 		B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA71CC4C88400E022A8 /* NearSDKError.swift */; };
 		B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */; };
+		B516ED401CC91A250029F58B /* ContentImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B516ED3F1CC91A250029F58B /* ContentImage.swift */; };
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
@@ -65,6 +66,7 @@
 		B50BCB741CBBD2DE005F7E86 /* THStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THStubs.swift; sourceTree = "<group>"; };
 		B510AAA71CC4C88400E022A8 /* NearSDKError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKError.swift; sourceTree = "<group>"; };
 		B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPImageCache.swift; sourceTree = "<group>"; };
+		B516ED3F1CC91A250029F58B /* ContentImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentImage.swift; sourceTree = "<group>"; };
 		B52AF6E11CB7BE4700769ECE /* NMSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NMSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52AF6E41CB7BE4700769ECE /* NMSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NMSDK.h; sourceTree = "<group>"; };
 		B52AF6E61CB7BE4700769ECE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				B503AD031CC120730081A581 /* Content.swift */,
+				B516ED3F1CC91A250029F58B /* ContentImage.swift */,
 				B503AD011CC11FB70081A581 /* Notification.swift */,
 				B503AD051CC1210D0081A581 /* Poll.swift */,
 			);
@@ -471,6 +474,7 @@
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */,
+				B516ED401CC91A250029F58B /* ContentImage.swift in Sources */,
 				B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */,
 				B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */,
 				B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */,
