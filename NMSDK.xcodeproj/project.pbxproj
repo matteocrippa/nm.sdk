@@ -18,10 +18,14 @@
 		B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50BCB741CBBD2DE005F7E86 /* THStubs.swift */; };
 		B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA71CC4C88400E022A8 /* NearSDKError.swift */; };
 		B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */; };
+		B516ED401CC91A250029F58B /* ContentImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B516ED3F1CC91A250029F58B /* ContentImage.swift */; };
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
+		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
+		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
+		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */; };
 		B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */; };
@@ -62,6 +66,7 @@
 		B50BCB741CBBD2DE005F7E86 /* THStubs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THStubs.swift; sourceTree = "<group>"; };
 		B510AAA71CC4C88400E022A8 /* NearSDKError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKError.swift; sourceTree = "<group>"; };
 		B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPImageCache.swift; sourceTree = "<group>"; };
+		B516ED3F1CC91A250029F58B /* ContentImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentImage.swift; sourceTree = "<group>"; };
 		B52AF6E11CB7BE4700769ECE /* NMSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NMSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B52AF6E41CB7BE4700769ECE /* NMSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NMSDK.h; sourceTree = "<group>"; };
 		B52AF6E61CB7BE4700769ECE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -71,6 +76,9 @@
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
+		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
+		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
+		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleOutput.swift; sourceTree = "<group>"; };
@@ -119,14 +127,15 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		B503AD001CC11F920081A581 /* Reactions */ = {
+		B503AD001CC11F920081A581 /* ContentTypes */ = {
 			isa = PBXGroup;
 			children = (
-				B503AD011CC11FB70081A581 /* Notification.swift */,
 				B503AD031CC120730081A581 /* Content.swift */,
+				B516ED3F1CC91A250029F58B /* ContentImage.swift */,
+				B503AD011CC11FB70081A581 /* Notification.swift */,
 				B503AD051CC1210D0081A581 /* Poll.swift */,
 			);
-			path = Reactions;
+			path = ContentTypes;
 			sourceTree = "<group>";
 		};
 		B50BCB731CBBD2AD005F7E86 /* PluginHelpers */ = {
@@ -144,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				B510AAA71CC4C88400E022A8 /* NearSDKError.swift */,
+				B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */,
 				B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */,
 				B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */,
 			);
@@ -198,10 +208,19 @@
 			path = NMSDKTests;
 			sourceTree = "<group>";
 		};
+		B54EB5981CC77C8000A80B04 /* UserActions */ = {
+			isa = PBXGroup;
+			children = (
+				B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */,
+			);
+			path = UserActions;
+			sourceTree = "<group>";
+		};
 		B58C48371CB816C2008714DC /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
 				B58C48381CB816EC008714DC /* NearSDKDelegate.swift */,
+				B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -209,7 +228,8 @@
 		B5FA83AF1CB7DCFC0090E5CD /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				B503AD001CC11F920081A581 /* Reactions */,
+				B54EB5981CC77C8000A80B04 /* UserActions */,
+				B503AD001CC11F920081A581 /* ContentTypes */,
 				B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */,
 				B5028A331CC643E100DA6381 /* Console.swift */,
 			);
@@ -230,11 +250,11 @@
 			children = (
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
 				B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */,
+				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
 				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
-				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -445,15 +465,19 @@
 				B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */,
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
+				B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */,
 				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,
 				B503AD021CC11FB70081A581 /* Notification.swift in Sources */,
+				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */,
+				B516ED401CC91A250029F58B /* ContentImage.swift in Sources */,
 				B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */,
 				B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */,
+				B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */,
 				B510AAAA1CC4E5DF00E022A8 /* NPImageCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

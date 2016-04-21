@@ -10,6 +10,7 @@ import XCTest
 import NMJSON
 import NMPlug
 import CoreLocation
+import OHHTTPStubs
 @testable import NMSDK
 
 class NPBeaconForestTests: XCTestCase {
@@ -36,7 +37,7 @@ class NPBeaconForestTests: XCTestCase {
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
                 let args = JSON(dictionary: ["do": "read-nodes"])
-                let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
                 
                 XCTAssertEqual(response.content.dictionaryArray("nodes")?.count, 9)
                 expectation.fulfill()
@@ -68,7 +69,7 @@ class NPBeaconForestTests: XCTestCase {
                 
                 for configurationTest in tests {
                     let args = JSON(dictionary: ["do": "read-node", "id": configurationTest.id])
-                    let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: args)
+                    let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
                     
                     XCTAssertEqual(response.content.string("node.id"), configurationTest.id)
                     XCTAssertEqual(response.content.stringArray("node.children")!, configurationTest.children)
@@ -102,7 +103,7 @@ class NPBeaconForestTests: XCTestCase {
                 
                 for test in enterTests {
                     let args = JSON(dictionary: ["do": "read-next-nodes", "when": "enter", "id": test.id])
-                    let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: args)
+                    let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
                     
                     XCTAssertEqual(response.content.stringArray("monitored-regions", emptyIfNil: true)!.sort(), test.target.sort())
                 }
@@ -132,7 +133,7 @@ class NPBeaconForestTests: XCTestCase {
                 
                 for test in enterTests {
                     let args = JSON(dictionary: ["do": "read-next-nodes", "when": "exit", "id": test.id])
-                    let response = NearSDK.plugins.run("com.nearit.sdk.plugin.np-beacon-monitor", withArguments: args)
+                    let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
                     
                     XCTAssertEqual(response.content.stringArray("monitored-regions", emptyIfNil: true)!.sort(), test.target.sort())
                 }
@@ -145,7 +146,7 @@ class NPBeaconForestTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
-    // MARK: Contents, polls, notifications
+    // MARK: Contents, polls, notifications, events
     func testEnterRegionReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
@@ -158,7 +159,32 @@ class NPBeaconForestTests: XCTestCase {
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
-                guard let beaconForest = NearSDK.plugins.pluginNamed("com.nearit.sdk.plugin.np-beacon-monitor") where (beaconForest is NPBeaconForest) else {
+                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+                    XCTFail("sdk plugin NPBeaconForest cannot be found")
+                    return
+                }
+                
+                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+            }
+        }
+        
+        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testSendBeaconDetected() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test send beacon detected")
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/trackings")) { (request) -> OHHTTPStubsResponse in
+            expectation.fulfill()
+            return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
+        }
+        
+        var pluginNames = (THStubs.corePluginNames())
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            pluginNames.remove(event.from)
+            if pluginNames.count <= 0 {
+                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
                     XCTFail("sdk plugin NPBeaconForest cannot be found")
                     return
                 }
@@ -173,11 +199,8 @@ class NPBeaconForestTests: XCTestCase {
     
     // MARK: Helper functions
     private func reset() {
-        SDKDelegate.didReceiveNotifications = nil
-        SDKDelegate.didReceiveContents = nil
-        SDKDelegate.didReceivePolls = nil
-        SDKDelegate.didReceiveEvent = nil
-        SDKDelegate.didReceiveError = nil
+        SDKDelegate.clearHandlers()
+        NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

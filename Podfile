@@ -2,6 +2,7 @@ use_frameworks!
 
 target 'NMSDK' do
   pod 'NMNet'
+  pod 'NMPlug'
   pod 'JWTDecode', '~> 1.0'
 end
 

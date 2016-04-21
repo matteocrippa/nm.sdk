@@ -20,7 +20,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-beacon-monitor"
+        return CorePlugin.BeaconForest.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -108,7 +108,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Read configuration
     private func nodes() -> [[String: AnyObject]] {
-        let resources = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
+        let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
         var nodes = [[String: AnyObject]]()
         for resource in resources {
@@ -118,7 +118,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nodes
     }
     private func node(id: String) -> [String: AnyObject]? {
-        let resources = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
+        let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
         for resource in resources where resource.id == id {
             return ["id": resource.id, "parent": resource.json.string("parent", fallback: "-")!, "children": resource.json.stringArray("children", emptyIfNil: true)!]
@@ -127,14 +127,12 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nil
     }
     private func triggerEnterEventWithRegion(region: CLRegion) {
-        hub?.send(direct: PluginDirectMessage(
-            from: name,
-            to: "com.nearit.sdk.plugin.np-recipes",
-            content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
+        hub?.send(direct: PluginDirectMessage(from: name, to: CorePlugin.Recipes.name, content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
     }
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
+        APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier))
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")

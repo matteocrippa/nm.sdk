@@ -14,7 +14,7 @@ import NMNet
 class NPRecipeReactionContent: Plugin {
     // MARK: Plugin override
     override var name: String {
-        return "com.nearit.sdk.plugin.np-recipe-reaction-content"
+        return CorePlugin.Contents.name
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -80,12 +80,10 @@ class NPRecipeReactionContent: Plugin {
         }
     }
     private func content(id: String) -> APRecipeContent? {
-        guard let
-            resource = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self),
-            reaction = APRecipeContent(dictionary: resource.dictionary) else {
-                return nil
+        guard let resource: APRecipeContent = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
+            return nil
         }
         
-        return reaction
+        return resource
     }
 }

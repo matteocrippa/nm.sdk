@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 import NMPlug
+import NMNet
 
 class NPBeaconForestNavigator {
     private var plugin: Pluggable!
@@ -16,7 +17,7 @@ class NPBeaconForestNavigator {
     var defaultRegionIdentifiers: [String] {
         var identifiers = [String]()
         
-        let resources = (plugin.hub?.cache.resourcesIn(collection: "DefaultRegions", forPlugin: plugin) ?? [])
+        let resources: [APBeaconForestNode] = (plugin.hub?.cache.resourcesIn(collection: "DefaultRegions", forPlugin: plugin) ?? [])
         for resource in resources where !identifiers.contains(resource.id) && resource.isRoot {
             identifiers.append(resource.id)
         }
@@ -86,24 +87,24 @@ class NPBeaconForestNavigator {
     func identifiersToRegions(identifiers: [String]) -> [CLRegion] {
         var regions = [CLRegion]()
         for id in identifiers {
-            guard let node = self[id], UUID = node.UUID, major = node.major, minor = node.minor else {
+            guard let node = self[id], major = node.major, minor = node.minor else {
                 continue
             }
             
-            regions.append(CLBeaconRegion(proximityUUID: UUID, major: UInt16(major), minor: UInt16(minor), identifier: node.id))
+            regions.append(CLBeaconRegion(proximityUUID: node.proximityUUID, major: UInt16(major), minor: UInt16(minor), identifier: node.id))
         }
         
         return regions
     }
     
     // MARK: Private
-    private func up(current: PluginResource, levels: Int) -> PluginResource? {
+    private func up(current: APBeaconForestNode, levels: Int) -> APBeaconForestNode? {
         if levels <= 0 {
             return current
         }
         
         var levelsLeft = levels
-        var parent: PluginResource?
+        var parent: APBeaconForestNode?
         while levelsLeft > 0 {
             guard let parentIdentifier = current.parent, newParent = self[parentIdentifier] else {
                 return nil
@@ -115,37 +116,12 @@ class NPBeaconForestNavigator {
         
         return parent
     }
-    private subscript(id: String) -> PluginResource? {
-        let resources = (plugin.hub?.cache.resourcesIn(collection: "Regions", forPlugin: plugin) ?? [])
+    private subscript(id: String) -> APBeaconForestNode? {
+        let resources: [APBeaconForestNode] = (plugin.hub?.cache.resourcesIn(collection: "Regions", forPlugin: plugin) ?? [])
         for resource in resources where resource.id == id {
             return resource
         }
         
         return nil
-    }
-}
-
-private extension PluginResource {
-    var UUID: NSUUID? {
-        guard let string = json.string("uuid"), uuid = NSUUID(UUIDString: string) else {
-            return nil
-        }
-        
-        return uuid
-    }
-    var major: Int? {
-        return json.int("major")
-    }
-    var minor: Int? {
-        return json.int("minor")
-    }
-    var children: [String] {
-        return json.stringArray("children", emptyIfNil: true)!
-    }
-    var parent: String? {
-        return json.string("parent")
-    }
-    var isRoot: Bool {
-        return (parent ?? "").isEmpty
     }
 }

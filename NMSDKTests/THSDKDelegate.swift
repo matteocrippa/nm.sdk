@@ -7,22 +7,34 @@
 //
 
 import Foundation
+import NMNet
 import NMSDK
 import NMPlug
 
 class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
+    var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
     var didReceiveContents: ((contents: [Content]) -> Void)?
     var didReceivePolls: ((polls: [Poll]) -> Void)?
-    var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     
     override init() {
         super.init()
     }
     
+    func clearHandlers() {
+        didReceiveEvent = nil
+        didReceiveError = nil
+        didReceiveNotifications = nil
+        didReceiveContents = nil
+        didReceivePolls = nil
+    }
+    
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
+    }
+    func nearSDKDidFail(error error: NearSDKError, message: String) {
+        didReceiveError?(error: error, message: message)
     }
     func nearSDKDidEvaluate(polls collection: [Poll]) {
         didReceivePolls?(polls: collection)
@@ -32,8 +44,5 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     }
     func nearSDKDidEvaluate(notifications collection: [Notification]) {
         didReceiveNotifications?(notifications: collection)
-    }
-    func nearSDKDidFail(error error: NearSDKError, message: String) {
-        didReceiveError?(error: error, message: message)
     }
 }
