@@ -35,6 +35,7 @@ class THStubs {
         }
         
         set.remove(CorePlugin.ImageCache.name)
+        set.remove(CorePlugin.Device.name)
         return set
     }
     class func stubImages(excluded exclude: [String] = []) {
@@ -56,6 +57,25 @@ class THStubs {
             return OHHTTPStubsResponse(data: (exclude.contains(excluded) ? NSData() : sampleImageData()), statusCode: 200, headers: nil)
         }
     }
+    class func stubRequestDeviceInstallation(id: String? = nil, expectedHTTPStatusCode: HTTPStatusCode) {
+        var path = "/installations"
+        if let installationID = id {
+            path = "\(path)/\(installationID)"
+        }
+        
+        stub(isHost("api.nearit.com") && isPath(path)) { (request) -> OHHTTPStubsResponse in
+            let resource = [
+                "data": [
+                    "id": "installation-id",
+                    "type": "installations",
+                    "attributes": ["platform": "test", "platform_version": "0", "sdk_version": "0", "device_identifier": "00000000-0000-0000-0000-000000000000", "app_id": "app-id"],
+                ]
+            ]
+            
+            return OHHTTPStubsResponse(JSONObject: resource, statusCode: Int32(expectedHTTPStatusCode.rawValue), headers: nil)
+        }
+    }
+    
     class func sampleImage() -> UIImage {
         return UIImage(data: sampleImageData())!
     }

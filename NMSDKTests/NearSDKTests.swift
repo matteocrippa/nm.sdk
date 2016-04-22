@@ -27,14 +27,14 @@ class NearSDKTests: XCTestCase {
     
     func testAssignAppToken() {
         let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
-        NearSDK.token = token
+        NearSDK.appToken = token
         
-        XCTAssertEqual(NearSDK.token, token)
+        XCTAssertEqual(NearSDK.appToken, token)
         XCTAssertEqual(NearSDK.appID, "identifier")
         
-        NearSDK.token = "invalid app token"
-        XCTAssertTrue(NearSDK.token.isEmpty)
-        XCTAssertNil(NearSDK.appID)
+        NearSDK.appToken = "invalid app token"
+        XCTAssertTrue(NearSDK.appToken.isEmpty)
+        XCTAssertTrue(NearSDK.appID.isEmpty)
     }
     func testAssignAPITimeoutInterval() {
         NearSDK.timeoutInterval = 15
@@ -53,12 +53,14 @@ class NearSDKTests: XCTestCase {
         var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
+            
+            print(pluginNames)
             if pluginNames.count <= 0 {
                 expectation.fulfill()
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testStartFail() {

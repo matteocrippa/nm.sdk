@@ -34,6 +34,8 @@
 		B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */; };
 		B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */; };
 		B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */; };
+		B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BC81CCA286B00E4D911 /* NPDevice.swift */; };
+		B5E12BF51CCA799B00E4D911 /* NPDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */; };
 		B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */; };
 		B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */; };
 		B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */; };
@@ -88,6 +90,8 @@
 		B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionContent.swift; sourceTree = "<group>"; };
 		B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionSimpleNotification.swift; sourceTree = "<group>"; };
 		B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionPoll.swift; sourceTree = "<group>"; };
+		B5E12BC81CCA286B00E4D911 /* NPDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDevice.swift; sourceTree = "<group>"; };
+		B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDeviceTests.swift; sourceTree = "<group>"; };
 		B5FA83AE1CB7D8290090E5CD /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B5FA83B01CB7DD7D0090E5CD /* NearSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDK.swift; sourceTree = "<group>"; };
 		B5FA83B21CB7DF690090E5CD /* NearSDKTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKTests.swift; sourceTree = "<group>"; };
@@ -241,6 +245,7 @@
 			children = (
 				B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */,
 				B50100D81CC3C3C1003231F9 /* NPBeaconForestTests.swift */,
+				B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -255,6 +260,7 @@
 				B5CBB14B1CBFF84E000DBA34 /* NPRecipeReactionContent.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift */,
 				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
+				B5E12BC81CCA286B00E4D911 /* NPDevice.swift */,
 			);
 			path = Plugins;
 			sourceTree = "<group>";
@@ -463,6 +469,7 @@
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */,
 				B5CBB14E1CBFF866000DBA34 /* NPRecipeReactionSimpleNotification.swift in Sources */,
+				B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */,
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
 				B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */,
@@ -493,6 +500,7 @@
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
 				B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */,
 				B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */,
+				B5E12BF51CCA799B00E4D911 /* NPDeviceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

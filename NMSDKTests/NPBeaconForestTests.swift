@@ -44,7 +44,7 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testTreeStructure() {
@@ -80,7 +80,7 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSimulateEnterRegion() {
@@ -112,7 +112,7 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSimulateExitRegion() {
@@ -142,7 +142,7 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -159,16 +159,16 @@ class NPBeaconForestTests: XCTestCase {
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
-                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+                guard let beaconForest: NPBeaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) else {
                     XCTFail("sdk plugin NPBeaconForest cannot be found")
                     return
                 }
                 
-                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+                beaconForest.locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSendBeaconDetected() {
@@ -184,16 +184,16 @@ class NPBeaconForestTests: XCTestCase {
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             pluginNames.remove(event.from)
             if pluginNames.count <= 0 {
-                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+                guard let beaconForest: NPBeaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) else {
                     XCTFail("sdk plugin NPBeaconForest cannot be found")
                     return
                 }
                 
-                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+                beaconForest.locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     

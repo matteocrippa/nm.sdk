@@ -64,6 +64,12 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /// The SDK will be able to evaluate contents and notifications when an iBeacon™ is detected
     case CannotDownloadPollReactions = 6000
     
+    /// This error happens when the SDK cannot request an installation identifier
+    case CannotObtainInstallationID = 7000
+    
+    /// This error happens when the SDK cannot update an existing installation identifier
+    case CannotUpdateInstallationID = 7001
+    
     /// SDKError description
     public var description: String {
         switch self {
@@ -85,6 +91,10 @@ public enum NearSDKError: Int, CustomStringConvertible {
             return "Cannot download content reactions"
         case .CannotDownloadPollReactions:
             return "Cannot download poll reactions"
+        case .CannotObtainInstallationID:
+            return "Cannot obtain installation identifier"
+        case .CannotUpdateInstallationID:
+            return "Cannot update installation identifier"
         }
     }
     
@@ -109,6 +119,10 @@ public enum NearSDKError: Int, CustomStringConvertible {
             self = .CannotDownloadContentReactions
         case NearSDKError.CannotDownloadPollReactions.rawValue:
             self = .CannotDownloadPollReactions
+        case NearSDKError.CannotObtainInstallationID.rawValue:
+            self = .CannotObtainInstallationID
+        case NearSDKError.CannotUpdateInstallationID.rawValue:
+            self = .CannotUpdateInstallationID
         default:
             return nil
         }

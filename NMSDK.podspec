@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                  = 'NMSDK'
-  s.version               = '0.6.1'
+  s.version               = '0.7'
   s.summary               = 'nearit.com iOS SDK'
   s.description           = 'nearit.com iOS SDK, which can be extended with plugins'
 
@@ -17,6 +17,5 @@ Pod::Spec.new do |s|
 
   s.dependency              'NMNet'
   s.dependency              'NMPlug'
-  s.dependency              'JWTDecode', '~> 1.0'
 
 end

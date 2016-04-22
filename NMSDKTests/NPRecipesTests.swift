@@ -45,7 +45,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateBeaconForestContentReaction() {
@@ -66,7 +66,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateBeaconForestPollReaction() {
@@ -87,7 +87,7 @@ class NPRecipesTests: XCTestCase {
             expectation.fulfill()
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -112,7 +112,7 @@ class NPRecipesTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testUnprocessableRecipe() {
@@ -135,7 +135,7 @@ class NPRecipesTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -157,7 +157,7 @@ class NPRecipesTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     

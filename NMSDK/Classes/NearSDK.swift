@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import JWTDecode
 import NMNet
 import NMJSON
 import NMPlug
@@ -17,10 +16,9 @@ import NMPlug
 @objc
 public class NearSDK: NSObject, Extensible {
     private static let sharedSDK = NearSDK()
+    static let currentVersion = "0.7"
     
     // MARK: Properties
-    private var token = ""
-    private var appID: String?
     private var timeoutInterval: NSTimeInterval = 10
     private var consoleOutput = false
     private var forwardCoreEvents = false
@@ -34,26 +32,11 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [
-            NPBeaconForest(),
-            NPRecipes(),
-            NPRecipeReactionSimpleNotification(),
-            NPRecipeReactionContent(),
-            NPRecipeReactionPoll(),
-            NPImageCache()]
-        
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionSimpleNotification(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
         }
-    }
-    private func resetAppInfo() {
-        Console.error(NearSDK.self, text: "Invalid token")
-        Console.errorLine("NearSDK.token will be set to \"\"")
-        Console.errorLine("NearSDK.appID will be set to nil")
-        
-        token = ""
-        appID = nil
     }
     
     // MARK: Class properties
@@ -78,39 +61,22 @@ public class NearSDK: NSObject, Extensible {
     
     /// The app token linked to an app registered on nearit.com
     /// The token must be a valid JSON Web Token
-    public class var token: String {
+    /// If the token is a valid nearit.com token, API.appID property
+    /// will return the app identifier of an app registered on
+    /// nearit.com for which the authorization token has been issued,
+    /// otherwise, API.appID will be empty, but API.authorizationToken
+    /// will be equal to the new value
+    public class var appToken: String {
         get {
-            return sharedSDK.token
+            return  API.authorizationToken
         }
         set(newToken) {
-            if newToken != sharedSDK.token {
-                do {
-                    let jwt = try decode(newToken)
-                    guard let data: [String: AnyObject] = jwt.claim("data") else {
-                        sharedSDK.resetAppInfo()
-                        return
-                    }
-                    
-                    guard let
-                        account = JSON(dictionary: data).json("account"),
-                        identifier = account.string("id"),
-                        role = account.string("role_key") where role.lowercaseString == "app" else {
-                            sharedSDK.resetAppInfo()
-                            return
-                    }
-                    
-                    sharedSDK.token = newToken
-                    sharedSDK.appID = identifier
-                }
-                catch _ {
-                    sharedSDK.resetAppInfo()
-                }
-            }
+            API.authorizationToken = newToken
         }
     }
-    /// The app identifier defined by NearSDK.token
-    public class var appID: String? {
-        return sharedSDK.appID
+    /// The app identifier defined by NearSDK.app
+    public class var appID: String {
+        return API.appID
     }
     /// The timeout interval of web requests sent to nearit.com servers
     /// The default value is 10 seconds
@@ -155,10 +121,10 @@ public class NearSDK: NSObject, Extensible {
     /// If token is defined, it will be used by the SDK
     /// If token is not defined, a token must be configured in app's
     /// Info.plist for key NearSDKToken, otherwise this method will fail (NearSDK will not start)
-    public class func start(token token: String? = nil) -> Bool {
+    public class func start(appToken token: String? = nil) -> Bool {
         // token is defined
         if let aToken = token {
-            NearSDK.token = aToken
+            NearSDK.appToken = aToken
             return startCorePlugins()
         }
         
@@ -174,14 +140,14 @@ public class NearSDK: NSObject, Extensible {
             return false
         }
         
-        NearSDK.token = aToken
+        NearSDK.appToken = aToken
         return startCorePlugins()
     }
     private class func startCorePlugins() -> Bool {
         var result = true
         
         let pluginsToRun = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
-        let arguments = JSON(dictionary: ["do": "sync", "app-token": token, "timeout-interval": timeoutInterval])
+        let arguments = JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": timeoutInterval])
         
         for plugin in pluginsToRun {
             result = result && (plugins.run(plugin.name, withArguments: arguments).status == .OK)
