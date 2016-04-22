@@ -16,6 +16,9 @@ class NPRecipeReactionContent: Plugin {
     override var name: String {
         return CorePlugin.Contents.name
     }
+    override var version: String {
+        return "0.1"
+    }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPRecipeReactionContent.self, text: "Cannot run")
