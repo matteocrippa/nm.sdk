@@ -15,6 +15,9 @@ class NPImageCache: Plugin {
     override var name: String {
         return CorePlugin.ImageCache.name
     }
+    override var version: String {
+        return "0.1"
+    }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPImageCache.self, text: "Cannot run")

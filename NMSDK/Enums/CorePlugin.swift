@@ -15,6 +15,7 @@ enum CorePlugin: Int {
     case Polls
     case Contents
     case Notifications
+    case Device
     
     var name: String {
         switch self {
@@ -30,6 +31,8 @@ enum CorePlugin: Int {
             return "com.nearit.sdk.plugin.np-contents"
         case .Notifications:
             return "com.nearit.sdk.plugin.np-notifications"
+        case .Device:
+            return "com.nearit.sdk.plugin.np-device"
         }
     }
 }
