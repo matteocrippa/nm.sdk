@@ -27,59 +27,82 @@ class NPDeviceTests: XCTestCase {
         super.tearDown()
     }
     
-    func testObtainInstallationIdentifier() {
-        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
-        
-        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
-        let expectation = expectationWithDescription("test obtain installation identifier")
-        SDKDelegate.didReceiveEvent = { (event) in
-            XCTAssertEqual(event.from, CorePlugin.Device.name)
-            XCTAssertEqual(event.content.string("status"), "obtained")
-            
-            expectation.fulfill()
-        }
-        
-        clearDeviceInstallations()
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "apns-token": "00000000-0000-0000-0000-000000000000"]))
-        XCTAssertEqual(response.status, PluginResponseStatus.OK)
-        
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
+    // MARK: Test update existing installation identifier
     func testUpdateInstallationIdentifier() {
-        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
+        storeSampleDeviceInstallation()
         
         THStubs.stubRequestDeviceInstallation("installation-id", expectedHTTPStatusCode: .OK)
         let expectation = expectationWithDescription("test update installation identifier")
+        
         SDKDelegate.didReceiveEvent = { (event) in
             XCTAssertEqual(event.from, CorePlugin.Device.name)
             XCTAssertEqual(event.content.string("status"), "updated")
-            
             expectation.fulfill()
         }
         
-        storeSampleDeviceInstallation()
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": token, "apns-token": "00000000-0000-0000-0000-000000000000"]))
+        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
         XCTAssertEqual(response.status, PluginResponseStatus.OK)
         
-        waitForExpectationsWithTimeout(1, handler: nil)
+        waitForExpectationsWithTimeout(1000, handler: nil)
+    }
+    func testUpdateInstallationIdentifierViaSDK() {
+        storeSampleDeviceInstallation()
+        
+        THStubs.stubRequestDeviceInstallation("installation-id", expectedHTTPStatusCode: .OK)
+        let expectation = expectationWithDescription("test update installation identifier via SDK")
+        
+        NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
+            XCTAssertEqual(status, DeviceInstallationStatus.Updated)
+            XCTAssertNotNil(installation)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1000, handler: nil)
+    }
+    
+    // MARK: Test receive new installation identifier
+    func testReceiveInstallationIdentifier() {
+        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
+        let expectation = expectationWithDescription("test receive installation identifier")
+        
+        SDKDelegate.didReceiveEvent = { (event) in
+            XCTAssertEqual(event.from, CorePlugin.Device.name)
+            XCTAssertEqual(event.content.string("status"), "received")
+            expectation.fulfill()
+        }
+        
+        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
+        XCTAssertEqual(response.status, PluginResponseStatus.OK)
+        
+        waitForExpectationsWithTimeout(1000, handler: nil)
+    }
+    func testReceiveInstallationIdentifierViaSDK() {
+        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
+        let expectation = expectationWithDescription("test receive installation identifier via SDK")
+        
+        NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
+            XCTAssertEqual(status, DeviceInstallationStatus.Received)
+            XCTAssertNotNil(installation)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1000, handler: nil)
     }
     
     // MARK: Helper functions
-    private func clearDeviceInstallations() {
-        if let plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name) {
-            NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
-        }
-    }
     private func storeSampleDeviceInstallation() {
-        if let plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name) {
-            NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
-            
-            if let sample = APDeviceInstallation(json: JSON(dictionary: ["id": "installation-id", "app-id": "app-id", "operating-system": "os", "operating-system-version": "test", "sdk-version": "test"])) {
+        if let
+            plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name),
+            sample = APDeviceInstallation(json: JSON(dictionary: ["id": "installation-id", "app-id": "app-id", "operating-system": "os", "operating-system-version": "test", "sdk-version": "test"])) {
                 NearSDK.plugins.cache.store(sample, inCollection: "Installations", forPlugin: plugin)
-            }
         }
     }
     private func reset() {
+        if let plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name) {
+            NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
+        }
+        
+        NearSDK.consoleOutput = true
         SDKDelegate.clearHandlers()
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true

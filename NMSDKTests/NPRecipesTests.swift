@@ -31,10 +31,8 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate notification reaction with NPRecipes")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_2", "trigger": "FLAVOR-2"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
@@ -52,10 +50,8 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate content reaction with NPRecipes")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_1", "trigger": "enter_region"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
@@ -73,10 +69,8 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate poll reaction with NPRecipes")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C20_1", "trigger": "FLAVOR-3"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
@@ -96,15 +90,13 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test recipe not found")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveError = { (error, message) -> Void in
             if error == NearSDKError.CannotEvaluateRecipe {
                 expectation.fulfill()
             }
         }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C0_0", "trigger": "FLAVOR-X"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
@@ -119,15 +111,13 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test unprocessable recipe - unknown content type")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveError = { (error, message) -> Void in
             if error == NearSDKError.CannotEvaluateRecipe {
                 expectation.fulfill()
             }
         }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "FLAVOR-1"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
@@ -145,10 +135,8 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubAPRecipePostPollAnswer(.Answer1, pollID: "poll_id")
         let expectation = expectationWithDescription("test send poll answer")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1), response: { (response, status) in
                     XCTAssertEqual(response.status, PluginResponseStatus.OK)
                     XCTAssertEqual(status.codeClass, HTTPStatusCodeClass.Successful)
@@ -168,5 +156,6 @@ class NPRecipesTests: XCTestCase {
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()
+        THStubs.resetWorkingCorePlugins()
     }
 }

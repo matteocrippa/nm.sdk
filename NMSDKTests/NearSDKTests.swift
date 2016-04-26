@@ -26,10 +26,9 @@ class NearSDKTests: XCTestCase {
     }
     
     func testAssignAppToken() {
-        let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
-        NearSDK.appToken = token
+        NearSDK.appToken = THStubs.SDKToken
         
-        XCTAssertEqual(NearSDK.appToken, token)
+        XCTAssertEqual(NearSDK.appToken, THStubs.SDKToken)
         XCTAssertEqual(NearSDK.appID, "identifier")
         
         NearSDK.appToken = "invalid app token"
@@ -50,12 +49,8 @@ class NearSDKTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test NearSDK.start")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            
-            print(pluginNames)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 expectation.fulfill()
             }
         }
@@ -144,5 +139,6 @@ class NearSDKTests: XCTestCase {
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()
+        THStubs.resetWorkingCorePlugins()
     }
 }

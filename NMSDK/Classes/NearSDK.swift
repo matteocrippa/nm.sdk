@@ -233,6 +233,16 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
+    /// Refreshes an existing installation identifier or requests a new one
+    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)?) {
+        guard let plugin: NPDevice = plugins.pluginNamed(CorePlugin.Device.name) else {
+            didRefresh?(status: DeviceInstallationStatus.NotRefreshed, installation: nil)
+            return
+        }
+        
+        plugin.sync(NearSDK.appToken, timeoutInterval: NearSDK.timeoutInterval, APNSToken: APNSToken, didRefresh: didRefresh)
+    }
+    
     // MARK: Actions
     public class func sendEvent(event: EventSerializable, response handler: ((response: PluginResponse, status: HTTPStatusCode) -> Void)?) {
         plugins.sendNetworkRequestWithPluginNamed(event.pluginName, arguments: event.body) { (response, HTTPCode) in

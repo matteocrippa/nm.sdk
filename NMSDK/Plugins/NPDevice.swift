@@ -45,48 +45,47 @@ class NPDevice: Plugin {
         }
     }
     
-    // MARK: Update
-    private func sync(appToken: String, timeoutInterval: NSTimeInterval?, APNSToken: String?) {
+    // MARK: Refresh
+    func sync(appToken: String, timeoutInterval: NSTimeInterval?, APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)? = nil) {
         API.authorizationToken = appToken
         API.timeoutInterval = timeoutInterval ?? 10.0
         
         guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
-            requestInstallation(APNSToken)
+            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: APNSToken, response: { (installation, status) in
+                self.manageSyncResponse(true, installation: installation, status: status, response: didRefresh)
+            })
+            
             return
         }
         
-        updateInstallation(installation, APNSToken: APNSToken)
-    }
-    private func requestInstallation(APNSToken: String?) {
-        APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: APNSToken) { (installation, status) in
-            guard let object = installation where status == .Created else {
-                Console.error(NPDevice.self, text: "Cannot obtain installation identifier")
-                self.hub?.dispatch(event: NearSDKError.CannotObtainInstallationID.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
-                return
-            }
-            
-            Console.info(NPDevice.self, text: "Installation identifier received")
-            Console.infoLine("identifier: \(object.id)")
-            
-            self.hub?.cache.removeAllResourcesWithPlugin(self)
-            self.hub?.cache.store(object, inCollection: "Installations", forPlugin: self)
-            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync", "installation-id": object.id, "status": "obtained"])))
-        }
-    }
-    private func updateInstallation(installation: APDeviceInstallation, APNSToken: String?) {
         APDevice.updateInstallationID(installation.id, NearSDKVersion: NearSDK.currentVersion, APNSToken: APNSToken) { (installation, status) in
-            guard let object = installation where status == .OK else {
-                Console.error(NPDevice.self, text: "Cannot update installation identifier")
-                self.hub?.dispatch(event: NearSDKError.CannotUpdateInstallationID.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
-                return
-            }
-            
-            Console.info(NPDevice.self, text: "Installation identifier updated")
-            Console.infoLine("identifier: \(object.id)")
-            
-            self.hub?.cache.removeAllResourcesWithPlugin(self)
-            self.hub?.cache.store(object, inCollection: "Installations", forPlugin: self)
-            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync", "installation-id": object.id, "status": "updated"])))
+            self.manageSyncResponse(false, installation: installation, status: status, response: didRefresh)
         }
+    }
+    private func manageSyncResponse(didRequestNewID: Bool, installation: APDeviceInstallation?, status: HTTPStatusCode, response: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)?) {
+        guard let object = installation where status == (didRequestNewID ? .Created : .OK) else {
+            Console.error(NPDevice.self, text: "Cannot \(didRequestNewID ? "receive" : "refresh") installation identifier")
+            
+            let event = (didRequestNewID ?
+                NearSDKError.CannotObtainInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)") :
+                NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)")
+            )
+            
+            hub?.dispatch(event: event)
+            response?(status: .NotRefreshed, installation: nil)
+            return
+        }
+        
+        Console.info(NPDevice.self, text: "Installation identifier \(didRequestNewID ? "received" : "updated")")
+        Console.infoLine("identifier: \(object.id)")
+        
+        hub?.cache.removeAllResourcesWithPlugin(self)
+        hub?.cache.store(object, inCollection: "Installations", forPlugin: self)
+        
+        let event = PluginEvent(from: name, content: JSON(dictionary: ["operation": "sync", "installation-id": object.id, "status": (didRequestNewID ? "received" : "updated")]))
+        Console.infoLine("event \(event)")
+        
+        hub?.dispatch(event: event)
+        response?(status: (didRequestNewID ? .Received : .Updated), installation: object)
     }
 }

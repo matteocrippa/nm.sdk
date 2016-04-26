@@ -14,6 +14,30 @@ import NMNet
 @testable import NMSDK
 
 class THStubs {
+    private static var syncDidEnd = false
+    private static var workingCorePlugins = Set<String>()
+    class func resetWorkingCorePlugins() {
+        var set = Set<String>()
+        for name in NearSDK.corePluginNames {
+            set.insert(name)
+        }
+        
+        set.remove(CorePlugin.ImageCache.name)
+        set.remove(CorePlugin.Device.name)
+        workingCorePlugins = set
+        syncDidEnd = false
+    }
+    class func checkSyncDidEnd(pluginName: String) -> Bool {
+        workingCorePlugins.remove(pluginName)
+        
+        if !syncDidEnd && workingCorePlugins.count <= 0 {
+            syncDidEnd = true
+            return true
+        }
+        
+        return false
+    }
+    
     class var SDKToken: String {
         return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImFjY291bnQiOnsiaWQiOiJpZGVudGlmaWVyIiwicm9sZV9rZXkiOiJhcHAifX19.8Ut6wrGrqd81pb-ObNvOUvG0o8JaJhmTvKwGQ44Nqj4"
     }
@@ -28,16 +52,7 @@ class THStubs {
         stubAPRecipeContentReactions()
         stubAPRecipePollReactions()
     }
-    class func corePluginNames() -> Set<String> {
-        var set = Set<String>()
-        for name in NearSDK.corePluginNames {
-            set.insert(name)
-        }
-        
-        set.remove(CorePlugin.ImageCache.name)
-        set.remove(CorePlugin.Device.name)
-        return set
-    }
+    
     class func stubImages(excluded exclude: [String] = []) {
         stub(isHost("api.nearit.com") && pathStartsWith("/media/images")) { (request) -> OHHTTPStubsResponse in
             let excluded = request.URL!.lastPathComponent!.stringByReplacingOccurrencesOfString(".png", withString: "")
