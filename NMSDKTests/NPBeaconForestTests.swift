@@ -32,10 +32,8 @@ class NPBeaconForestTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let args = JSON(dictionary: ["do": "read-nodes"])
                 let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
                 
@@ -44,17 +42,15 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testTreeStructure() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test tree structure")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let tests: [(id: String, parent: String?, children: [String])] = [
                     ("R1_1",    nil,      ["C10_1",  "C10_2"]),
                     ("R1_2",    nil,      ["C20_1",  "C20_2"]),
@@ -80,17 +76,15 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSimulateEnterRegion() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let enterTests: [(id: String, target: [String])] = [
                     ("R1_1",    ["R1_1", "R1_2", "C10_1", "C10_2"]),
                     ("R1_2",    ["R1_1", "R1_2", "C20_1", "C20_2"]),
@@ -112,17 +106,15 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSimulateExitRegion() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
         
-        var pluginNames = THStubs.corePluginNames()
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
+            if THStubs.checkSyncDidEnd(event.from) {
                 let enterTests: [(id: String, target: [String])] = [
                     ("R1_1", ["R1_1", "R1_2"]),
                     ("C10_1", ["R1_1", "R1_2", "C10_1", "C10_2"]),
@@ -142,7 +134,7 @@ class NPBeaconForestTests: XCTestCase {
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -151,24 +143,22 @@ class NPBeaconForestTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
         
-        var pluginNames = (THStubs.corePluginNames())
         SDKDelegate.didReceiveContents = { (contents) -> Void in
             XCTAssertEqual(contents.count, 1)
             expectation.fulfill()
         }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
-                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+            if THStubs.checkSyncDidEnd(event.from) {
+                guard let beaconForest: NPBeaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) else {
                     XCTFail("sdk plugin NPBeaconForest cannot be found")
                     return
                 }
                 
-                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+                beaconForest.locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testSendBeaconDetected() {
@@ -180,20 +170,18 @@ class NPBeaconForestTests: XCTestCase {
             return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
         }
         
-        var pluginNames = (THStubs.corePluginNames())
         SDKDelegate.didReceiveEvent = { (event) -> Void in
-            pluginNames.remove(event.from)
-            if pluginNames.count <= 0 {
-                guard let beaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) where (beaconForest is NPBeaconForest) else {
+            if THStubs.checkSyncDidEnd(event.from) {
+                guard let beaconForest: NPBeaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) else {
                     XCTFail("sdk plugin NPBeaconForest cannot be found")
                     return
                 }
                 
-                (beaconForest as! NPBeaconForest).locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
+                beaconForest.locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: "C10_1"))
             }
         }
         
-        XCTAssertTrue(NearSDK.start(token: THStubs.SDKToken))
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
@@ -204,5 +192,6 @@ class NPBeaconForestTests: XCTestCase {
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()
+        THStubs.resetWorkingCorePlugins()
     }
 }

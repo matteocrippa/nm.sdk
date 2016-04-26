@@ -30,6 +30,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceivePolls = nil
     }
     
+    
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
     }
