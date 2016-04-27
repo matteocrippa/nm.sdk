@@ -312,27 +312,27 @@ public class NearSDK: NSObject, Extensible {
     private func manageRecipeReaction(event: PluginEvent) {
         switch event.from {
         case CorePlugin.Recipes.name:
-            guard let content = event.content.json("content"), type = event.content.string("type") else {
+            guard let contentJSON = event.content.json("reaction"), recipeJSON = event.content.json("recipe"), type = event.content.string("type") else {
                 return
             }
             
-            manageReaction(content, type: type)
+            manageReaction(contentJSON, recipe: APRecipe(json: recipeJSON), type: type)
         default:
             break
         }
     }
-    private func manageReaction(content: JSON, type: String) {
+    private func manageReaction(reactionJSON: JSON, recipe: APRecipe?, type: String) {
         switch type {
         case "content-notification":
-            if let contentObject = content.json("content"), reaction = APRecipeContent(json: contentObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+            if let reaction = APRecipeContent(json: reactionJSON)  {
                 delegate?.nearSDKDidEvaluate?(contents: [Content(content: reaction, recipe: recipe)])
             }
         case "simple-notification":
-            if let notificationObject = content.json("notification"), reaction = APRecipeNotification(json: notificationObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+            if let reaction = APRecipeNotification(json: reactionJSON) {
                 delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: reaction, recipe: recipe)])
             }
         case "poll-notification":
-            if let pollObject = content.json("poll"), reaction = APRecipePoll(json: pollObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+            if let reaction = APRecipePoll(json: reactionJSON) {
                 delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: reaction, recipe: recipe)])
             }
         default:

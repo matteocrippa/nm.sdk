@@ -116,8 +116,9 @@ class NPRecipes: Plugin {
             Console.info(NPRecipes.self, text: "Recipe \(key) has been evaluated")
             Console.infoLine("content id: \(recipe.outTarget)")
             Console.infoLine("      type: \(recipe.outCase)")
-            let content = JSON(dictionary: ["content": response.content.dictionary, "type": recipe.outCase])
-            return pluginHub.dispatch(event: PluginEvent(from: name, content: content))
+            
+            let reaction = JSON(dictionary: ["reaction": response.content.dictionary, "recipe": recipe.json.dictionary, "type": recipe.outCase])
+            return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction))
         }
         
         Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
