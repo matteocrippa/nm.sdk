@@ -114,3 +114,5 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
     - `answer1`
     - `answer2`
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
+
+All reactions evaluated by `NearSDK` may include a reference to the evaluating `Recipe`, i.e. the transformation of an input event into an output reaction.
