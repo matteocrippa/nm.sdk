@@ -16,6 +16,9 @@ public class Content: NSObject {
     /// The identifier of the content.
     public private (set) var id = ""
     
+    /// The recipe which evaluated the content.
+    public private (set) var recipe: Recipe?
+    
     /// The title of the content.
     public private (set) var title = ""
     
@@ -33,7 +36,8 @@ public class Content: NSObject {
     ///
     /// - parameters:
     ///   - content: the source `APRecipeContent` instance
-    public init(content: APRecipeContent) {
+    ///   - recipe: the source `APRecipe` which evaluated the content
+    public init(content: APRecipeContent, recipe evaluatedRecipe: APRecipe?) {
         super.init()
         
         id = content.id
@@ -41,11 +45,15 @@ public class Content: NSObject {
         text = content.text
         imageIdentifiers = content.imageIdentifiers
         videoURL = content.videoURL
+        
+        if let r = evaluatedRecipe {
+            recipe = Recipe(recipe: r)
+        }
     }
     
     // MARK: Properties
     /// Human-readable description of Self.
     public override var description: String {
-        return Console.describe(Notification.self, properties: [("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL)])
+        return Console.describe(Notification.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL), ("recipe", recipe?.evaluation))
     }
 }

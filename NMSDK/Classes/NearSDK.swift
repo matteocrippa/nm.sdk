@@ -312,28 +312,28 @@ public class NearSDK: NSObject, Extensible {
     private func manageRecipeReaction(event: PluginEvent) {
         switch event.from {
         case CorePlugin.Recipes.name:
-            guard let content = event.content.json("content"), type = event.content.string("type") else {
+            guard let contentJSON = event.content.json("reaction"), recipeJSON = event.content.json("recipe"), type = event.content.string("type") else {
                 return
             }
             
-            manageReaction(content, type: type)
+            manageReaction(contentJSON, recipe: APRecipe(json: recipeJSON), type: type)
         default:
             break
         }
     }
-    private func manageReaction(content: JSON, type: String) {
+    private func manageReaction(reactionJSON: JSON, recipe: APRecipe?, type: String) {
         switch type {
         case "content-notification":
-            if let object = APRecipeContent(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(contents: [Content(content: object)])
+            if let reaction = APRecipeContent(json: reactionJSON)  {
+                delegate?.nearSDKDidEvaluate?(contents: [Content(content: reaction, recipe: recipe)])
             }
         case "simple-notification":
-            if let object = APRecipeNotification(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: object)])
+            if let reaction = APRecipeNotification(json: reactionJSON) {
+                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: reaction, recipe: recipe)])
             }
         case "poll-notification":
-            if let object = APRecipePoll(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: object)])
+            if let reaction = APRecipePoll(json: reactionJSON) {
+                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: reaction, recipe: recipe)])
             }
         default:
             break
