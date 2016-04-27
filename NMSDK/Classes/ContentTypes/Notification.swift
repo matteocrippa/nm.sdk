@@ -30,4 +30,10 @@ public class Notification: NSObject {
         id = notification.id
         text = notification.text
     }
+    
+    // MARK: Properties
+    /// Human-readable description of Self.
+    public override var description: String {
+        return Console.describe(Notification.self, properties: [("id", id), ("text", text)])
+    }
 }

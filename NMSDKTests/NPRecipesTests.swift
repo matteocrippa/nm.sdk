@@ -148,6 +148,24 @@ class NPRecipesTests: XCTestCase {
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testSendPollAnswerViaSDK() {
+        THStubs.stubConfigurationAPIResponse()
+        THStubs.stubAPRecipePostPollAnswer(.Answer1, pollID: "poll_id")
+        let expectation = expectationWithDescription("test send poll answer via SDK")
+        
+        SDKDelegate.didReceiveEvent = { (event) -> Void in
+            if THStubs.checkSyncDidEnd(event.from) {
+                NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id") { (response, result) in
+                    XCTAssertEqual(result, SendEventResult.Success)
+                    XCTAssertEqual(response.dictionary.count, 0)
+                    expectation.fulfill()
+                }
+            }
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     
     // MARK: Helper functions
     private func reset() {

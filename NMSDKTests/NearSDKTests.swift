@@ -25,6 +25,7 @@ class NearSDKTests: XCTestCase {
         super.tearDown()
     }
     
+    // MARK: Configuration
     func testAssignAppToken() {
         NearSDK.appToken = THStubs.SDKToken
         
@@ -45,6 +46,8 @@ class NearSDKTests: XCTestCase {
         NearSDK.timeoutInterval = -1
         XCTAssertEqualWithAccuracy(NearSDK.timeoutInterval, 10.0, accuracy: DBL_EPSILON)
     }
+    
+    // MARK: Start
     func testStart() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test NearSDK.start")
@@ -69,6 +72,7 @@ class NearSDKTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Images
     func testDownloadImages() {
         THStubs.stubImages()
         THStubs.stubImageData()

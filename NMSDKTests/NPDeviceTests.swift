@@ -27,7 +27,7 @@ class NPDeviceTests: XCTestCase {
         super.tearDown()
     }
     
-    // MARK: Test update existing installation identifier
+    // MARK: Update existing installation identifier
     func testUpdateInstallationIdentifier() {
         storeSampleDeviceInstallation()
         
@@ -60,7 +60,7 @@ class NPDeviceTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
-    // MARK: Test receive new installation identifier
+    // MARK: Receive new installation identifier
     func testReceiveInstallationIdentifier() {
         THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
         let expectation = expectationWithDescription("test receive installation identifier")
@@ -102,7 +102,6 @@ class NPDeviceTests: XCTestCase {
             NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
         }
         
-        NearSDK.consoleOutput = true
         SDKDelegate.clearHandlers()
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true
