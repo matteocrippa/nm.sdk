@@ -40,6 +40,7 @@ class NPRecipesTests: XCTestCase {
         }
         SDKDelegate.didReceiveNotifications = { (notifications) -> Void in
             XCTAssertEqual(notifications.count, 1)
+            XCTAssertNotNil(contents[0].evaluatedRecipe)
             expectation.fulfill()
         }
         
@@ -59,6 +60,7 @@ class NPRecipesTests: XCTestCase {
         }
         SDKDelegate.didReceiveContents = { (contents) -> Void in
             XCTAssertEqual(contents.count, 1)
+            XCTAssertNotNil(contents[0].evaluatedRecipe)
             expectation.fulfill()
         }
         
@@ -78,6 +80,7 @@ class NPRecipesTests: XCTestCase {
         }
         SDKDelegate.didReceivePolls = { (polls) -> Void in
             XCTAssertEqual(polls.count, 1)
+            XCTAssertNotNil(polls[0].evaluatedRecipe)
             expectation.fulfill()
         }
         
