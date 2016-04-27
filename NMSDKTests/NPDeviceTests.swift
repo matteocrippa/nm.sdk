@@ -102,7 +102,6 @@ class NPDeviceTests: XCTestCase {
             NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
         }
         
-        NearSDK.consoleOutput = true
         SDKDelegate.clearHandlers()
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = true

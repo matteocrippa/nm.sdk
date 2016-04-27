@@ -290,9 +290,9 @@ public class NearSDK: NSObject, Extensible {
             handler?(response: response, status: HTTPStatusCode(rawValue: HTTPCode))
         }
     }
-    /// Sends an answer for a given poll to nearit.com
+    /// Sends an answer for a given poll to nearit.com.
     ///
-    /// This is a facility method which sends a `PollAnswer` instance by calling `NearSDK.sendEvent(_:response:)`
+    /// This is a facility method which sends a `PollAnswer` instance by calling `NearSDK.sendEvent(_:response:)`.
     ///
     /// - parameters:
     ///   - answer: the answer

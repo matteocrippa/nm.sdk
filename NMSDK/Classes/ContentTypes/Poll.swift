@@ -43,4 +43,10 @@ public class Poll: NSObject {
         answer1 = poll.answer1
         answer2 = poll.answer2
     }
+    
+    // MARK: Properties
+    /// Human-readable description of Self.
+    public override var description: String {
+        return Console.describe(Poll.self, properties: [("id", id), ("text", text), ("question", question), ("answer1", answer1), ("answer2", answer2)])
+    }
 }

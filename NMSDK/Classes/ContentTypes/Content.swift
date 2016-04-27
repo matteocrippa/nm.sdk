@@ -42,4 +42,10 @@ public class Content: NSObject {
         imageIdentifiers = content.imageIdentifiers
         videoURL = content.videoURL
     }
+    
+    // MARK: Properties
+    /// Human-readable description of Self.
+    public override var description: String {
+        return Console.describe(Notification.self, properties: [("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL)])
+    }
 }
