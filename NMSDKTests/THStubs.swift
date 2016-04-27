@@ -161,10 +161,10 @@ class THStubs {
         }
         
         let recipe1 = recipe("R1", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT-1",      contentType: "content-notification", trigger: "enter_region")
-        let recipe2 = recipe("R2", nodeIdentifier: "C10_2",   contentIdentifier: "NOTIFICATION-1", contentType: "simple-notification",  trigger: "FLAVOR-2")
-        let recipe3 = recipe("R3", nodeIdentifier: "C20_1",   contentIdentifier: "POLL-1",         contentType: "poll-notification",    trigger: "FLAVOR-3")
-        let recipe4 = recipe("R4", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "FLAVOR-1")
-        let recipe5 = recipe("R5", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "FLAVOR-1")
+        let recipe2 = recipe("R2", nodeIdentifier: "C10_2",   contentIdentifier: "NOTIFICATION-1", contentType: "simple-notification",  trigger: "EVENT-2")
+        let recipe3 = recipe("R3", nodeIdentifier: "C20_1",   contentIdentifier: "POLL-1",         contentType: "poll-notification",    trigger: "EVENT-3")
+        let recipe4 = recipe("R4", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "EVENT-1")
+        let recipe5 = recipe("R5", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "EVENT-1")
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)

@@ -33,7 +33,7 @@ class NPRecipesTests: XCTestCase {
         
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             if THStubs.checkSyncDidEnd(event.from) {
-                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_2", "trigger": "FLAVOR-2"])
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_2", "trigger": "EVENT-2"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
             }
@@ -73,7 +73,7 @@ class NPRecipesTests: XCTestCase {
         
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             if THStubs.checkSyncDidEnd(event.from) {
-                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C20_1", "trigger": "FLAVOR-3"])
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C20_1", "trigger": "EVENT-3"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
             }
@@ -100,7 +100,7 @@ class NPRecipesTests: XCTestCase {
         }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             if THStubs.checkSyncDidEnd(event.from) {
-                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C0_0", "trigger": "FLAVOR-X"])
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C0_0", "trigger": "EVENT-X"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)
@@ -121,7 +121,7 @@ class NPRecipesTests: XCTestCase {
         }
         SDKDelegate.didReceiveEvent = { (event) -> Void in
             if THStubs.checkSyncDidEnd(event.from) {
-                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "FLAVOR-1"])
+                let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "EVENT-1"])
                 let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
                 
                 XCTAssertEqual(response.status, PluginResponseStatus.Error)

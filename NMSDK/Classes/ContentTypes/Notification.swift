@@ -42,6 +42,6 @@ public class Notification: NSObject {
     // MARK: Properties
     /// Human-readable description of Self.
     public override var description: String {
-        return Console.describe(Notification.self, properties: [("id", id), ("text", text)])
+        return Console.describe(Notification.self, properties: ("id", id), ("text", text), ("recipe", recipe?.evaluation))
     }
 }

@@ -30,7 +30,7 @@ class Console {
         log(line, type: .Error, symbol: symbol)
     }
     
-    class func describe(sourceClass: AnyClass, properties: [(String, AnyObject?)]) -> String {
+    class func describe(sourceClass: AnyClass, properties: (String, AnyObject?)...) -> String {
         var descriptionComponents = ["\n\(ConsoleOutput.Information.char)NearSDK", "\(ConsoleSymbol.Square.char)\(NSStringFromClass(sourceClass))"]
         
         var longestPropertyName = 0
