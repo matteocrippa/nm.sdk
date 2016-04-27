@@ -17,6 +17,9 @@ public class Poll: NSObject {
     /// The identifier of the poll.
     public private (set) var id = ""
     
+    /// The recipe which evaluated the poll.
+    public private (set) var recipe: Recipe?
+    
     /// The question of the poll.
     public var question = ""
     
@@ -34,7 +37,8 @@ public class Poll: NSObject {
     ///
     /// - parameters:
     ///   - poll: the source `APRecipePoll` instance
-    public init(poll: APRecipePoll) {
+    ///   - recipe: the source `APRecipe` which evaluated the poll
+    public init(poll: APRecipePoll, recipe evaluatedRecipe: APRecipe?) {
         super.init()
         
         id = poll.id
@@ -42,11 +46,15 @@ public class Poll: NSObject {
         text = poll.text
         answer1 = poll.answer1
         answer2 = poll.answer2
+        
+        if let r = evaluatedRecipe {
+            recipe = Recipe(recipe: r)
+        }
     }
     
     // MARK: Properties
     /// Human-readable description of Self.
     public override var description: String {
-        return Console.describe(Poll.self, properties: [("id", id), ("text", text), ("question", question), ("answer1", answer1), ("answer2", answer2)])
+        return Console.describe(Poll.self, properties: ("id", id), ("text", text), ("question", question), ("answer1", answer1), ("answer2", answer2), ("recipe", recipe?.evaluation))
     }
 }

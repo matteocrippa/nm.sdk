@@ -23,6 +23,7 @@
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
 		B53D6D081CD0F17500500244 /* SendEventResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53D6D071CD0F17500500244 /* SendEventResult.swift */; };
+		B53D6D0A1CD10EF100500244 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53D6D091CD10EF100500244 /* Recipe.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
@@ -80,6 +81,7 @@
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
 		B53D6D071CD0F17500500244 /* SendEventResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendEventResult.swift; sourceTree = "<group>"; };
+		B53D6D091CD10EF100500244 /* Recipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 		B503AD001CC11F920081A581 /* ContentTypes */ = {
 			isa = PBXGroup;
 			children = (
+				B53D6D091CD10EF100500244 /* Recipe.swift */,
 				B503AD031CC120730081A581 /* Content.swift */,
 				B516ED3F1CC91A250029F58B /* ContentImage.swift */,
 				B503AD011CC11FB70081A581 /* Notification.swift */,
@@ -486,6 +489,7 @@
 				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,
+				B53D6D0A1CD10EF100500244 /* Recipe.swift in Sources */,
 				B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */,
 				B510AAA81CC4C88400E022A8 /* NearSDKError.swift in Sources */,
 				B516ED401CC91A250029F58B /* ContentImage.swift in Sources */,
