@@ -290,6 +290,20 @@ public class NearSDK: NSObject, Extensible {
             handler?(response: response, status: HTTPStatusCode(rawValue: HTTPCode))
         }
     }
+    /// Sends an answer for a given poll to nearit.com
+    ///
+    /// This is a facility method which sends a `PollAnswer` instance by calling `NearSDK.sendEvent(_:response:)`
+    ///
+    /// - parameters:
+    ///   - answer: the answer
+    ///   - poll: the identifier of the target poll
+    ///   - response: the handler which will be executed when the answer is sent to nearit.com or when an error occurs
+    public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: ((response: JSON, result: SendEventResult) -> Void)?) {
+        sendEvent(PollAnswer(poll: poll, answer: answer)) { (response, status) in
+            handler?(response: response.content, result: (status == .Created ? .Success : .Failure))
+        }
+    }
+    
     /// Manages plugins sent from registered plugins to `NearSDK`.
     public func didReceivePluginEvent(event: PluginEvent) {
         manageRecipeReaction(event)
