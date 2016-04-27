@@ -10,67 +10,66 @@ import Foundation
 import NMPlug
 import NMJSON
 
-/// Error of the SDK
+/// Errors of the SDK.
 @objc
 public enum NearSDKError: Int, CustomStringConvertible {
-    // MARK: Common
-    /// This error happens when NearSDK.tokenInAppConfiguration is true
-    /// and app's Info.plist file does not include key NearSDKToken, which must be a valid JWT
-    /// token issued for an app registered on nearit.com
+    /// Thrown when `NearSDK.tokenInAppConfiguration` is `true` and app's `Info.plist` file does not include key `NearSDKToken`, which must be a valid JWT token issued for an app registered on nearit.com.
     case TokenNotFoundInAppConfiguration = 1
     
-    // MARK: Region monitoring
-    /// This error happens when the SDK is started,
-    /// but the configuration of BeaconForest cannot be downloaded
-    /// If this error occurs, the SDK will never be able to evaluate
-    /// any type of content when an iBeacon™ is detected - contents, notifications and polls
+    /// Thrown when `NearSDK` is started, but the configuration of `BeaconForest` plugin cannot be downloaded.
+    ///
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
     case CannotDownloadRegionMonitoringConfiguration = 1000
     
-    /// This error happens when the SDK is started, but
-    /// CLLocationManager.authorizationStatus() is not CLAuthorizationStatus.AuthorizedAlways
-    /// Appropriate authorization levels should be obtained before starting the SDK.
-    /// If this error occurs, the SDK will never be able to evaluate
-    /// any type of content when an iBeacon™ is detected - contents, notifications and polls
+    /// Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways`.
+    ///
+    /// Appropriate authorization levels should be obtained before starting `NearSDK`.
+    /// 
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
     case RegionMonitoringIsNotAuthorized = 1001
     
-    /// This error happens when the SDK is started,
-    /// the user authorized the app to monitor region changes
-    /// in backgrund, but no regions can be monitored because
-    /// BeaconForest's configuration has been received, but it's empty.
-    /// If this error occurs, the SDK will never be able to evaluate
-    /// any type of content when an iBeacon™ is detected - contents, notifications and polls
+    /// Thrown when `NearSDK` is started, the user authorized the app to monitor region changes in background, but no regions can be monitored because the configuration of `BeaconForest` plugin is empty.
+    /// 
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
     case NoRegionsToMonitor = 1002
     
-    // MARK: Recipes
-    /// This error happens when the SDK is started, but recipes cannot be downloaded.
-    /// While the SDK may be able to detect iBeacon™s, it will not be able to evaluate any content
+    /// Thrown when `NearSDK` is started, but recipes cannot be downloaded.
+    /// 
+    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate any content, notification or poll reaction.
     case CannotDownloadRecipes = 2000
     
-    /// This error happens when the SDK cannot evaluate correctly an event
+    /// Thrown when the `NarSDK` cannot evaluate correctly an event.
     case CannotEvaluateRecipe = 3000
     
-    /// This error happens when the SDK is started, but "notification" reactions cannot be downloaded.
-    /// While the SDK may be able to detect iBeacon™s, it will not be able to evaluate notifications
-    /// The SDK will be able to evaluate contents and polls when an iBeacon™ is detected
+    /// Thrown when the `NearSDK` is started, but notification reactions cannot be downloaded.
+    ///
+    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate notification reactions.
+    /// 
+    /// `NearSDK` will be able to evaluate contents and polls when an iBeacon™ is detected.
     case CannotDownloadNotificationReactions = 4000
     
-    /// This error happens when the SDK is started, but "content" reactions cannot be downloaded.
-    /// While the SDK may be able to detect iBeacon™s, it will not be able to evaluate contents
-    /// The SDK will be able to evaluate notifications and polls when an iBeacon™ is detected
+    /// Thrown when `NearSDK` is started, but content reactions cannot be downloaded.
+    ///
+    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate content reactions.
+    ///
+    /// `NearSDK` will be able to evaluate notifications and polls when an iBeacon™ is detected.
     case CannotDownloadContentReactions = 5000
     
-    /// This error happens when the SDK is started, but "poll" reactions cannot be downloaded.
-    /// While the SDK may be able to detect iBeacon™s, it will not be able to evaluate polls
-    /// The SDK will be able to evaluate contents and notifications when an iBeacon™ is detected
+    /// Thrown when `NearSDK` is started, but poll reactions cannot be downloaded.
+    ///
+    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate poll reactions.
+    /// 
+    /// `NearSDK` will be able to evaluate contents and notifications when an iBeacon™ is detected.
     case CannotDownloadPollReactions = 6000
     
-    /// This error happens when the SDK cannot request an installation identifier
-    case CannotObtainInstallationID = 7000
+    /// Thrown when `NearSDK` cannot request an installation identifier.
+    case CannotReceiveInstallationID = 7000
     
-    /// This error happens when the SDK cannot update an existing installation identifier
+    /// Thrown when `NearSDK` cannot update an existing installation identifier.
     case CannotUpdateInstallationID = 7001
     
-    /// SDKError description
+    // MARK: Properties
+    /// Human-readable description of `Self`.
     public var description: String {
         switch self {
         case TokenNotFoundInAppConfiguration:
@@ -91,45 +90,49 @@ public enum NearSDKError: Int, CustomStringConvertible {
             return "Cannot download content reactions"
         case .CannotDownloadPollReactions:
             return "Cannot download poll reactions"
-        case .CannotObtainInstallationID:
-            return "Cannot obtain installation identifier"
+        case .CannotReceiveInstallationID:
+            return "Cannot receive installation identifier"
         case .CannotUpdateInstallationID:
             return "Cannot update installation identifier"
         }
     }
     
-    /// Initializes a value of SDKError
+    // MARK: Initializers
+    /// Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
+    /// 
+    /// - parameters:
+    ///   - rawValue: must be either 1, 1000, 1001, 1002, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
+    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
     public init?(rawValue: Int) {
         switch rawValue {
-        case NearSDKError.TokenNotFoundInAppConfiguration.rawValue:
+        case 1:
             self = .TokenNotFoundInAppConfiguration
-        case NearSDKError.CannotDownloadRegionMonitoringConfiguration.rawValue:
+        case 1000:
             self = .CannotDownloadRegionMonitoringConfiguration
-        case NearSDKError.RegionMonitoringIsNotAuthorized.rawValue:
+        case 1001:
             self = .RegionMonitoringIsNotAuthorized
-        case NearSDKError.NoRegionsToMonitor.rawValue:
+        case 1002:
             self = .NoRegionsToMonitor
-        case NearSDKError.CannotDownloadRecipes.rawValue:
+        case 2000:
             self = .CannotDownloadRecipes
-        case NearSDKError.CannotEvaluateRecipe.rawValue:
+        case 3000:
             self = .CannotEvaluateRecipe
-        case NearSDKError.CannotDownloadNotificationReactions.rawValue:
+        case 4000:
             self = .CannotDownloadNotificationReactions
-        case NearSDKError.CannotDownloadContentReactions.rawValue:
+        case 5000:
             self = .CannotDownloadContentReactions
-        case NearSDKError.CannotDownloadPollReactions.rawValue:
+        case 6000:
             self = .CannotDownloadPollReactions
-        case NearSDKError.CannotObtainInstallationID.rawValue:
-            self = .CannotObtainInstallationID
-        case NearSDKError.CannotUpdateInstallationID.rawValue:
+        case 7000:
+            self = .CannotReceiveInstallationID
+        case 7001:
             self = .CannotUpdateInstallationID
         default:
             return nil
         }
     }
     
-    // MARK: Internal
-    /// Returns a PluginEvent instance configured for the current SDKError
+    /// Returns a `PluginEvent` instance configured for `Self`.
     func pluginEvent(pluginName: String, message: String) -> PluginEvent {
         return PluginEvent(from: pluginName, content: JSON(dictionary: ["error": self.rawValue, "description": description, "message": message]))
     }

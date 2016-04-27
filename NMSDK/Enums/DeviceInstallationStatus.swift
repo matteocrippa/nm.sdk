@@ -8,15 +8,15 @@
 
 import Foundation
 
-/// Describes the status of a device installation refresh operation
+/// Describes the status of a device installation refresh operation.
 @objc
 public enum DeviceInstallationStatus: Int {
-    /// A new installation identifier has been received
-    case Received
+    /// A new installation identifier has been received.
+    case Received = 10
     
-    /// An existing installation identifier has been updated
-    case Updated
+    /// An existing installation identifier has been updated.
+    case Updated = 20
     
-    /// The installation identifier cannot be received or updated
-    case NotRefreshed
+    /// The installation identifier cannot be received or updated.
+    case NotRefreshed = 0
 }

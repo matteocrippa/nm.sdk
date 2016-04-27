@@ -67,7 +67,7 @@ class NPDevice: Plugin {
             Console.error(NPDevice.self, text: "Cannot \(didRequestNewID ? "receive" : "refresh") installation identifier")
             
             let event = (didRequestNewID ?
-                NearSDKError.CannotObtainInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)") :
+                NearSDKError.CannotReceiveInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)") :
                 NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)")
             )
             

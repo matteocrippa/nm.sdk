@@ -10,23 +10,30 @@ import Foundation
 import NMJSON
 import NMNet
 
-/// A "poll answer" event
+/// A "poll answer" event.
 @objc
 public class PollAnswer: NSObject, EventSerializable {
+    // MARK: Properties
+    /// The identifier of the poll.
     public private (set) var pollID = ""
+    
+    /// The answer of the poll.
     public private (set) var answer = APRecipePollAnswer.Answer1
     
-    /// The name of the plugin which should manage the answer
+    /// The name of the plugin which should manage the answer.
     public var pluginName: String {
         return CorePlugin.Polls.name
     }
     
-    /// The dictionary which holds event's data
+    /// The dictionary which holds event's data.
     public var body: JSON {
         return JSON(dictionary: ["answer": answer.rawValue, "notification_id": pollID])
     }
     
-    /// Returns an instance of PollAnswer or nil
+    // MARK: Initializers
+    /// Initializes a new `PollAnswer`.
+    ///
+    /// - returns: nil if `body` does not include fields `poll-id` (`String`) and `answer` (`Int`, convertible to `APRecipePollAnswer` case)
     required public init?(body: JSON) {
         super.init()
         
@@ -38,7 +45,11 @@ public class PollAnswer: NSObject, EventSerializable {
         answer = pollAnswer
     }
     
-    /// Returns an instance of PollAnswer with a give poll identifier and an answer
+    /// Initializes a new `PollAnswer`.
+    /// 
+    /// - parameters:
+    ///   - poll: the identifier of the poll
+    ///   - answer: the answer of the poll
     public init(poll id: String, answer pollAnswer: APRecipePollAnswer) {
         super.init()
         

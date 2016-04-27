@@ -22,6 +22,7 @@
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
+		B53D6D081CD0F17500500244 /* SendEventResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53D6D071CD0F17500500244 /* SendEventResult.swift */; };
 		B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B548FE921CBCEDAA006DCC02 /* THBeacon.swift */; };
 		B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */; };
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
@@ -78,6 +79,7 @@
 		B52AF6FB1CB7BE9F00769ECE /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
+		B53D6D071CD0F17500500244 /* SendEventResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendEventResult.swift; sourceTree = "<group>"; };
 		B548FE921CBCEDAA006DCC02 /* THBeacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THBeacon.swift; sourceTree = "<group>"; };
 		B54EB59E1CC7B50600A80B04 /* EventSerializable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventSerializable.swift; sourceTree = "<group>"; };
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */,
 				B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */,
 				B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */,
+				B53D6D071CD0F17500500244 /* SendEventResult.swift */,
 			);
 			path = Enums;
 			sourceTree = "<group>";
@@ -468,6 +471,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B53D6D081CD0F17500500244 /* SendEventResult.swift in Sources */,
 				B503AD061CC1210D0081A581 /* Poll.swift in Sources */,
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */,

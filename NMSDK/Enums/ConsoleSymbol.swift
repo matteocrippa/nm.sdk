@@ -13,6 +13,7 @@ enum ConsoleSymbol {
     case Add
     case To
     case Download
+    case Square
     
     var char: String {
         switch self {
@@ -24,6 +25,8 @@ enum ConsoleSymbol {
             return "➡️"
         case .Download:
             return "⬇️"
+        case .Square:
+            return "◻️"
         }
     }
 }
