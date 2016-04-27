@@ -1,25 +1,28 @@
 # NMSDK
-nearit.com SDK for iOS apps
+nearit.com iOS SDK
 
 ### WARNING
 This is a pre-release software and is not production-ready - code snippets contained in this README are Swift 2.2.
 
-# Installation
+**Installation**
+
 `NearSDK` is available as a CocoaPod for iOS 8 and later and can be easily integrated into existing iOS apps by adding `pod 'NMSDK'` command to your `Podfile`.
 
 The following code snippet may be used as a template of a `Podfile`
 
-# sample Podfile
+**sample Podfile**
     use_frameworks!
 
     target '<your app target name>' do
-      pod 'NMSDK'
+    pod 'NMSDK'
     end
 
 For more informations about CocoaPods, check visit the [official website](https://guides.cocoapods.org).
 
-# Using `NearSDK`
-### Configuring an iOS app
+**Using `NearSDK`**
+
+*Configuring an iOS app*
+
 `NearSDK` interacts with nearit.com APIs, thus an app token is required: it can be obtained by creating an app on nearit.com.
 
 Once a token has been obtained, it must be set either in app's `Info.plist` file (key `NearSDKToken`) or whenever `NearSDK` is started; those approaches are mutually exclusive.
@@ -32,7 +35,8 @@ to your app's users: this implies that iOS apps using the SDK must:
   - `Location updates`
   - `Uses Bluetooth LE accessories`
 
-### Interacting with NearSDK
+*Interacting with NearSDK*
+
 `NearSDK` can be used in any class of your app by importing its module
 
     import NMSDK
@@ -52,7 +56,7 @@ If `start()` method is called, nearit.com app token must be set in app's `Info.p
 
 The following code snippets illustrate how `NearSDK` can be started:
 
-###### nearit.com app token defined in app's `Info.plist` file, key `NearSDKToken`
+**Code snippet** - *nearit.com app token in app's `Info.plist` file, key `NearSDKToken`*
 
     import UIKit
     import NMSDK
@@ -66,7 +70,7 @@ The following code snippets illustrate how `NearSDK` can be started:
       }
     }
 
-###### nearit.com app token is set explicitly
+**Code snippet** - *nearit.com app token set at startup*
 
     import UIKit
     import NMSDK
@@ -84,7 +88,8 @@ Because `NearSDK` uses iBeacon™ technology, apps should start the SDK after ap
 
 `NearSDK`-to-Xcode console output can be enabled by setting class property`consoleOutput` to `true`.
 
-### Using nearit.com contents
+*Using nearit.com contents*
+
 `NearSDK` can detect iBeacon™s registered for nearit.com apps: whenever a beacon is detected, a content, a notification or a poll may be evaluated by the SDK.
 
 Contents, notifications and polls (more simply, "reactions") must be configured on nearit.com and must be linked to specific beacons.
