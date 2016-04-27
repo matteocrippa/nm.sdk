@@ -324,16 +324,16 @@ public class NearSDK: NSObject, Extensible {
     private func manageReaction(content: JSON, type: String) {
         switch type {
         case "content-notification":
-            if let object = APRecipeContent(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(contents: [Content(content: object)])
+            if let contentObject = content.json("content"), reaction = APRecipeContent(json: contentObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+                delegate?.nearSDKDidEvaluate?(contents: [Content(content: reaction, recipe: recipe)])
             }
         case "simple-notification":
-            if let object = APRecipeNotification(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: object)])
+            if let notificationObject = content.json("notification"), reaction = APRecipeNotification(json: notificationObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: reaction, recipe: recipe)])
             }
         case "poll-notification":
-            if let object = APRecipePoll(json: JSON(dictionary: content.dictionary)) {
-                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: object)])
+            if let pollObject = content.json("poll"), reaction = APRecipePoll(json: pollObject), recipeObject = content.json("recipe"), recipe = APRecipe(json: recipeObject) {
+                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: reaction, recipe: recipe)])
             }
         default:
             break

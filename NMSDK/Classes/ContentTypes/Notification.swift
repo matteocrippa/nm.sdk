@@ -16,6 +16,9 @@ public class Notification: NSObject {
     /// The identifier of the notification.
     public private (set) var id = ""
     
+    /// The recipe which evaluated the notification.
+    public private (set) var recipe: Recipe?
+    
     /// The text of the notification.
     public private (set) var text = ""
     
@@ -24,11 +27,16 @@ public class Notification: NSObject {
     ///
     /// - parameters:
     ///   - notification: the source `APRecipeNotification` instance
-    public init(notification: APRecipeNotification) {
+    ///   - recipe: the source `APRecipe` which evaluated the notification
+    public init(notification: APRecipeNotification, recipe evaluatedRecipe: APRecipe?) {
         super.init()
         
         id = notification.id
         text = notification.text
+        
+        if let r = evaluatedRecipe {
+            recipe = Recipe(recipe: r)
+        }
     }
     
     // MARK: Properties
