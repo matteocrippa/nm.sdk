@@ -7,27 +7,34 @@
 //
 
 import Foundation
+import NMCache
 import NMNet
 
-/// A content reaction
+/// A content reaction.
 @objc
 public class Poll: NSObject {
-    /// The identifier of the poll
+    // MARK: Properties
+    /// The identifier of the poll.
     public private (set) var id = ""
     
-    /// The question of the poll
+    /// The question of the poll.
     public var question = ""
     
-    /// The text of the poll - may be a short title
+    /// The text of the poll: this may be a short title.
     public var text = ""
     
-    /// The text of the first answer
+    /// The text of the first answer.
     public var answer1 = ""
     
-    /// The text of the second answer
+    /// The text of the second answer.
     public var answer2 = ""
     
-    init(poll: APRecipePoll) {
+    // MARK: Initializers
+    /// Initializes a new `Poll`.
+    ///
+    /// - parameters:
+    ///   - poll: the source `APRecipePoll` instance
+    public init(poll: APRecipePoll) {
         super.init()
         
         id = poll.id

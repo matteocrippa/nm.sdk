@@ -9,25 +9,31 @@
 import Foundation
 import NMNet
 
-/// A content reaction
+/// A content reaction.
 @objc
 public class Content: NSObject {
-    /// The identifier of the content
+    // MARK: Properties
+    /// The identifier of the content.
     public private (set) var id = ""
     
-    /// The title of the content
+    /// The title of the content.
     public private (set) var title = ""
     
-    /// The text of the content
+    /// The text of the content.
     public private (set) var text = ""
     
-    /// The identifiers of image contents associated to the content
+    /// The identifiers of image contents associated to the content.
     public var imageIdentifiers = [String]()
     
-    /// The URL of the video associated to the content
+    /// The URL of the video associated to the content.
     public var videoURL: NSURL?
     
-    init(content: APRecipeContent) {
+    // MARK: Initializers
+    /// Initializes a new `Content`.
+    ///
+    /// - parameters:
+    ///   - content: the source `APRecipeContent` instance
+    public init(content: APRecipeContent) {
         super.init()
         
         id = content.id

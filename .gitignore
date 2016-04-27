@@ -43,3 +43,10 @@ playground.xcworkspace
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
 #
 Pods/
+
+# Docs
+# 
+# HTML documentation is currently generated with Jazzy 
+# see https://github.com/realm/jazzy
+.jazzy.yaml
+docset/

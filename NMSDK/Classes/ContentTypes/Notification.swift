@@ -9,16 +9,22 @@
 import Foundation
 import NMNet
 
-/// A notification reaction
+/// A notification reaction.
 @objc
 public class Notification: NSObject {
-    /// The identifier of the notification
+    // MARK: Properties
+    /// The identifier of the notification.
     public private (set) var id = ""
     
-    /// The text of the notification
+    /// The text of the notification.
     public private (set) var text = ""
     
-    init(notification: APRecipeNotification) {
+    // MARK: Initializers
+    /// Initializes a new `Notification`.
+    ///
+    /// - parameters:
+    ///   - notification: the source `APRecipeNotification` instance
+    public init(notification: APRecipeNotification) {
         super.init()
         
         id = notification.id
