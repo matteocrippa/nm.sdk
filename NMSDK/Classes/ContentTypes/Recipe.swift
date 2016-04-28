@@ -65,7 +65,7 @@ public class Recipe: NSObject {
     }
     
     // MARK: Properties
-    /// Human-readable description of Self.
+    /// Human-readable description of `Self`.
     public override var description: String {
         return Console.describe(Recipe.self, properties: ("id", id), ("inCase", inCase), ("inTarget", inTarget), ("trigger", trigger), ("outCase", outCase), ("outTarget", outTarget), ("evaluation", evaluation))
     }

@@ -64,7 +64,7 @@ class NPRecipes: Plugin {
         APRecipes.get { (recipes, recipeMaps, status) in
             if status != .OK {
                 Console.error(NPRecipes.self, text: "Cannot download recipes")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
                 return
             }
             
@@ -101,7 +101,7 @@ class NPRecipes: Plugin {
         guard let pluginHub = hub, recipeMap: APRecipeMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self) else {
             Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
             Console.warningLine("recipe not found", symbol: .Space)
-            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found"))
+            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found", operation: "evaluate"))
             return false
         }
         
@@ -123,7 +123,7 @@ class NPRecipes: Plugin {
         
         Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
         Console.warningLine("content type may be invalid or no content can be found for the given recipe", symbol: .Space)
-        self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" cannot be evaluated"))
+        self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" cannot be evaluated", operation: "evaluate"))
         return false
     }
     private func evaluatorName(recipe: APRecipe) -> String? {

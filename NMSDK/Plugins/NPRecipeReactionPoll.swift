@@ -81,7 +81,7 @@ class NPRecipeReactionPoll: Plugin {
         APRecipeReactions.getPollNotifications { (polls, status) in
             if status != .OK {
                 Console.error(NPRecipeReactionPoll.self, text: "Cannot download poll reactions")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadPollReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadPollReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
                 return
             }
             

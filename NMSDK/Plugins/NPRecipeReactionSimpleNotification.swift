@@ -67,7 +67,7 @@ class NPRecipeReactionSimpleNotification: Plugin {
             if status != .OK {
                 Console.error(NPRecipeReactionSimpleNotification.self, text: "Cannot download notification reactions")
                 
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadNotificationReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadNotificationReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
                 return
             }
             

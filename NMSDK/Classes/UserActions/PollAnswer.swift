@@ -33,7 +33,9 @@ public class PollAnswer: NSObject, EventSerializable {
     // MARK: Initializers
     /// Initializes a new `PollAnswer`.
     ///
-    /// - returns: nil if `body` does not include fields `poll-id` (`String`) and `answer` (`Int`, convertible to `APRecipePollAnswer` case)
+    /// - parameters:
+    ///   - body: a JSON object which must include fields `poll-id` (`String`) and `answer` (`Int`, convertible to a `APRecipePollAnswer` case)
+    /// - returns: nil if `body` does not include fields `poll-id` (`String`) and `answer` (`Int`, convertible to a `APRecipePollAnswer` case)
     required public init?(body: JSON) {
         super.init()
         

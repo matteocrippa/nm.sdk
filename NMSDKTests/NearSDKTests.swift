@@ -52,10 +52,9 @@ class NearSDKTests: XCTestCase {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test NearSDK.start")
         
-        SDKDelegate.didReceiveEvent = { (event) -> Void in
-            if THStubs.checkSyncDidEnd(event.from) {
-                expectation.fulfill()
-            }
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            expectation.fulfill()
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
@@ -63,13 +62,33 @@ class NearSDKTests: XCTestCase {
     }
     func testStartFail() {
         let expectation = expectationWithDescription("test NearSDK.start fail")
-        SDKDelegate.didReceiveError = { (error, message) -> Void in
+        
+        SDKDelegate.didReceiveError = { (error, message) in
             XCTAssertEqual(error, NearSDKError.TokenNotFoundInAppConfiguration)
             expectation.fulfill()
         }
         
         XCTAssertFalse(NearSDK.start())
         waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Sync process
+    func testSync() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test sync")
+        
+        var syncedPlugins = [CorePlugin]()
+        SDKDelegate.sdkPluginDidSync = { (plugin, error) in
+            syncedPlugins.append(plugin)
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            XCTAssertEqual(syncedPlugins.count, 5)
+            expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1000, handler: nil)
     }
     
     // MARK: Images
@@ -140,9 +159,8 @@ class NearSDKTests: XCTestCase {
     private func reset() {
         SDKDelegate.clearHandlers()
         NearSDK.clearImageCache()
-        NearSDK.forwardCoreEvents = true
+        NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate
         THStubs.clear()
-        THStubs.resetWorkingCorePlugins()
     }
 }

@@ -82,7 +82,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
                 Console.error(NPBeaconForest.self, text: "Cannot download nodes")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
                 return
             }
             
@@ -155,7 +155,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         if CLLocationManager.authorizationStatus() != CLAuthorizationStatus.AuthorizedAlways {
             Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
             Console.errorLine("authorization status is not equal to AuthorizedAlways")
-            hub?.dispatch(event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways"))
+            hub?.dispatch(event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways", operation: "start-monitoring"))
             return
         }
         
@@ -169,7 +169,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         let regions = navigator.identifiersToRegions(navigator.defaultRegionIdentifiers)
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
-            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)"))
+            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", operation: "start-monitoring"))
             return
         }
         

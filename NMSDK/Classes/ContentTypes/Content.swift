@@ -52,7 +52,7 @@ public class Content: NSObject {
     }
     
     // MARK: Properties
-    /// Human-readable description of Self.
+    /// Human-readable description of `Self`.
     public override var description: String {
         return Console.describe(Notification.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL), ("recipe", recipe?.evaluation))
     }
