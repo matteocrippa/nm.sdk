@@ -37,7 +37,7 @@ import NMPlug
 public class NearSDK: NSObject, Extensible {
     // MARK: Static constants
     /// A `String` representing the current version of `NearSDK`.
-    static let currentVersion = "0.7"
+    static let currentVersion = "0.8"
     
     private static let sharedSDK = NearSDK()
     private var timeoutInterval: NSTimeInterval = 10
@@ -46,6 +46,13 @@ public class NearSDK: NSObject, Extensible {
     private var corePluginNames = [String]()
     private var pluginHub: PluginHub!
     private var delegate: NearSDKDelegate?
+    
+    // Synchronization process support properties
+    private static var syncDidEnd = false
+    private static var syncingCorePlugins = Set<CorePlugin>()
+    private static var syncincErrors = [CorePluginError]()
+    
+    // Initializer
     private override init() {
         super.init()
         
@@ -166,10 +173,13 @@ public class NearSDK: NSObject, Extensible {
     private class func startCorePlugins() -> Bool {
         var result = true
         
-        let pluginsToRun = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
+        syncDidEnd = false
+        syncincErrors = []
+        syncingCorePlugins = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
+        
         let arguments = JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": timeoutInterval])
         
-        for plugin in pluginsToRun {
+        for plugin in syncingCorePlugins {
             result = result && (plugins.run(plugin.name, withArguments: arguments).status == .OK)
             
             if !result {
@@ -180,6 +190,19 @@ public class NearSDK: NSObject, Extensible {
         }
         
         return result
+    }
+    private class func corePlugin(plugin: CorePlugin, didSynchronizeWithError error: CorePluginError?) {
+        if let e = error {
+            syncincErrors.append(e)
+        }
+        
+        syncingCorePlugins.remove(plugin)
+        delegate?.nearSDKPluginDidSync?(plugin, error: error)
+        
+        if !syncDidEnd && syncingCorePlugins.count <= 0 {
+            syncDidEnd = true
+            delegate?.nearSDKDidSync?(syncincErrors)
+        }
     }
     
     /// Returns some `UIImage` instances asynchronously for a given array of image identifiers.
@@ -340,7 +363,8 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {
-        // Errors should be examined first
+        // Sync tasks and errors should be examined first
+        manageSync(event)
         if manageError(event) {
             return
         }
@@ -352,6 +376,13 @@ public class NearSDK: NSObject, Extensible {
         
         // Non-blocked events will be forwarded to delegate
         delegate?.nearSDKDidReceiveEvent?(event)
+    }
+    private func manageSync(event: PluginEvent) {
+        guard let plugin = CorePlugin(name: event.from), operation = event.content.string("operation") where operation == "sync" else {
+            return
+        }
+        
+        NearSDK.corePlugin(plugin, didSynchronizeWithError: CorePluginError(event: event))
     }
     private func manageError(event: PluginEvent) -> Bool {
         if let errorValue = event.content.int("error"), error = NearSDKError(rawValue: errorValue), message = event.content.string("message") {

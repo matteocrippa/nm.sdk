@@ -66,7 +66,7 @@ class NPRecipeReactionContent: Plugin {
         APRecipeReactions.getContentNotifications { (contents, status) in
             if status != .OK {
                 Console.error(NPRecipeReactionContent.self, text: "Cannot download content reactions")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadContentReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadContentReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
                 return
             }
             

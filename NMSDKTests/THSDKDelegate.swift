@@ -17,6 +17,8 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
     var didReceiveContents: ((contents: [Content]) -> Void)?
     var didReceivePolls: ((polls: [Poll]) -> Void)?
+    var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
+    var sdkPluginDidSync: ((plugin: CorePlugin, error: CorePluginError?) -> Void)?
     
     override init() {
         super.init()
@@ -28,9 +30,16 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceiveNotifications = nil
         didReceiveContents = nil
         didReceivePolls = nil
+        sdkDidSync = nil
+        sdkPluginDidSync = nil
     }
     
-    
+    func nearSDKDidSync(errors: [CorePluginError]) {
+        sdkDidSync?(errors: errors)
+    }
+    func nearSDKPluginDidSync(plugin: CorePlugin, error: CorePluginError?) {
+        sdkPluginDidSync?(plugin: plugin, error: error)
+    }
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         didReceiveEvent?(event: event)
     }
