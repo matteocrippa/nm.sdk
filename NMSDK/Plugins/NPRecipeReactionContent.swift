@@ -22,8 +22,8 @@ class NPRecipeReactionContent: Plugin {
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPRecipeReactionContent.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"read\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\" or \"read\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
         }
         
         switch command {
@@ -35,6 +35,8 @@ class NPRecipeReactionContent: Plugin {
             }
             
             sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
+        case "index":
+            return PluginResponse.ok(JSON(dictionary: ["reactions": index()]))
         case "read":
             guard let id = arguments.string("content") else {
                 Console.error(NPRecipeReactionContent.self, text: "Cannot run \"read\" command")
@@ -50,8 +52,8 @@ class NPRecipeReactionContent: Plugin {
             return PluginResponse.ok(reaction.json)
         default:
             Console.error(NPRecipeReactionContent.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"read\"")
-            return PluginResponse.error("\"do\" parameter must be \"sync\" or \"read\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
         }
         
         return PluginResponse.ok()
@@ -81,6 +83,20 @@ class NPRecipeReactionContent: Plugin {
             Console.infoLine("content reactions saved: \(contents.count)")
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
+    }
+    
+    // MARK: Read
+    private func index() -> [String] {
+        guard let resources: [APRecipeContent] = hub?.cache.resourcesIn(collection: "Reactions", forPlugin: self) else {
+            return []
+        }
+        
+        var keys = [String]()
+        for resource in resources {
+            keys.append(resource.id)
+        }
+        
+        return keys
     }
     private func content(id: String) -> APRecipeContent? {
         guard let resource: APRecipeContent = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {

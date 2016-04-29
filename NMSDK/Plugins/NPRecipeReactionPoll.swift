@@ -22,8 +22,8 @@ class NPRecipeReactionPoll: Plugin {
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPRecipeReactionPoll.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
         }
         
         switch command {
@@ -35,6 +35,8 @@ class NPRecipeReactionPoll: Plugin {
             }
             
             sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
+        case "index":
+            return PluginResponse.ok(JSON(dictionary: ["reactions": index()]))
         case "read":
             guard let id = arguments.string("content") else {
                 Console.error(NPRecipeReactionPoll.self, text: "Cannot run \"read\" command")
@@ -50,8 +52,8 @@ class NPRecipeReactionPoll: Plugin {
             return PluginResponse.ok(reaction.json)
         default:
             Console.error(NPRecipeReactionPoll.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read\" or \"send-event\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"read\"")
         }
         
         return PluginResponse.ok()
@@ -98,6 +100,18 @@ class NPRecipeReactionPoll: Plugin {
     }
     
     // MARK: Read
+    private func index() -> [String] {
+        guard let resources: [APRecipePoll] = hub?.cache.resourcesIn(collection: "Reactions", forPlugin: self) else {
+            return []
+        }
+        
+        var keys = [String]()
+        for resource in resources {
+            keys.append(resource.id)
+        }
+        
+        return keys
+    }
     private func poll(id: String) -> APRecipePoll? {
         guard let resource: APRecipePoll = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
             return nil
