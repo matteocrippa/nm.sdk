@@ -52,7 +52,7 @@ public enum CorePlugin: Int, CustomStringConvertible {
     
     // MARK: Properties
     /// The name used to plug `Self` into `NearSDK`'s plugin hub.
-    var name: String {
+    public var name: String {
         switch self {
         case .BeaconForest:
             return "com.nearit.sdk.plugin.np-beacon-forest"
