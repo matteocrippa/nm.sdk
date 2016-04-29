@@ -58,7 +58,7 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionSimpleNotification(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionNotification(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
