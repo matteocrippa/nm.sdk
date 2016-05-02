@@ -17,7 +17,7 @@ class NPRecipeReactionContent: Plugin {
         return CorePlugin.Contents.name
     }
     override var version: String {
-        return "0.1"
+        return "0.2"
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
