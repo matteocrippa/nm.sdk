@@ -21,7 +21,7 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
     case CannotDownloadRegionMonitoringConfiguration = 1000
     
-    /// Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways`.
+    /// Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways` or `CLAuthorizationStatus.AuthorizedWhenInUse`.
     ///
     /// Appropriate authorization levels should be obtained before starting `NearSDK`.
     /// 
