@@ -13,6 +13,7 @@ import NMJSON
 import NMNet
 
 class NPBeaconForest: Plugin, CLLocationManagerDelegate {
+    private var monitoringDidStart = true
     private var locationManager = CLLocationManager()
     private lazy var navigator: NPBeaconForestNavigator = {
         return NPBeaconForestNavigator(plugin: self)
@@ -23,7 +24,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.1"
+        return "0.2"
     }
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
@@ -65,7 +66,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
                 return PluginResponse.error("\"action\" and \"id\" parameters are required, \"when\" must be either \"enter\" or \"exit\"")
             }
             
-            return PluginResponse.ok(JSON(dictionary: ["monitored-regions": (when == "enter" ? navigator.enter(id) : navigator.exit(id))]))
+            let regions = (when == "enter" ? navigator.enter(id) : navigator.exit(id))
+            return PluginResponse.ok(JSON(dictionary: ["monitored-regions": regions]))
         default:
             Console.error(NPBeaconForest.self, text: "Cannot run")
             Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read-nodes\", \"read-node\" or \"read-next-nodes\"")
@@ -135,19 +137,16 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        APBeaconForest.postBeaconDetected(region.identifier, response: nil)
-        triggerEnterEventWithRegion(region)
-        updateMonitoredRegions(navigator.enter(region.identifier))
-        Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
+        enterInto(region)
     }
     func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
-        for monitoredRegion in locationManager.monitoredRegions where monitoredRegion.identifier == region.identifier {
-            // If the region left by the device is being monitored, the navigator should update monitored regions
-            updateMonitoredRegions(navigator.exit(region.identifier))
-            return
+        exitFrom(region)
+    }
+    func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
+        if monitoringDidStart && state == .Inside {
+            monitoringDidStart = false
+            enterInto(region)
         }
-        
-        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier)")
     }
     
     // MARK: Region monitoring
@@ -175,9 +174,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Starting monitoring regions...")
         locationManager.delegate = self
+        monitoringDidStart = true
         for region in regions {
             Console.infoLine("region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
+            locationManager.requestStateForRegion(region)
         }
     }
     private func updateMonitoredRegions(targetIdentifiers: [String]) {
@@ -206,5 +207,20 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             Console.infoLine("starting monitoring region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
         }
+    }
+    private func enterInto(region: CLRegion) {
+        APBeaconForest.postBeaconDetected(region.identifier, response: nil)
+        triggerEnterEventWithRegion(region)
+        updateMonitoredRegions(navigator.enter(region.identifier))
+        Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
+    }
+    private func exitFrom(region: CLRegion) {
+        // If the region left by the device is being monitored, the navigator should update monitored regions
+        for monitoredRegion in locationManager.monitoredRegions where monitoredRegion.identifier == region.identifier {
+            updateMonitoredRegions(navigator.exit(region.identifier))
+            return
+        }
+        
+        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier)")
     }
 }
