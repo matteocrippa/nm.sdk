@@ -151,10 +151,14 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: Region monitoring
     func startMonitoring() {
-        if CLLocationManager.authorizationStatus() != CLAuthorizationStatus.AuthorizedAlways {
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        if ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus)  {
             Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
-            Console.errorLine("authorization status is not equal to AuthorizedAlways")
-            hub?.dispatch(event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways", operation: "start-monitoring"))
+            Console.errorLine("authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse")
+            hub?.dispatch(
+                event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(
+                    name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
+                    operation: "start-monitoring"))
             return
         }
         

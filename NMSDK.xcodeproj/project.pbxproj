@@ -485,7 +485,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count`\nbranch=`\"$git\" rev-parse --abbrev-ref HEAD`\n\nif [[ $branch =~ develop* ]]; then\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild.D\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\nelif [[ $branch =~ feature* ]]; then\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild.F\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\nelif [[ $branch =~ hotfix* ]]; then\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild.H\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\nelse\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\nfi\n";
+			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count`\nbranch=`\"$git\" rev-parse --abbrev-ref HEAD`\n\ntag=\"\"\nif [[ $branch =~ develop* ]] || [[ $branch =~ feature* ]]; then\n  tag=\"D\"\nelif [[ $branch =~ hotfix* ]]; then\n  tag=\"X\"\nelif [[ $branch =~ release* ]]; then\n  tag=\"R\"\nfi\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild$tag\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
