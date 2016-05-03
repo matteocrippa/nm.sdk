@@ -13,7 +13,6 @@ import NMJSON
 import NMNet
 
 class NPBeaconForest: Plugin, CLLocationManagerDelegate {
-    private var monitoringDidStart = true
     private var locationManager = CLLocationManager()
     private lazy var navigator: NPBeaconForestNavigator = {
         return NPBeaconForestNavigator(plugin: self)
@@ -142,12 +141,6 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
         exitFrom(region)
     }
-    func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
-        if monitoringDidStart && state == .Inside {
-            monitoringDidStart = false
-            enterInto(region)
-        }
-    }
     
     // MARK: Region monitoring
     func startMonitoring() {
@@ -169,7 +162,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             locationManager.stopMonitoringForRegion(region)
         }
         
-        let regions = navigator.identifiersToRegions(navigator.defaultRegionIdentifiers)
+        let regions = navigator.identifiersToRegions(Set(navigator.defaultRegionIdentifiers))
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
             hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", operation: "start-monitoring"))
@@ -178,15 +171,13 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Starting monitoring regions...")
         locationManager.delegate = self
-        monitoringDidStart = true
         for region in regions {
             Console.infoLine("region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
-            locationManager.requestStateForRegion(region)
         }
     }
     private func updateMonitoredRegions(targetIdentifiers: [String]) {
-        var acceptedIdentifiers = [String]()
+        var acceptedIdentifiers = Set<String>()
         let monitoredRegions = Array(locationManager.monitoredRegions)
         Console.info(NPBeaconForest.self, text: "Updating regions monitored...")
         
@@ -198,12 +189,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
                 continue
             }
             
-            acceptedIdentifiers.append(region.identifier)
-        }
-        
-        /// Add all other target identifiers
-        for id in targetIdentifiers where !acceptedIdentifiers.contains(id) {
-            acceptedIdentifiers.append(id)
+            acceptedIdentifiers.remove(region.identifier)
         }
         
         let acceptedRegions = navigator.identifiersToRegions(acceptedIdentifiers)
