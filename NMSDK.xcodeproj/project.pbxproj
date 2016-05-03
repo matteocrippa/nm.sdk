@@ -313,7 +313,6 @@
 				B52AF6DE1CB7BE4700769ECE /* Headers */,
 				B52AF6DF1CB7BE4700769ECE /* Resources */,
 				8F0C401BBEA9D7C4DC1317ED /* Copy Pods Resources */,
-				B515B5D41CD7458A0044289D /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -473,19 +472,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NMSDK/Pods-NMSDK-resources.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		B515B5D41CD7458A0044289D /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "git=`sh /etc/profile; which git`\nappBuild=`\"$git\" rev-list HEAD --count`\nbranch=`\"$git\" rev-parse --abbrev-ref HEAD`\n\ntag=\"\"\nif [[ $branch =~ develop* ]] || [[ $branch =~ feature* ]]; then\n  tag=\"D\"\nelif [[ $branch =~ hotfix* ]]; then\n  tag=\"X\"\nelif [[ $branch =~ release* ]]; then\n  tag=\"R\"\nfi\n\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $appBuild$tag\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

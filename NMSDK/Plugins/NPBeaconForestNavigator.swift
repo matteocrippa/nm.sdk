@@ -84,7 +84,7 @@ class NPBeaconForestNavigator {
         /// Otherwise, return current node's brothers, current node's parent and its brothers
         return l1Parent.children + l2Parent.children
     }
-    func identifiersToRegions(identifiers: [String]) -> [CLRegion] {
+    func identifiersToRegions(identifiers: Set<String>) -> [CLRegion] {
         var regions = [CLRegion]()
         for id in identifiers {
             guard let node = self[id], major = node.major, minor = node.minor else {

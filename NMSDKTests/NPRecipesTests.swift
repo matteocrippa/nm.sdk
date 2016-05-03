@@ -131,6 +131,31 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Read recipes
+    func testIndexRecipes() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test index recipes")
+        
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            
+            let args = JSON(dictionary: ["do": "index"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
+            
+            guard let triggers = response.content.dictionary("triggers") else {
+                XCTFail("triggers not found")
+                return
+            }
+            
+            XCTAssertEqual(triggers.count, 5)
+            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+            expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     // MARK: Send events
     func testSendPollAnswer() {
         THStubs.stubConfigurationAPIResponse()

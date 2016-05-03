@@ -22,8 +22,8 @@ class NPRecipes: Plugin {
     override func run(arguments: JSON, sender: String?) -> PluginResponse {
         guard let command = arguments.string("do") else {
             Console.error(NPRecipes.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"evaluate\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\" or \"evaluate\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
         }
         
         switch command {
@@ -35,6 +35,8 @@ class NPRecipes: Plugin {
             }
             
             sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
+        case "index":
+            return PluginResponse.ok(index())
         case "evaluate":
             guard let inCase = arguments.string("in-case"), inTarget = arguments.string("in-target"), trigger = arguments.string("trigger") else {
                 Console.error(NPRecipes.self, text: "Cannot run \"evaluate\" command")
@@ -48,8 +50,8 @@ class NPRecipes: Plugin {
                 PluginResponse.error("Cannot evaluate event \(recipeIdentifier)")
         default:
             Console.error(NPRecipes.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\" or \"evaluate\"")
-            return PluginResponse.error("\"do\" parameter must be \"sync\" or \"evaluate\"")
+            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
+            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
         }
         
         return PluginResponse.ok()
@@ -91,7 +93,27 @@ class NPRecipes: Plugin {
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
         }
+    }
+    
+    // MARK: Index
+    private func index() -> JSON {
+        var maps = [String: [Recipe]]()
+        guard let recipeMaps: [APRecipeMap] = hub?.cache.resourcesIn(collection: "RecipesMaps", forPlugin: self) else {
+            return JSON(dictionary: ["triggers": maps])
+        }
         
+        for map in recipeMaps {
+            var recipes = [Recipe]()
+            for id in map.recipes {
+                if let recipe: APRecipe = hub?.cache.resource(id, inCollection: "Recipes", forPlugin: self) {
+                    recipes.append(Recipe(recipe: recipe))
+                }
+            }
+            
+            maps[map.recipeKey] = recipes
+        }
+        
+        return JSON(dictionary: ["triggers": maps])
     }
     
     // MARK: Evaluate
