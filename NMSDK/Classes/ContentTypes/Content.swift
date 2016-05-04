@@ -64,7 +64,7 @@ public class Content: NSObject {
     ///
     /// - parameters:
     ///   - fireDate: defines the fire date of the local notification
-    public func makeLocalNotification(fireDate: NSDate) -> UILocalNotification {
+    public func makeLocalNotification(fireDate fireDate: NSDate) -> UILocalNotification {
         let notification = UILocalNotification()
         
         notification.alertTitle = title
