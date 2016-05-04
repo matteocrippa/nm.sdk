@@ -34,7 +34,7 @@ class NPRecipeReactionsTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let response = NearSDK.plugins.run(CorePlugin.Notifications.name, withArguments: JSON(dictionary: ["do": "index"]))
+            let response = NearSDK.plugins.run(CorePlugin.Notifications.name, command: "index")
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             XCTAssertNotNil(response.content.stringArray("reactions"))
             XCTAssertEqual(response.content.stringArray("reactions")?.count, 2)
@@ -52,7 +52,7 @@ class NPRecipeReactionsTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let response = NearSDK.plugins.run(CorePlugin.Contents.name, withArguments: JSON(dictionary: ["do": "index"]))
+            let response = NearSDK.plugins.run(CorePlugin.Contents.name, command: "index")
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             XCTAssertNotNil(response.content.stringArray("reactions"))
             XCTAssertEqual(response.content.stringArray("reactions")?.count, 3)
@@ -70,7 +70,7 @@ class NPRecipeReactionsTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let response = NearSDK.plugins.run(CorePlugin.Polls.name, withArguments: JSON(dictionary: ["do": "index"]))
+            let response = NearSDK.plugins.run(CorePlugin.Polls.name, command: "index")
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             XCTAssertNotNil(response.content.stringArray("reactions"))
             XCTAssertEqual(response.content.stringArray("reactions")?.count, 2)

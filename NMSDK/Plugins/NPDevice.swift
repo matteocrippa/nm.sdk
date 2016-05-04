@@ -17,58 +17,53 @@ class NPDevice: Plugin {
         return CorePlugin.Device.name
     }
     override var version: String {
-        return "0.1"
+        return "0.2"
     }
-    override func run(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let command = arguments.string("do") else {
-            Console.error(NPBeaconForest.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\"")
-            
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\"")
-        }
-        
+    override var supportedCommands: Set<String> {
+        return Set(["refresh"])
+    }
+    
+    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
         switch command {
-        case "sync":
-            guard let appToken = arguments.string("app-token") else {
-                Console.error(NPBeaconForest.self, text: "Cannot run \"sync\" command")
-                Console.errorLine("\"app-token\" parameter is required, \"timeout-interval\" is optional")
-                Console.errorLine("\"apns-token\" parameter is optional and, if provided, must be a valid UUID string, otherwise it will be ignored")
-                return PluginResponse.error("\"app-token\" parameter is required, \"timeout-interval\" and \"apns-token\" are optional: if \"app-token\" is defined, it must be a valid UUID string, otherwise it will be ignored")
-            }
-            
-            sync(appToken, timeoutInterval: arguments.double("timeout-interval"), APNSToken: arguments.string("apns-token"))
-            return PluginResponse.ok()
+        case "refresh":
+            return refresh(arguments)
         default:
-            Console.error(NPBeaconForest.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\"")
+            Console.commandNotSupportedError(NPDevice.self, supportedCommands: supportedCommands)
+            return PluginResponse.commandNotSupported(command)
         }
     }
     
     // MARK: Refresh
-    func sync(appToken: String, timeoutInterval: NSTimeInterval?, APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)? = nil) {
+    func refresh(arguments: JSON, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)? = nil) -> PluginResponse {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPDevice.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token"])
+            return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token"])
+        }
+        
         API.authorizationToken = appToken
-        API.timeoutInterval = timeoutInterval ?? 10.0
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
-            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: APNSToken, response: { (installation, status) in
+            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token"), response: { (installation, status) in
                 self.manageSyncResponse(true, installation: installation, status: status, response: didRefresh)
             })
             
-            return
+            return PluginResponse.ok(command: "refresh")
         }
         
-        APDevice.updateInstallationID(installation.id, NearSDKVersion: NearSDK.currentVersion, APNSToken: APNSToken) { (installation, status) in
+        APDevice.updateInstallationID(installation.id, NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token")) { (installation, status) in
             self.manageSyncResponse(false, installation: installation, status: status, response: didRefresh)
         }
+        
+        return PluginResponse.ok(command: "refresh")
     }
     private func manageSyncResponse(didRequestNewID: Bool, installation: APDeviceInstallation?, status: HTTPStatusCode, response: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)?) {
         guard let object = installation where status == (didRequestNewID ? .Created : .OK) else {
             Console.error(NPDevice.self, text: "Cannot \(didRequestNewID ? "receive" : "refresh") installation identifier")
             
             let event = (didRequestNewID ?
-                NearSDKError.CannotReceiveInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync") :
-                NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync")
+                NearSDKError.CannotReceiveInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "sync") :
+                NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "sync")
             )
             
             hub?.dispatch(event: event)

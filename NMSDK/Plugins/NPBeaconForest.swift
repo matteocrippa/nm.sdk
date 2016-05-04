@@ -23,67 +23,43 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.2"
+        return "0.3"
     }
-    override func run(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let command = arguments.string("do") else {
-            Console.error(NPBeaconForest.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read-nodes\", \"read-node\" or \"read-next-nodes\"")
-            
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read-nodes\", \"read-node\" or \"read-next-nodes\"")
-        }
-        
+    override var supportedCommands: Set<String> {
+        return Set(["sync", "read-nodes", "read-node", "read-next-nodes"])
+    }
+    
+    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
         switch command {
         case "sync":
-            guard let appToken = arguments.string("app-token") else {
-                Console.error(NPBeaconForest.self, text: "Cannot run \"sync\" command")
-                Console.errorLine("\"app-token\" parameter is required, \"timeout-interval\" is optional")
-                return PluginResponse.error("\"app-token\" parameter is required, \"timeout-interval\" is optional")
-            }
-            
-            sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
-            return PluginResponse.ok()
+            return sync(arguments)
         case "read-nodes":
-            return PluginResponse.ok(JSON(dictionary: ["nodes": nodes()]))
+            return PluginResponse.ok(JSON(dictionary: ["nodes": nodes()]), command: command)
         case "read-node":
-            guard let id = arguments.string("id") else {
-                Console.error(NPBeaconForest.self, text: "Cannot run \"read-node\" command")
-                Console.errorLine("\"id\" parameter is required")
-                return PluginResponse.error("\"id\" parameter is required")
-            }
-            
-            guard let node = node(id) else {
-                Console.warning(NPBeaconForest.self, text: "\"read-node\" command could not find node \"\(id)\"")
-                return PluginResponse.error("Node \"\(id)\" not found")
-            }
-            
-            return PluginResponse.ok(JSON(dictionary: ["node": node]))
+            return readNode(arguments.string("id"))
         case "read-next-nodes":
-            guard let when = arguments.string("when"), id = arguments.string("id") where when == "enter" || when == "exit" else {
-                Console.error(NPBeaconForest.self, text: "Cannot run \"read-next-nodes\" command")
-                Console.errorLine("\"action\" and \"id\" parameters are required, \"when\" must be either \"enter\" or \"exit\"")
-                return PluginResponse.error("\"action\" and \"id\" parameters are required, \"when\" must be either \"enter\" or \"exit\"")
-            }
-            
-            let regions = (when == "enter" ? navigator.enter(id) : navigator.exit(id))
-            return PluginResponse.ok(JSON(dictionary: ["monitored-regions": regions]))
+            return readNextNodes(arguments.string("when"), nodeID: arguments.string("node-id"))
         default:
-            Console.error(NPBeaconForest.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"read-nodes\", \"read-node\" or \"read-next-nodes\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"read-nodes\", \"read-node\" or \"read-next-nodes\"")
+            Console.commandNotSupportedError(NPBeaconForest.self, supportedCommands: supportedCommands)
+            return PluginResponse.commandNotSupported(command)
         }
     }
     
     // MARK: Sync
-    private func sync(appToken: String, timeoutInterval: NSTimeInterval?) {
+    private func sync(arguments: JSON) -> PluginResponse {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPBeaconForest.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+            return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+        }
+        
         API.authorizationToken = appToken
-        API.timeoutInterval = timeoutInterval ?? 10.0
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         Console.info(NPBeaconForest.self, text: "Downloading nodes...", symbol: .Download)
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
                 Console.error(NPBeaconForest.self, text: "Cannot download nodes")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
                 return
             }
             
@@ -103,14 +79,38 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
                     self.hub?.cache.store(node, inCollection: "DefaultRegions", forPlugin: self)
                 }
             }
-            
             Console.infoLine("nodes saved: \(nodes.count)")
-            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
+            
+            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
             self.startMonitoring()
         }
+        
+        return PluginResponse.ok(command: "sync")
     }
     
     // MARK: Read configuration
+    private func readNode(id: String?) -> PluginResponse {
+        guard let nodeID = id else {
+            Console.commandError(NPBeaconForest.self, command: "read-node", requiredParameters: ["id"])
+            return PluginResponse.cannotRun("read-node", requiredParameters: ["id"])
+        }
+        
+        guard let node = node(nodeID) else {
+            Console.warning(NPBeaconForest.self, text: "Cannot find node \(id)")
+            return PluginResponse.cannotRun("read-node", requiredParameters: ["id"], cause: "Cannot find node \(id)")
+        }
+        
+        return PluginResponse.ok(JSON(dictionary: ["node": node]), command: "read-node")
+    }
+    private func readNextNodes(whenTrigger: String?, nodeID: String?) -> PluginResponse {
+        guard let when = whenTrigger, id = nodeID where when == "enter" || when == "exit" else {
+            Console.commandError(NPBeaconForest.self, command: "read-next-nodes", cause: "A valid node identifier must be provided, when must be either \"enter\" or \"exit\"", requiredParameters: ["when", "node-id"])
+            return PluginResponse.cannotRun("read-next-nodes", requiredParameters: ["when", "node-id"], cause: "A valid node identifier must be provided, when must be either \"enter\" or \"exit\"")
+        }
+        
+        let regions = (when == "enter" ? navigator.enter(id) : navigator.exit(id))
+        return PluginResponse.ok(JSON(dictionary: ["monitored-regions": regions]), command: "read-next-nodes")
+    }
     private func nodes() -> [[String: AnyObject]] {
         let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
@@ -131,7 +131,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return nil
     }
     private func triggerEnterEventWithRegion(region: CLRegion) {
-        hub?.send(direct: PluginDirectMessage(from: name, to: CorePlugin.Recipes.name, content: JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"])))
+        hub?.send(
+            "evaluate",
+            fromPluginNamed: name,
+            toPluginNamed: CorePlugin.Recipes.name,
+            withArguments: JSON(dictionary: ["in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"]))
     }
     
     // MARK: CoreLocation
@@ -151,7 +155,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             hub?.dispatch(
                 event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(
                     name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
-                    operation: "start-monitoring"))
+                    command: "start-monitoring"))
             return
         }
         
@@ -165,7 +169,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         let regions = navigator.identifiersToRegions(Set(navigator.defaultRegionIdentifiers))
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
-            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", operation: "start-monitoring"))
+            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", command: "start-monitoring"))
             return
         }
         

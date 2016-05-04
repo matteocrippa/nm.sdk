@@ -35,9 +35,7 @@ class NPBeaconForestTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "read-nodes"])
-            let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
-            
+            let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-nodes")
             XCTAssertEqual(response.content.dictionaryArray("nodes")?.count, 9)
             expectation.fulfill()
         }
@@ -65,8 +63,7 @@ class NPBeaconForestTests: XCTestCase {
             ]
             
             for configurationTest in tests {
-                let args = JSON(dictionary: ["do": "read-node", "id": configurationTest.id])
-                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
+                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-node", withArguments: JSON(dictionary: ["id": configurationTest.id]))
                 
                 XCTAssertEqual(response.content.string("node.id"), configurationTest.id)
                 XCTAssertEqual(response.content.stringArray("node.children")!, configurationTest.children)
@@ -97,9 +94,7 @@ class NPBeaconForestTests: XCTestCase {
             ]
             
             for test in enterTests {
-                let args = JSON(dictionary: ["do": "read-next-nodes", "when": "enter", "id": test.id])
-                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
-                
+                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-next-nodes", withArguments: JSON(dictionary: ["when": "enter", "node-id": test.id]))
                 XCTAssertEqual(response.content.stringArray("monitored-regions", emptyIfNil: true)!.sort(), test.target.sort())
             }
             
@@ -125,9 +120,7 @@ class NPBeaconForestTests: XCTestCase {
             ]
             
             for test in enterTests {
-                let args = JSON(dictionary: ["do": "read-next-nodes", "when": "exit", "id": test.id])
-                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, withArguments: args)
-                
+                let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-next-nodes", withArguments: JSON(dictionary: ["when": "exit", "node-id": test.id]))
                 XCTAssertEqual(response.content.stringArray("monitored-regions", emptyIfNil: true)!.sort(), test.target.sort())
             }
             

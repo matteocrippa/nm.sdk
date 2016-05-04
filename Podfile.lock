@@ -17,7 +17,7 @@ PODS:
     - Alamofire (~> 3.0)
     - JWTDecode (~> 1.0)
     - NMCache
-  - NMPlug (0.7.6):
+  - NMPlug (0.8):
     - NMCache
   - OHHTTPStubs (5.0.0):
     - OHHTTPStubs/Default (= 5.0.0)
@@ -91,7 +91,7 @@ SPEC CHECKSUMS:
   NMCache: 6591e1cc44e795ab32081c5ca6444cccaed8b2be
   NMJSON: 88c6cce9d65bde04806304ecb8b2a165f63bbc49
   NMNet: 687fdf6dc1e522dd772a5ea81f8a8626a48ec7cf
-  NMPlug: eadb1db7c9282f5be03f41dcbdc97632118cbaaf
+  NMPlug: ce1309fe7ca468a06a1cd0e1347cec4544f695a8
   OHHTTPStubs: a5d2e9eea07869d42ec03338325f398bc520e159
   YapDatabase: 15b6867a07ff30eac3af28794cd2262b4d0ca4ca
 

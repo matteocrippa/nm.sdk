@@ -133,7 +133,7 @@ public enum NearSDKError: Int, CustomStringConvertible {
     }
     
     /// Returns a `PluginEvent` instance configured for `Self`.
-    func pluginEvent(pluginName: String, message: String, operation: String) -> PluginEvent {
-        return PluginEvent(from: pluginName, content: JSON(dictionary: ["error": self.rawValue, "description": description, "message": message, "operation": operation]))
+    func pluginEvent(pluginName: String, message: String, command: String) -> PluginEvent {
+        return PluginEvent(from: pluginName, content: JSON(dictionary: ["error": self.rawValue, "description": description, "message": message]), pluginCommand: command)
     }
 }
