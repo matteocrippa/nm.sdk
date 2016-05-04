@@ -6,7 +6,7 @@
 //  Copyright © 2016 Near srl. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import NMNet
 
 /// A notification reaction.
@@ -43,5 +43,23 @@ public class Notification: NSObject {
     /// Human-readable description of `Self`.
     public override var description: String {
         return Console.describe(Notification.self, properties: ("id", id), ("text", text), ("recipe", recipe?.evaluation))
+    }
+    
+    // MARK: Methods
+    /// Returns an instance of a UILocalNotification.
+    ///
+    /// The alert body of the local notification will be equal to `text`.
+    ///
+    /// - parameters:
+    ///   - title: the title of the local notification
+    ///   - fireDate: defines the fire date of the local notification
+    public func makeLocalNotification(title title: String, fireDate: NSDate) -> UILocalNotification {
+        let notification = UILocalNotification()
+        
+        notification.alertTitle = title
+        notification.alertBody = text
+        notification.fireDate = fireDate
+        
+        return notification
     }
 }
