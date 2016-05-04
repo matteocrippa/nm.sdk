@@ -40,7 +40,7 @@ class NPDeviceTests: XCTestCase {
             expectation.fulfill()
         }
         
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
+        let response = NearSDK.plugins.run(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
         XCTAssertEqual(response.status, PluginResponseStatus.OK)
         
         waitForExpectationsWithTimeout(1, handler: nil)
@@ -71,7 +71,7 @@ class NPDeviceTests: XCTestCase {
             expectation.fulfill()
         }
         
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, withArguments: JSON(dictionary: ["do": "sync", "app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
+        let response = NearSDK.plugins.run(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
         XCTAssertEqual(response.status, PluginResponseStatus.OK)
         
         waitForExpectationsWithTimeout(1, handler: nil)

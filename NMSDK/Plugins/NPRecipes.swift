@@ -17,56 +17,41 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.1"
+        return "0.2"
     }
-    override func run(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let command = arguments.string("do") else {
-            Console.error(NPRecipes.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
-        }
-        
+    override var supportedCommands: Set<String> {
+        return Set(["sync", "index", "evaluate"])
+    }
+    
+    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
         switch command {
         case "sync":
-            guard let appToken = arguments.string("app-token") else {
-                Console.error(NPRecipes.self, text: "Cannot run \"sync\" command")
-                Console.errorLine("\"app-token\" parameter is required, \"timeout-interval\" is optional")
-                return PluginResponse.error("\"app-token\" parameter is required, \"timeout-interval\" is optional")
-            }
-            
-            sync(appToken, timeoutInterval: arguments.double("timeout-interval"))
+            return sync(arguments)
         case "index":
-            return PluginResponse.ok(index())
+            return PluginResponse.ok(index(), command: "index")
         case "evaluate":
-            guard let inCase = arguments.string("in-case"), inTarget = arguments.string("in-target"), trigger = arguments.string("trigger") else {
-                Console.error(NPRecipes.self, text: "Cannot run \"evaluate\" command")
-                Console.errorLine("\"evaluate\" requires \"in-case\", \"in-target\" and \"trigger\" parameters")
-                return PluginResponse.error("\"evaluate\" requires \"in-case\", \"in-target\" and \"trigger\" parameters")
-            }
-            
-            let recipeIdentifier = APRecipe.evaluationKey(inCase: inCase, inTarget: inTarget, trigger: trigger)
-            return evaluate(recipeIdentifier) ?
-                PluginResponse.ok() :
-                PluginResponse.error("Cannot evaluate event \(recipeIdentifier)")
+            return evaluate(arguments)
         default:
-            Console.error(NPRecipes.self, text: "Cannot run")
-            Console.errorLine("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
-            return PluginResponse.error("\"do\" parameter is required, must be \"sync\", \"index\" or \"evaluate\"")
+            Console.commandNotSupportedError(NPRecipes.self, supportedCommands: supportedCommands)
+            return PluginResponse.commandNotSupported(command)
         }
-        
-        return PluginResponse.ok()
     }
     
     // MARK: Sync
-    private func sync(appToken: String, timeoutInterval: NSTimeInterval?) {
+    private func sync(arguments: JSON) -> PluginResponse {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipes.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+            return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+        }
+        
         API.authorizationToken = appToken
-        API.timeoutInterval = timeoutInterval ?? 10.0
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         Console.info(NPRecipes.self, text: "Downloading recipes...", symbol: .Download)
         APRecipes.get { (recipes, recipeMaps, status) in
             if status != .OK {
                 Console.error(NPRecipes.self, text: "Cannot download recipes")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", operation: "sync"))
+                self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
                 return
             }
             
@@ -91,8 +76,10 @@ class NPRecipes: Plugin {
             }
             Console.infoLine("mappings saved: \(recipes.count)")
             
-            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: ["operation": "sync"])))
+            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
         }
+        
+        return PluginResponse.ok(command: "sync")
     }
     
     // MARK: Index
@@ -117,36 +104,48 @@ class NPRecipes: Plugin {
     }
     
     // MARK: Evaluate
-    private func evaluate(key: String) -> Bool {
-        Console.info(NPRecipes.self, text: "Will evaluate recipe \(key)")
+    private func evaluate(arguments: JSON) -> PluginResponse {
+        guard let inCase = arguments.string("in-case"), inTarget = arguments.string("in-target"), trigger = arguments.string("trigger") else {
+            Console.commandError(NPRecipes.self, command: "evaluate", requiredParameters: ["in-case", "in-target", "trigger"])
+            return PluginResponse.cannotRun("evaluate", requiredParameters: ["in-case", "in-target", "trigger"])
+        }
         
-        guard let pluginHub = hub, recipeMap: APRecipeMap = hub?.cache.resource(key, inCollection: "RecipesMaps", forPlugin: self) else {
-            Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
-            Console.warningLine("recipe not found", symbol: .Space)
-            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" not found", operation: "evaluate"))
-            return false
+        let evaluationKey = APRecipe.evaluationKey(inCase: inCase, inTarget: inTarget, trigger: trigger)
+        Console.info(NPRecipes.self, text: "Will evaluate recipe \(evaluationKey)")
+        
+        guard let pluginHub = hub, recipeMap: APRecipeMap = hub?.cache.resource(evaluationKey, inCollection: "RecipesMaps", forPlugin: self) else {
+            Console.commandWarning(NPRecipes.self, command: "evaluate", cause: "Cannot evaluate recipe \(evaluationKey)")
+            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" not found", command: "evaluate"))
+            return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
         }
         
         for id in recipeMap.recipes {
             guard let
                 recipe: APRecipe = hub?.cache.resource(id, inCollection: "Recipes", forPlugin: self),
-                message = evaluatorMessage(recipe),
-                response = hub?.send(direct: message) where response.status == .OK else {
+                command = evaluatorCommand(recipe),
+                response = hub?.send(command.command, fromPluginNamed: name, toPluginNamed: command.evaluator, withArguments: command.args) else {
                     continue
             }
             
-            Console.info(NPRecipes.self, text: "Recipe \(key) has been evaluated")
+            if response.status != .OK {
+                Console.error(NPRecipes.self, text: "Cannot evaluate reaction")
+                return PluginResponse.cannotForward(command.command, toPluginNamed: command.evaluator, targetPluginResponse: response)
+            }
+            
+            Console.info(NPRecipes.self, text: "Recipe \(evaluationKey) has been evaluated")
             Console.infoLine("content id: \(recipe.outTarget)")
             Console.infoLine("      type: \(recipe.outCase)")
             
             let reaction = JSON(dictionary: ["reaction": response.content.dictionary, "recipe": recipe.json.dictionary, "type": recipe.outCase])
-            return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction))
+            return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
+                PluginResponse.ok(command: "evaluate") :
+                PluginResponse.cannotRun("evaluate", requiredParameters: ["in-case", "in-target", "trigger"], cause: "Cannot send evaluation request to \(command.evaluator) for evaluation key \(evaluationKey)")
         }
         
-        Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(key)")
+        Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(evaluationKey)")
         Console.warningLine("content type may be invalid or no content can be found for the given recipe", symbol: .Space)
-        self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(key)\" cannot be evaluated", operation: "evaluate"))
-        return false
+        self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" cannot be evaluated", command: "evaluate"))
+        return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
     }
     private func evaluatorName(recipe: APRecipe) -> String? {
         switch recipe.outCase {
@@ -160,11 +159,11 @@ class NPRecipes: Plugin {
             return nil
         }
     }
-    private func evaluatorMessage(recipe: APRecipe) -> PluginDirectMessage? {
+    private func evaluatorCommand(recipe: APRecipe) -> (command: String, args: JSON, evaluator: String)? {
         guard let evaluator = evaluatorName(recipe) else {
             return nil
         }
         
-        return PluginDirectMessage(from: name, to: evaluator, content: JSON(dictionary: ["do": "read", "content": recipe.outTarget]))
+        return ("read", JSON(dictionary: ["content-id": recipe.outTarget]), evaluator)
     }
 }

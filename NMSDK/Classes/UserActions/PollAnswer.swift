@@ -27,7 +27,7 @@ public class PollAnswer: NSObject, EventSerializable {
     
     /// The dictionary which holds event's data.
     public var body: JSON {
-        return JSON(dictionary: ["answer": answer.rawValue, "notification_id": pollID])
+        return JSON(dictionary: ["answer": answer.rawValue, "notification-id": pollID])
     }
     
     // MARK: Initializers

@@ -26,6 +26,23 @@ class Console {
     class func error(sourceClass: AnyClass, text: String, symbol: ConsoleSymbol = .Space) {
         log(sourceClass, text: text, type: .Error, symbol: symbol)
     }
+    class func commandError(sourceClass: AnyClass, command: String, cause: String? = nil, requiredParameters: [String] = [], optionalParameters: [String] = []) {
+        error(sourceClass, text: "Cannot run \(command)", symbol: .Error)
+        errorLine("required parameters: \(requiredParameters.sort())", symbol: .Space)
+        errorLine("optional parameters: \(optionalParameters.sort())", symbol: .Space)
+        
+        if let message = cause {
+            errorLine("              cause: \(message)", symbol: .Space)
+        }
+    }
+    class func commandWarning(sourceClass: AnyClass, command: String, cause: String) {
+        warning(sourceClass, text: "Command \(command) produced a warning", symbol: .Error)
+        warningLine("message: \(cause)", symbol: .Space)
+    }
+    class func commandNotSupportedError(sourceClass: AnyClass, supportedCommands: Set<String>) {
+        error(sourceClass, text: "Command not supported")
+        errorLine("Supported commands: \(supportedCommands.sort())")
+    }
     class func errorLine(line: String, symbol: ConsoleSymbol = .Space) {
         log(line, type: .Error, symbol: symbol)
     }

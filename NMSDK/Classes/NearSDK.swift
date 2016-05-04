@@ -177,10 +177,9 @@ public class NearSDK: NSObject, Extensible {
         syncincErrors = []
         syncingCorePlugins = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
         
-        let arguments = JSON(dictionary: ["do": "sync", "app-token": appToken, "timeout-interval": timeoutInterval])
-        
+        let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval])
         for plugin in syncingCorePlugins {
-            result = result && (plugins.run(plugin.name, withArguments: arguments).status == .OK)
+            result = result && (plugins.run(plugin.name, command: "sync", withArguments: arguments).status == .OK)
             
             if !result {
                 Console.error(NearSDK.self, text: "An error occurred while starting NearSDK")
@@ -237,7 +236,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private class func images(identifiers: [String], inout storeInto target: [String: UIImage], inout notFound: Set<String>) -> Bool {
-        let response = plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "read", "identifiers": identifiers]))
+        let response = plugins.run(CorePlugin.ImageCache.name, command: "read", withArguments: JSON(dictionary: ["identifiers": identifiers]))
         guard let images = response.content.dictionary("images") where response.status == .OK else {
             target.removeAll()
             notFound = Set(identifiers)
@@ -277,8 +276,7 @@ public class NearSDK: NSObject, Extensible {
     ///
     /// - returns: `true` if the cache has been cleared, `false` otherwise
     public class func clearImageCache() -> Bool {
-        let didClearImageCache = (plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "clear"])).status == .OK)
-        
+        let didClearImageCache = (plugins.run(CorePlugin.ImageCache.name, command: "clear").status == .OK)
         if !didClearImageCache {
             Console.error(NearSDK.self, text: "Cannot clear images' cache")
         }
@@ -299,7 +297,15 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        plugin.sync(NearSDK.appToken, timeoutInterval: NearSDK.timeoutInterval, APNSToken: APNSToken, didRefresh: didRefresh)
+        var dictionary = [String: AnyObject]()
+        dictionary["app-token"] = NearSDK.appToken
+        dictionary["timeout-interval"]  = NearSDK.timeoutInterval
+        
+        if let token = APNSToken {
+            dictionary["apns-token"] = token
+        }
+        
+        plugin.refresh(JSON(dictionary: dictionary), didRefresh: didRefresh)
     }
     
     // MARK: Communicating with NearSDK
@@ -309,8 +315,8 @@ public class NearSDK: NSObject, Extensible {
     ///   - event: the event being sent
     ///   - response: the handler which will be executed when `event`'s recipient will end processing `event`
     public class func sendEvent(event: EventSerializable, response handler: ((response: PluginResponse, status: HTTPStatusCode) -> Void)?) {
-        plugins.sendNetworkRequestWithPluginNamed(event.pluginName, arguments: event.body) { (response, HTTPCode) in
-            handler?(response: response, status: HTTPStatusCode(rawValue: HTTPCode))
+        plugins.runAsync(CorePlugin.Polls.name, command: "post", withArguments: event.body) { (response) in
+            handler?(response: response, status: HTTPStatusCode(rawValue: response.content.int("HTTPStatusCode", fallback: -1)!))
         }
     }
     /// Sends an answer for a given poll to nearit.com.
@@ -378,7 +384,7 @@ public class NearSDK: NSObject, Extensible {
         delegate?.nearSDKDidReceiveEvent?(event)
     }
     private func manageSync(event: PluginEvent) {
-        guard let plugin = CorePlugin(name: event.from), operation = event.content.string("operation") where operation == "sync" else {
+        guard let plugin = CorePlugin(name: event.from) where event.command == "sync" else {
             return
         }
         

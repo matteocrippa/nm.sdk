@@ -88,7 +88,7 @@ class NearSDKTests: XCTestCase {
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
-        waitForExpectationsWithTimeout(1000, handler: nil)
+        waitForExpectationsWithTimeout(1, handler: nil)
     }
     
     // MARK: Images
@@ -112,7 +112,7 @@ class NearSDKTests: XCTestCase {
         THStubs.stubImageData()
         
         let expectation = expectationWithDescription("test get images")
-        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, command: "store", withArguments: JSON(dictionary: ["images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
         NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 1)
@@ -125,9 +125,9 @@ class NearSDKTests: XCTestCase {
     }
     func testCachedImages() {
         let expectation = expectationWithDescription("test get images")
-        let arguments = JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()], ["id": "image_2", "image": THStubs.sampleImage()]]])
+        let arguments = JSON(dictionary: ["images": [["id": "image_1", "image": THStubs.sampleImage()], ["id": "image_2", "image": THStubs.sampleImage()]]])
         
-        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: arguments)
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, command: "store", withArguments: arguments)
         NearSDK.imagesWithIdentifiers(["image_1", "image_2"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 0)
@@ -143,7 +143,7 @@ class NearSDKTests: XCTestCase {
         THStubs.stubImageData(excluded: ["image_3"])
         
         let expectation = expectationWithDescription("test get images")
-        NearSDK.plugins.run(CorePlugin.ImageCache.name, withArguments: JSON(dictionary: ["do": "store", "images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
+        NearSDK.plugins.run(CorePlugin.ImageCache.name, command: "store", withArguments: JSON(dictionary: ["images": [["id": "image_1", "image": THStubs.sampleImage()]]]))
         NearSDK.imagesWithIdentifiers(["image_1", "image_2", "image_3", "image_4"]) { (images, downloaded, notFound) in
             XCTAssertEqual(images.count, 2)
             XCTAssertEqual(downloaded.count, 1)

@@ -34,8 +34,8 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_2", "trigger": "EVENT-2"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
+            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C10_2", "trigger": "EVENT-2"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
         }
         
@@ -55,8 +55,8 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C10_1", "trigger": "enter_region"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
+            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C10_1", "trigger": "enter_region"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
         }
         SDKDelegate.didReceiveContents = { (contents) in
@@ -75,8 +75,8 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C20_1", "trigger": "EVENT-3"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
+            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C20_1", "trigger": "EVENT-3"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
         }
         SDKDelegate.didReceivePolls = { (polls) in
@@ -102,9 +102,9 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C0_0", "trigger": "EVENT-X"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
-            XCTAssertEqual(response.status, PluginResponseStatus.Error)
+            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C0_0", "trigger": "EVENT-X"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.Warning)
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
@@ -122,9 +122,9 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "evaluate", "in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "EVENT-1"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
-            XCTAssertEqual(response.status, PluginResponseStatus.Error)
+            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "EVENT-1"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.Warning)
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
@@ -139,9 +139,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["do": "index"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, withArguments: args)
-            
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "index")
             guard let triggers = response.content.dictionary("triggers") else {
                 XCTFail("triggers not found")
                 return
@@ -185,7 +183,7 @@ class NPRecipesTests: XCTestCase {
             
             NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id") { (response, result) in
                 XCTAssertEqual(result, SendEventResult.Success)
-                XCTAssertEqual(response.dictionary.count, 0)
+                XCTAssertTrue(response.containsInt("HTTPStatusCode"))
                 expectation.fulfill()
             }
         }
