@@ -35,13 +35,23 @@ class NPDeviceTests: XCTestCase {
         let expectation = expectationWithDescription("test update installation identifier")
         
         SDKDelegate.didReceiveEvent = { (event) in
-            XCTAssertEqual(event.from, CorePlugin.Device.name)
-            XCTAssertEqual(event.content.string("status"), "updated")
-            expectation.fulfill()
+            
         }
         
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
-        XCTAssertEqual(response.status, PluginResponseStatus.OK)
+        NearSDK.plugins.runAsync(
+            CorePlugin.Device.name,
+            command: "refresh",
+            withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"])) { (response) in
+                XCTAssertEqual(response.status, PluginResponseStatus.OK)
+                
+                guard let statusValue = response.content.int("status"), _ = response.content.object("installation") as? DeviceInstallation else {
+                    XCTFail("invalid response content")
+                    return
+                }
+                
+                XCTAssertEqual(DeviceInstallationStatus(rawValue: statusValue), DeviceInstallationStatus.Updated)
+                expectation.fulfill()
+        }
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
@@ -65,14 +75,20 @@ class NPDeviceTests: XCTestCase {
         THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
         let expectation = expectationWithDescription("test receive installation identifier")
         
-        SDKDelegate.didReceiveEvent = { (event) in
-            XCTAssertEqual(event.from, CorePlugin.Device.name)
-            XCTAssertEqual(event.content.string("status"), "received")
-            expectation.fulfill()
+        NearSDK.plugins.runAsync(
+            CorePlugin.Device.name,
+            command: "refresh",
+            withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"])) { (response) in
+                XCTAssertEqual(response.status, PluginResponseStatus.OK)
+                
+                guard let statusValue = response.content.int("status"), _ = response.content.object("installation") as? DeviceInstallation else {
+                    XCTFail("invalid response content")
+                    return
+                }
+                
+                XCTAssertEqual(DeviceInstallationStatus(rawValue: statusValue), DeviceInstallationStatus.Received)
+                expectation.fulfill()
         }
-        
-        let response = NearSDK.plugins.run(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: ["app-token": THStubs.SDKToken, "apns-token": "00000000-0000-0000-0000-000000000000"]))
-        XCTAssertEqual(response.status, PluginResponseStatus.OK)
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }

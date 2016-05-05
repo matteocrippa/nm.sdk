@@ -16,28 +16,14 @@ class NPImageCache: Plugin {
         return CorePlugin.ImageCache.name
     }
     override var version: String {
-        return "0.2"
+        return "0.3"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["store", "clear", "read"])
-    }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "store":
-            return store(arguments)
-        case "clear":
-            return clear()
-        case "read":
-            return read(arguments)
-        default:
-            Console.commandNotSupportedError(NPImageCache.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
+    override var commands: [String: RunHandler] {
+        return ["store": store, "clear": clear, "read": read]
     }
     
     // MARK: Images' management
-    private func store(arguments: JSON) -> PluginResponse {
+    private func store(arguments: JSON, sender: String?) -> PluginResponse {
         guard let dictionaries = arguments.dictionaryArray("images") else {
             Console.commandError(NPImageCache.self, command: "store", cause: "\"images\" must be an array of dictionaries like [\"id\": <String>, \"image\": <UIImage>]", requiredParameters: ["images"])
             return PluginResponse.cannotRun("store", requiredParameters: ["images"], cause: "\"images\" must be an array of dictionaries like [\"id\": <String>, \"image\": <UIImage>]")
@@ -58,11 +44,11 @@ class NPImageCache: Plugin {
         
         return PluginResponse.ok(command: "store")
     }
-    private func clear() -> PluginResponse {
+    private func clear(arguments: JSON, sender: String?) -> PluginResponse {
         hub?.cache.removeAllResourcesWithPlugin(self)
         return PluginResponse.ok(command: "clear")
     }
-    private func read(arguments: JSON) -> PluginResponse {
+    private func read(arguments: JSON, sender: String?) -> PluginResponse {
         guard let identifiers = arguments.stringArray("identifiers") else {
             Console.commandError(NPImageCache.self, command: "read", cause: "\"identifiers\" must be an array of String identifiers", requiredParameters: ["identifiers"])
             return PluginResponse.cannotRun("read", requiredParameters: ["identifiers"], cause: "\"identifiers\" must be an array of String identifiers")

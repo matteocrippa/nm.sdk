@@ -19,4 +19,26 @@ public enum DeviceInstallationStatus: Int {
     
     /// The installation identifier cannot be received or updated.
     case NotRefreshed = 0
+    
+    /// An unsupported status value
+    case Unknown = -1
+    
+    // MARK: Initializers
+    /// Converts `rawValue` in `Self`.
+    ///
+    /// - parameters:
+    ///   - rawValue: must be either 10, 20 or 0
+    ///   - returns: .Unknown if rawValue is not 10, 20 or 0
+    public init(rawValue: Int) {
+        switch rawValue {
+        case 10:
+            self = .Received
+        case 20:
+            self = .Updated
+        case 0:
+            self = .NotRefreshed
+        default:
+            self = .Unknown
+        }
+    }
 }
