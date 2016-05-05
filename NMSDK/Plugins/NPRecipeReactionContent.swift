@@ -17,28 +17,14 @@ class NPRecipeReactionContent: Plugin {
         return CorePlugin.Contents.name
     }
     override var version: String {
-        return "0.3"
+        return "0.4"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["sync", "index", "read"])
-    }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "sync":
-            return sync(arguments)
-        case "index":
-            return PluginResponse.ok(JSON(dictionary: ["reactions": index()]), command: "index")
-        case "read":
-            return read(arguments.string("content-id"))
-        default:
-            Console.commandNotSupportedError(NPRecipeReactionContent.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
+    override var commands: [String: RunHandler] {
+        return ["sync": sync, "index": index, "read": read]
     }
     
     // MARK: Sync
-    private func sync(arguments: JSON) -> PluginResponse {
+    private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
             Console.commandError(NPRecipeReactionContent.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
@@ -71,9 +57,9 @@ class NPRecipeReactionContent: Plugin {
     }
     
     // MARK: Read
-    private func index() -> [String] {
+    private func index(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resources: [APRecipeContent] = hub?.cache.resourcesIn(collection: "Reactions", forPlugin: self) else {
-            return []
+            return PluginResponse.ok(JSON(dictionary: ["reactions": [String]()]), command: "index")
         }
         
         var keys = [String]()
@@ -81,10 +67,10 @@ class NPRecipeReactionContent: Plugin {
             keys.append(resource.id)
         }
         
-        return keys
+        return PluginResponse.ok(JSON(dictionary: ["reactions": keys]), command: "index")
     }
-    private func read(contentID: String?) -> PluginResponse {
-        guard let id = contentID else {
+    private func read(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let id = arguments.string("content-id") else {
             Console.commandError(NPRecipeReactionContent.self, command: "read", requiredParameters: ["content-id"])
             return PluginResponse.cannotRun("read", requiredParameters: ["content-id"])
         }
