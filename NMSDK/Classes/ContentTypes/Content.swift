@@ -56,4 +56,21 @@ public class Content: NSObject {
     public override var description: String {
         return Console.describe(Notification.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL), ("recipe", recipe?.evaluation))
     }
+    
+    // MARK: Methods
+    /// Returns an instance of a UILocalNotification.
+    ///
+    /// The alert body of the local notification will be equal to `text`, while its title will be equal to `title`.
+    ///
+    /// - parameters:
+    ///   - fireDate: defines the fire date of the local notification
+    public func makeLocalNotification(fireDate fireDate: NSDate) -> UILocalNotification {
+        let notification = UILocalNotification()
+        
+        notification.alertTitle = title
+        notification.alertBody = text
+        notification.fireDate = fireDate
+        
+        return notification
+    }
 }

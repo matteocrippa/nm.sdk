@@ -17,27 +17,18 @@ class NPDevice: Plugin {
         return CorePlugin.Device.name
     }
     override var version: String {
-        return "0.2"
+        return "0.3"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["refresh"])
-    }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "refresh":
-            return refresh(arguments)
-        default:
-            Console.commandNotSupportedError(NPDevice.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
+    override var asyncCommands: [String: RunAsyncHandler] {
+        return ["refresh": refresh]
     }
     
     // MARK: Refresh
-    func refresh(arguments: JSON, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)? = nil) -> PluginResponse {
+    func refresh(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) {
         guard let appToken = arguments.string("app-token") else {
             Console.commandError(NPDevice.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token"])
-            return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token"])
+            completionHandler?(response: PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token"]))
+            return
         }
         
         API.authorizationToken = appToken
@@ -45,29 +36,26 @@ class NPDevice: Plugin {
         
         guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
             APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token"), response: { (installation, status) in
-                self.manageSyncResponse(true, installation: installation, status: status, response: didRefresh)
+                self.manageSyncResponse(true, installation: installation, status: status, completionHandler: completionHandler)
             })
             
-            return PluginResponse.ok(command: "refresh")
+            return
         }
         
         APDevice.updateInstallationID(installation.id, NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token")) { (installation, status) in
-            self.manageSyncResponse(false, installation: installation, status: status, response: didRefresh)
+            self.manageSyncResponse(false, installation: installation, status: status, completionHandler: completionHandler)
         }
-        
-        return PluginResponse.ok(command: "refresh")
     }
-    private func manageSyncResponse(didRequestNewID: Bool, installation: APDeviceInstallation?, status: HTTPStatusCode, response: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)?) {
+    private func manageSyncResponse(didRequestNewID: Bool, installation: APDeviceInstallation?, status: HTTPStatusCode, completionHandler: ResponseHandler?) {
         guard let object = installation where status == (didRequestNewID ? .Created : .OK) else {
             Console.error(NPDevice.self, text: "Cannot \(didRequestNewID ? "receive" : "refresh") installation identifier")
             
             let event = (didRequestNewID ?
-                NearSDKError.CannotReceiveInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "sync") :
-                NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "sync")
+                NearSDKError.CannotReceiveInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "refresh") :
+                NearSDKError.CannotUpdateInstallationID.pluginEvent(name, message: "HTTPStatusCode \(status.rawValue)", command: "refresh")
             )
             
-            hub?.dispatch(event: event)
-            response?(status: .NotRefreshed, installation: nil)
+            completionHandler?(response: PluginResponse(status: .Error, content: event.content, command: "refresh"))
             return
         }
         
@@ -77,10 +65,8 @@ class NPDevice: Plugin {
         hub?.cache.removeAllResourcesWithPlugin(self)
         hub?.cache.store(object, inCollection: "Installations", forPlugin: self)
         
-        let event = PluginEvent(from: name, content: JSON(dictionary: ["operation": "sync", "installation-id": object.id, "status": (didRequestNewID ? "received" : "updated")]))
-        Console.infoLine("event \(event)")
-        
-        hub?.dispatch(event: event)
-        response?(status: (didRequestNewID ? .Received : .Updated), installation: object)
+        completionHandler?(response: PluginResponse.ok(
+            JSON(dictionary: ["status": (didRequestNewID ? DeviceInstallationStatus.Received : DeviceInstallationStatus.Updated).rawValue, "installation": DeviceInstallation(installation: object)]),
+            command: "refresh"))
     }
 }

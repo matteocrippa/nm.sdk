@@ -17,28 +17,14 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.2"
+        return "0.3"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["sync", "index", "evaluate"])
-    }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "sync":
-            return sync(arguments)
-        case "index":
-            return PluginResponse.ok(index(), command: "index")
-        case "evaluate":
-            return evaluate(arguments)
-        default:
-            Console.commandNotSupportedError(NPRecipes.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
+    override var commands: [String: RunHandler] {
+        return ["sync": sync, "index": index, "evaluate": evaluate]
     }
     
     // MARK: Sync
-    private func sync(arguments: JSON) -> PluginResponse {
+    private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
             Console.commandError(NPRecipes.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
@@ -83,10 +69,10 @@ class NPRecipes: Plugin {
     }
     
     // MARK: Index
-    private func index() -> JSON {
+    private func index(arguments: JSON, sender: String?) -> PluginResponse {
         var maps = [String: [Recipe]]()
         guard let recipeMaps: [APRecipeMap] = hub?.cache.resourcesIn(collection: "RecipesMaps", forPlugin: self) else {
-            return JSON(dictionary: ["triggers": maps])
+            return PluginResponse.ok(JSON(dictionary: ["triggers": maps]), command: "index")
         }
         
         for map in recipeMaps {
@@ -100,11 +86,11 @@ class NPRecipes: Plugin {
             maps[map.recipeKey] = recipes
         }
         
-        return JSON(dictionary: ["triggers": maps])
+        return PluginResponse.ok(JSON(dictionary: ["triggers": maps]), command: "index")
     }
     
     // MARK: Evaluate
-    private func evaluate(arguments: JSON) -> PluginResponse {
+    private func evaluate(arguments: JSON, sender: String?) -> PluginResponse {
         guard let inCase = arguments.string("in-case"), inTarget = arguments.string("in-target"), trigger = arguments.string("trigger") else {
             Console.commandError(NPRecipes.self, command: "evaluate", requiredParameters: ["in-case", "in-target", "trigger"])
             return PluginResponse.cannotRun("evaluate", requiredParameters: ["in-case", "in-target", "trigger"])

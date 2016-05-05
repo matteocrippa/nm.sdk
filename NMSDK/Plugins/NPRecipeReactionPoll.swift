@@ -17,42 +17,17 @@ class NPRecipeReactionPoll: Plugin {
         return CorePlugin.Polls.name
     }
     override var version: String {
-        return "0.3"
+        return "0.4"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["sync", "index", "read", "post"])
+    override var commands: [String: RunHandler] {
+        return ["sync": sync, "index": index, "read": read]
     }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "sync":
-            return sync(arguments)
-        case "index":
-            return PluginResponse.ok(JSON(dictionary: ["reactions": index()]), command: "index")
-        case "read":
-            return read(arguments.string("content-id"))
-        case "post":
-            return PluginResponse.warning("Async command", command: "post")
-        default:
-            Console.commandNotSupportedError(NPRecipeReactionPoll.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
-    }
-    
-    override func runAsync(command: String, arguments: JSON, sender: String?, handler: ((response: PluginResponse) -> Void)?) {
-        switch command {
-        case "sync", "index", "read":
-            handler?(response: PluginResponse.warning("Sync command", command: command))
-        case "post":
-            post(arguments, handler: handler)
-        default:
-            Console.commandNotSupportedError(NPRecipeReactionPoll.self, supportedCommands: supportedCommands)
-            handler?(response: PluginResponse.commandNotSupported(command))
-        }
+    override var asyncCommands: [String: RunAsyncHandler] {
+        return ["post": post]
     }
     
     // MARK: Async
-    private func post(arguments: JSON, handler: ((response: PluginResponse) -> Void)?) {
+    private func post(arguments: JSON, sender: String?, handler: ((response: PluginResponse) -> Void)?) {
         guard let pollID = arguments.string("notification-id"), answerValue = arguments.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
             Console.commandError(NPRecipeReactionPoll.self, command: "post", requiredParameters: ["notification-id", "answer"])
             handler?(response: PluginResponse.cannotRun("post", requiredParameters: ["notification-id", "answer"], cause: "\"notification-id\", i.e. the poll identifier, is required, as well as the answer (which can be either 1 or 2)"))
@@ -68,7 +43,7 @@ class NPRecipeReactionPoll: Plugin {
     }
     
     // MARK: Sync
-    private func sync(arguments: JSON) -> PluginResponse {
+    private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
             Console.commandError(NPRecipeReactionPoll.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
@@ -100,9 +75,9 @@ class NPRecipeReactionPoll: Plugin {
     }
     
     // MARK: Read
-    private func index() -> [String] {
+    private func index(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resources: [APRecipePoll] = hub?.cache.resourcesIn(collection: "Reactions", forPlugin: self) else {
-            return []
+            return PluginResponse.ok(JSON(dictionary: ["reactions": [String]()]), command: "index")
         }
         
         var keys = [String]()
@@ -110,10 +85,10 @@ class NPRecipeReactionPoll: Plugin {
             keys.append(resource.id)
         }
         
-        return keys
+        return PluginResponse.ok(JSON(dictionary: ["reactions": keys]), command: "index")
     }
-    private func read(contentID: String?) -> PluginResponse {
-        guard let id = contentID else {
+    private func read(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let id = arguments.string("content-id") else {
             Console.commandError(NPRecipeReactionPoll.self, command: "read", requiredParameters: ["content-id"])
             return PluginResponse.cannotRun("read", requiredParameters: ["content-id"])
         }

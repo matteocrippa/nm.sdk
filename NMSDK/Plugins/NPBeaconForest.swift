@@ -23,30 +23,14 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.3"
+        return "0.4"
     }
-    override var supportedCommands: Set<String> {
-        return Set(["sync", "read-nodes", "read-node", "read-next-nodes"])
-    }
-    
-    override func run(command: String, arguments: JSON, sender: String?) -> PluginResponse {
-        switch command {
-        case "sync":
-            return sync(arguments)
-        case "read-nodes":
-            return PluginResponse.ok(JSON(dictionary: ["nodes": nodes()]), command: command)
-        case "read-node":
-            return readNode(arguments.string("id"))
-        case "read-next-nodes":
-            return readNextNodes(arguments.string("when"), nodeID: arguments.string("node-id"))
-        default:
-            Console.commandNotSupportedError(NPBeaconForest.self, supportedCommands: supportedCommands)
-            return PluginResponse.commandNotSupported(command)
-        }
+    override var commands: [String: RunHandler] {
+        return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
     }
     
     // MARK: Sync
-    private func sync(arguments: JSON) -> PluginResponse {
+    private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
             Console.commandError(NPBeaconForest.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
@@ -88,22 +72,25 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return PluginResponse.ok(command: "sync")
     }
     
-    // MARK: Read configuration
-    private func readNode(id: String?) -> PluginResponse {
-        guard let nodeID = id else {
+    // MARK: Read
+    private func readNode(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let id = arguments.string("id") else {
             Console.commandError(NPBeaconForest.self, command: "read-node", requiredParameters: ["id"])
             return PluginResponse.cannotRun("read-node", requiredParameters: ["id"])
         }
         
-        guard let node = node(nodeID) else {
+        guard let node = node(id) else {
             Console.warning(NPBeaconForest.self, text: "Cannot find node \(id)")
             return PluginResponse.cannotRun("read-node", requiredParameters: ["id"], cause: "Cannot find node \(id)")
         }
         
         return PluginResponse.ok(JSON(dictionary: ["node": node]), command: "read-node")
     }
-    private func readNextNodes(whenTrigger: String?, nodeID: String?) -> PluginResponse {
-        guard let when = whenTrigger, id = nodeID where when == "enter" || when == "exit" else {
+    private func readNodes(arguments: JSON, sender: String?) -> PluginResponse {
+        return PluginResponse.ok(JSON(dictionary: ["nodes": nodes()]), command: "read-nodes")
+    }
+    private func readNextNodes(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let when = arguments.string("when"), id = arguments.string("node-id") where when == "enter" || when == "exit" else {
             Console.commandError(NPBeaconForest.self, command: "read-next-nodes", cause: "A valid node identifier must be provided, when must be either \"enter\" or \"exit\"", requiredParameters: ["when", "node-id"])
             return PluginResponse.cannotRun("read-next-nodes", requiredParameters: ["when", "node-id"], cause: "A valid node identifier must be provided, when must be either \"enter\" or \"exit\"")
         }

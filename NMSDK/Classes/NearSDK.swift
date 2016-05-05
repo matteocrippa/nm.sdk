@@ -291,12 +291,7 @@ public class NearSDK: NSObject, Extensible {
     /// - parameters:
     ///   - APNSToken: the optional Apple Push Notification token which should be associated to the device installation
     ///   - didRefresh: the closure which should be executed when the refresh of the installation identifier ends
-    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: APDeviceInstallation?) -> Void)?) {
-        guard let plugin: NPDevice = plugins.pluginNamed(CorePlugin.Device.name) else {
-            didRefresh?(status: DeviceInstallationStatus.NotRefreshed, installation: nil)
-            return
-        }
-        
+    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: DeviceInstallation?) -> Void)?) {
         var dictionary = [String: AnyObject]()
         dictionary["app-token"] = NearSDK.appToken
         dictionary["timeout-interval"]  = NearSDK.timeoutInterval
@@ -305,7 +300,19 @@ public class NearSDK: NSObject, Extensible {
             dictionary["apns-token"] = token
         }
         
-        plugin.refresh(JSON(dictionary: dictionary), didRefresh: didRefresh)
+        plugins.runAsync(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: dictionary)) { (response) in
+            if response.status != .OK {
+                didRefresh?(status: .NotRefreshed, installation: nil)
+                return
+            }
+            
+            guard let statusValue = response.content.int("status"), installation = response.content.object("installation") as? DeviceInstallation else {
+                didRefresh?(status: .Unknown, installation: nil)
+                return
+            }
+            
+            didRefresh?(status: DeviceInstallationStatus(rawValue: statusValue), installation: installation)
+        }
     }
     
     // MARK: Communicating with NearSDK

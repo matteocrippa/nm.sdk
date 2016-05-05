@@ -57,4 +57,21 @@ public class Poll: NSObject {
     public override var description: String {
         return Console.describe(Poll.self, properties: ("id", id), ("text", text), ("question", question), ("answer1", answer1), ("answer2", answer2), ("recipe", recipe?.evaluation))
     }
+    
+    // MARK: Methods
+    /// Returns an instance of a UILocalNotification.
+    ///
+    /// The alert body of the local notification will be equal to `text`, while its title will be equal to `question`.
+    ///
+    /// - parameters:
+    ///   - fireDate: defines the fire date of the local notification
+    public func makeLocalNotification(fireDate fireDate: NSDate) -> UILocalNotification {
+        let notification = UILocalNotification()
+        
+        notification.alertTitle = question
+        notification.alertBody = text
+        notification.fireDate = fireDate
+        
+        return notification
+    }
 }
