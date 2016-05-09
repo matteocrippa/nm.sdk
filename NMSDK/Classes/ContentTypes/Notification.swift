@@ -22,6 +22,12 @@ public class Notification: NSObject {
     /// The text of the notification.
     public private (set) var text = ""
     
+    /// The creation date of the notification
+    public private (set) var creationDate: NSDate?
+    
+    /// The last update date of the notification
+    public private (set) var lastUpdate: NSDate?
+    
     // MARK: Initializers
     /// Initializes a new `Notification`.
     ///
@@ -33,6 +39,8 @@ public class Notification: NSObject {
         
         id = notification.id
         text = notification.text
+        creationDate = notification.creationDate
+        lastUpdate = notification.lastUpdate
         
         if let r = evaluatedRecipe {
             recipe = Recipe(recipe: r)

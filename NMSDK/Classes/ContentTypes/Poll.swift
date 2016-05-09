@@ -32,6 +32,12 @@ public class Poll: NSObject {
     /// The text of the second answer.
     public var answer2 = ""
     
+    /// The creation date of the poll
+    public private (set) var creationDate: NSDate?
+    
+    /// The last update date of the poll
+    public private (set) var lastUpdate: NSDate?
+    
     // MARK: Initializers
     /// Initializes a new `Poll`.
     ///
@@ -46,6 +52,8 @@ public class Poll: NSObject {
         text = poll.text
         answer1 = poll.answer1
         answer2 = poll.answer2
+        creationDate = poll.creationDate
+        lastUpdate = poll.lastUpdate
         
         if let r = evaluatedRecipe {
             recipe = Recipe(recipe: r)
