@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                  = 'NMSDK'
-  s.version               = '0.10.1'
+  s.version               = '0.10.2'
   s.summary               = 'nearit.com iOS SDK'
   s.description           = 'nearit.com iOS SDK, which can be extended with plugins'
 
