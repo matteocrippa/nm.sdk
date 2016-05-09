@@ -51,6 +51,12 @@ public class Recipe: NSObject {
         return "when \(inCase)▶️\(inTarget) triggers \(trigger), \(name) (recipe \(id)) evaluates \(outCase)▶️\(outTarget)"
     }
     
+    /// The creation date of the recipe
+    public private (set) var creationDate: NSDate?
+    
+    /// The last update date of the recipe
+    public private (set) var lastUpdate: NSDate?
+    
     // MARK: Initializers
     /// Initializes a new `Recipe`.
     ///
@@ -66,6 +72,8 @@ public class Recipe: NSObject {
         trigger = recipe.trigger
         outCase = recipe.outCase
         outTarget = recipe.outTarget
+        creationDate = recipe.creationDate
+        lastUpdate = recipe.lastUpdate
     }
     
     // MARK: Properties
