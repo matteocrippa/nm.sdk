@@ -42,6 +42,10 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didReceiveNotifications = { (notifications) in
             XCTAssertEqual(notifications.count, 1)
             XCTAssertNotNil(notifications[0].recipe)
+            XCTAssertNotNil(notifications[0].creationDate)
+            XCTAssertNotNil(notifications[0].lastUpdate)
+            XCTAssertNotNil(notifications[0].recipe?.creationDate)
+            XCTAssertNotNil(notifications[0].recipe?.lastUpdate)
             expectation.fulfill()
         }
         
@@ -62,6 +66,10 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didReceiveContents = { (contents) in
             XCTAssertEqual(contents.count, 1)
             XCTAssertNotNil(contents[0].recipe)
+            XCTAssertNotNil(contents[0].creationDate)
+            XCTAssertNotNil(contents[0].lastUpdate)
+            XCTAssertNotNil(contents[0].recipe?.creationDate)
+            XCTAssertNotNil(contents[0].recipe?.lastUpdate)
             expectation.fulfill()
         }
         
@@ -82,6 +90,10 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didReceivePolls = { (polls) in
             XCTAssertEqual(polls.count, 1)
             XCTAssertNotNil(polls[0].recipe)
+            XCTAssertNotNil(polls[0].creationDate)
+            XCTAssertNotNil(polls[0].lastUpdate)
+            XCTAssertNotNil(polls[0].recipe?.creationDate)
+            XCTAssertNotNil(polls[0].recipe?.lastUpdate)
             expectation.fulfill()
         }
         

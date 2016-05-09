@@ -31,6 +31,12 @@ public class Content: NSObject {
     /// The URL of the video associated to the content.
     public var videoURL: NSURL?
     
+    /// The creation date of the content
+    public private (set) var creationDate: NSDate?
+    
+    /// The last update date of the content
+    public private (set) var lastUpdate: NSDate?
+    
     // MARK: Initializers
     /// Initializes a new `Content`.
     ///
@@ -45,6 +51,8 @@ public class Content: NSObject {
         text = content.text
         imageIdentifiers = content.imageIdentifiers
         videoURL = content.videoURL
+        creationDate = content.creationDate
+        lastUpdate = content.lastUpdate
         
         if let r = evaluatedRecipe {
             recipe = Recipe(recipe: r)
