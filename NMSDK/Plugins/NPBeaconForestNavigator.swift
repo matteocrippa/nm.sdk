@@ -30,8 +30,15 @@ class NPBeaconForestNavigator {
     }
     
     func enter(regionIdentifier: String) -> [String] {
+        var ignoredFlag = false
+        return enter(regionIdentifier, forceForestNavigation: &ignoredFlag)
+    }
+    func enter(regionIdentifier: String, inout forceForestNavigation: Bool) -> [String] {
+        forceForestNavigation = false
+        
         /// The current region does not exist -> return root regions
         guard let node = self[regionIdentifier] else {
+            forceForestNavigation = true
             return defaultRegionIdentifiers
         }
         
@@ -55,13 +62,21 @@ class NPBeaconForestNavigator {
         return node.children + l1Parent.children
     }
     func exit(regionIdentifier: String) -> [String] {
+        var ignoredFlag = false
+        return exit(regionIdentifier, forceForestNavigation: &ignoredFlag)
+    }
+    func exit(regionIdentifier: String, inout forceForestNavigation: Bool) -> [String] {
+        forceForestNavigation = false
+        
         /// The current region does not exist -> return root regions
         guard let node = self[regionIdentifier] else {
+            forceForestNavigation = true
             return defaultRegionIdentifiers
         }
         
         /// If the current region is root
         guard let l1Parent = up(node, levels: 1) else {
+            forceForestNavigation = true
             return defaultRegionIdentifiers
         }
         
