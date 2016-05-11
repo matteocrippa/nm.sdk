@@ -13,6 +13,7 @@ import NMJSON
 import NMNet
 
 class NPBeaconForest: Plugin, CLLocationManagerDelegate {
+    private var forceForestNavigation = false
     private var locationManager = CLLocationManager()
     private lazy var navigator: NPBeaconForestNavigator = {
         return NPBeaconForestNavigator(plugin: self)
@@ -132,6 +133,22 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
         exitFrom(region)
     }
+    func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
+        if !forceForestNavigation {
+            return
+        }
+        
+        switch state {
+        case .Inside:
+            enterInto(region)
+            forceForestNavigation = false
+        case .Outside:
+            exitFrom(region)
+            forceForestNavigation = false
+        default:
+            break
+        }
+    }
     
     // MARK: Region monitoring
     func startMonitoring() {
@@ -162,6 +179,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Starting monitoring regions...")
         locationManager.delegate = self
+        forceForestNavigation = true
         for region in regions {
             Console.infoLine("region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
@@ -192,13 +210,13 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     private func enterInto(region: CLRegion) {
         APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
-        updateMonitoredRegions(navigator.enter(region.identifier))
+        updateMonitoredRegions(navigator.enter(region.identifier, forceForestNavigation: &forceForestNavigation))
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
     }
     private func exitFrom(region: CLRegion) {
         // If the region left by the device is being monitored, the navigator should update monitored regions
         for monitoredRegion in locationManager.monitoredRegions where monitoredRegion.identifier == region.identifier {
-            updateMonitoredRegions(navigator.exit(region.identifier))
+            updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
             return
         }
         
