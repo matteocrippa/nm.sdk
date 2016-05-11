@@ -168,7 +168,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         }
     }
     private func updateMonitoredRegions(targetIdentifiers: [String]) {
-        var acceptedIdentifiers = Set<String>()
+        var acceptedIdentifiers = Set(targetIdentifiers)
         let monitoredRegions = Array(locationManager.monitoredRegions)
         Console.info(NPBeaconForest.self, text: "Updating regions monitored...")
         
