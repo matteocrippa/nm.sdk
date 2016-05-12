@@ -36,7 +36,13 @@ class NPBeaconForestTests: XCTestCase {
             XCTAssertEqual(errors.count, 0)
             
             let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-nodes")
-            XCTAssertEqual(response.content.dictionaryArray("nodes")?.count, 9)
+            guard let nodes = response.content.dictionaryArray("nodes") else {
+                XCTFail("nil nodes")
+                return
+            }
+            
+            XCTAssertEqual(nodes.count, 9)
+            XCTAssertNotNil(nodes.first?["name"])
             expectation.fulfill()
         }
         

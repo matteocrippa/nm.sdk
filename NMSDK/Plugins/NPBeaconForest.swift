@@ -24,7 +24,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.4"
+        return "0.5"
     }
     override var commands: [String: RunHandler] {
         return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
@@ -53,6 +53,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             for node in nodes {
                 Console.infoLine(node.id, symbol: .Add)
                 Console.infoLine("beacon UUID: \(node.proximityUUID.UUIDString)", symbol: .Space)
+                
+                if let name = node.name {
+                    Console.infoLine("       name: \(name)", symbol: .Space)
+                }
+                
                 if let major = node.major, minor = node.minor {
                     Console.infoLine("      major: \(major)", symbol: .Space)
                     Console.infoLine("      minor: \(minor)", symbol: .Space)
@@ -104,7 +109,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         var nodes = [[String: AnyObject]]()
         for resource in resources {
-            nodes.append(["id": resource.id, "parent": resource.json.string("parent", fallback: "-")!, "children": resource.json.stringArray("children", emptyIfNil: true)!])
+            nodes.append(["id": resource.id, "name": resource.name ?? "-", "parent": resource.parent ?? "-", "children": resource.children])
         }
         
         return nodes
@@ -113,7 +118,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
         
         for resource in resources where resource.id == id {
-            return ["id": resource.id, "parent": resource.json.string("parent", fallback: "-")!, "children": resource.json.stringArray("children", emptyIfNil: true)!]
+            return ["id": resource.id, "name": resource.name ?? "-", "parent": resource.parent ?? "-", "children": resource.children]
         }
         
         return nil
@@ -128,10 +133,10 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        enterInto(region)
+        enter(region)
     }
     func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
-        exitFrom(region)
+        exit(region)
     }
     func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
         if !forceForestNavigation {
@@ -140,14 +145,30 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         switch state {
         case .Inside:
-            enterInto(region)
+            enter(region)
             forceForestNavigation = false
         case .Outside:
-            exitFrom(region)
+            exit(region)
             forceForestNavigation = false
         default:
             break
         }
+    }
+    func locationManager(manager: CLLocationManager, monitoringDidFailForRegion region: CLRegion?, withError error: NSError) {
+        guard let monitoredRegion = region, beaconRegion = monitoredRegion as? CLBeaconRegion else {
+            return
+        }
+        
+        var dictionary: [String: AnyObject] = [
+            "id": beaconRegion.identifier,
+            "proximity-uuid": beaconRegion.proximityUUID.UUIDString
+        ]
+        if let major = beaconRegion.major, minor = beaconRegion.minor {
+            dictionary["major"] = major.integerValue
+            dictionary["minor"] = minor.integerValue
+        }
+        
+        hub?.dispatch(event: NearSDKError.RegionMonitoringDidFail.pluginEvent(name, message: "Region monitoring did fail for region \(monitoredRegion.identifier)", command: nil, details: ["region": dictionary]))
     }
     
     // MARK: Region monitoring
@@ -179,6 +200,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Starting monitoring regions...")
         locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         forceForestNavigation = true
         for region in regions {
             Console.infoLine("region \(region.identifier)")
@@ -207,13 +229,13 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             locationManager.startMonitoringForRegion(region)
         }
     }
-    private func enterInto(region: CLRegion) {
+    private func enter(region: CLRegion) {
         APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier, forceForestNavigation: &forceForestNavigation))
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
     }
-    private func exitFrom(region: CLRegion) {
+    private func exit(region: CLRegion) {
         // If the region left by the device is being monitored, the navigator should update monitored regions
         for monitoredRegion in locationManager.monitoredRegions where monitoredRegion.identifier == region.identifier {
             updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
