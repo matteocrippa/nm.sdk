@@ -76,8 +76,8 @@ class THStubs {
         return NSData(base64EncodedString: base64Image, options: NSDataBase64DecodingOptions(rawValue: 0))!
     }
     private class func stubAPBeaconForestResponse() {
-        func attributes(major major: Int, minor: Int) -> [String: AnyObject] {
-            return ["uuid": "00000000-0000-0000-0000-000000000000", "major": major, "minor": minor]
+        func attributes(major major: Int, minor: Int, name: String) -> [String: AnyObject] {
+            return ["uuid": "00000000-0000-0000-0000-000000000000", "major": major, "minor": minor, "name": name]
         }
         func parent(id: String?) -> [String: AnyObject] {
             guard let parentID = id else {
@@ -101,22 +101,22 @@ class THStubs {
             
             return result
         }
-        func node(id: String, major: Int, minor: Int, parent parentIdentifier: String? = nil, children childrenIdentifiers: [String] = []) -> [String: AnyObject] {
-            return ["id": id, "type": "beacons", "attributes": attributes(major: major, minor: minor), "relationships": ["parent": parent(parentIdentifier), "children": children(childrenIdentifiers)]]
+        func node(id: String, major: Int, minor: Int, name: String, parent parentIdentifier: String? = nil, children childrenIdentifiers: [String] = []) -> [String: AnyObject] {
+            return ["id": id, "type": "beacons", "attributes": attributes(major: major, minor: minor, name: name), "relationships": ["parent": parent(parentIdentifier), "children": children(childrenIdentifiers)]]
         }
         
-        let R1_1    = node("R1_1",    major: 1,    minor: 1,                   children: ["C10_1",  "C10_2"])
-        let R1_2    = node("R1_2",    major: 2,    minor: 1,                   children: ["C20_1",  "C20_2"])
+        let R1_1    = node("R1_1",    major: 1,    minor: 1, name: "Root 1",                                    children: ["C10_1",  "C10_2"])
+        let R1_2    = node("R1_2",    major: 2,    minor: 1, name: "Root 2",                                    children: ["C20_1",  "C20_2"])
         
-        let C10_1   = node("C10_1",   major: 10,   minor: 1, parent: "R1_1",   children: ["C101_1", "C101_2"])
-        let C10_2   = node("C10_2",   major: 10,   minor: 2, parent: "R1_1")
-        let C20_1   = node("C20_1",   major: 20,   minor: 1, parent: "R1_2")
-        let C20_2   = node("C20_2",   major: 20,   minor: 2, parent: "R1_2")
+        let C10_1   = node("C10_1",   major: 10,   minor: 1, name: "Child 1 - Parent R1_1",    parent: "R1_1",  children: ["C101_1", "C101_2"])
+        let C10_2   = node("C10_2",   major: 10,   minor: 2, name: "Child 2 - Parent R1_1",    parent: "R1_1")
+        let C20_1   = node("C20_1",   major: 20,   minor: 1, name: "Child 1 - Parent R1_2",    parent: "R1_2")
+        let C20_2   = node("C20_2",   major: 20,   minor: 2, name: "Child 2 - Parent R1_2",    parent: "R1_2")
         
-        let C101_1  = node("C101_1",  major: 101,  minor: 1, parent: "C10_1",  children: ["C1000_1"])
-        let C101_2  = node("C101_2",  major: 101,  minor: 2, parent: "C10_1")
+        let C101_1  = node("C101_1",  major: 101,  minor: 1, name: "Child 1 - Parent C10_1",   parent: "C10_1", children: ["C1000_1"])
+        let C101_2  = node("C101_2",  major: 101,  minor: 2, name: "Child 2 - Parent C10_1",   parent: "C10_1")
         
-        let C1000_1 = node("C1000_1", major: 1000, minor: 1, parent: "C101_1")
+        let C1000_1 = node("C1000_1", major: 1000, minor: 1, name: "Child 1 - Parent C1000_1", parent: "C101_1")
         
         stub(isHost("api.nearit.com") && isPath("/plugins/beacon-forest/beacons")) { (response) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(

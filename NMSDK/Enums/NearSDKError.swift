@@ -33,6 +33,9 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
     case NoRegionsToMonitor = 1002
     
+    /// Thrown when `NearSDK` fails at monitoring a certain region
+    case RegionMonitoringDidFail = 1003
+    
     /// Thrown when `NearSDK` is started, but recipes cannot be downloaded.
     /// 
     /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate any content, notification or poll reaction.
@@ -80,6 +83,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
             return "Region monitoring is not authorized"
         case .NoRegionsToMonitor:
             return "No regions to monitor"
+        case .RegionMonitoringDidFail:
+            return "Region monitoring did fail"
         case .CannotDownloadRecipes:
             return "Cannot download recipes"
         case .CannotEvaluateRecipe:
@@ -101,8 +106,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /// Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
     /// 
     /// - parameters:
-    ///   - rawValue: must be either 1, 1000, 1001, 1002, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
-    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
+    ///   - rawValue: must be either 1, 1000, 1001, 1002, 1003, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
+    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 1003, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
     public init?(rawValue: Int) {
         switch rawValue {
         case 1:
@@ -113,6 +118,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
             self = .RegionMonitoringIsNotAuthorized
         case 1002:
             self = .NoRegionsToMonitor
+        case 1003:
+            self = .RegionMonitoringDidFail
         case 2000:
             self = .CannotDownloadRecipes
         case 3000:
@@ -133,7 +140,7 @@ public enum NearSDKError: Int, CustomStringConvertible {
     }
     
     /// Returns a `PluginEvent` instance configured for `Self`.
-    func pluginEvent(pluginName: String, message: String, command: String) -> PluginEvent {
-        return PluginEvent(from: pluginName, content: JSON(dictionary: ["error": self.rawValue, "description": description, "message": message]), pluginCommand: command)
+    func pluginEvent(pluginName: String, message: String, command: String?, details: [String: AnyObject] = [: ]) -> PluginEvent {
+        return PluginEvent(from: pluginName, content: JSON(dictionary: ["error": self.rawValue, "description": description, "message": message, "details": details]), pluginCommand: command)
     }
 }
