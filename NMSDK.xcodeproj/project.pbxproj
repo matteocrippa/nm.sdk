@@ -30,6 +30,7 @@
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
 		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B55E7A141CD23AF0008CCADC /* CorePluginError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E7A131CD23AF0008CCADC /* CorePluginError.swift */; };
+		B589B7DF1CE60769002CB061 /* NPBeaconForestRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */; };
 		B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AF70811CC658DF007AC07D /* ConsoleSymbol.swift */; };
@@ -91,6 +92,7 @@
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
 		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B55E7A131CD23AF0008CCADC /* CorePluginError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePluginError.swift; sourceTree = "<group>"; };
+		B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestRegion.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AE75761CBD430C0040FCF3 /* NMSDK.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = NMSDK.podspec; sourceTree = "<group>"; };
 		B5AF707F1CC658C5007AC07D /* ConsoleOutput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleOutput.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 			children = (
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
 				B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */,
+				B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */,
 				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14D1CBFF866000DBA34 /* NPRecipeReactionNotification.swift */,
@@ -492,6 +495,7 @@
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
 				B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */,
+				B589B7DF1CE60769002CB061 /* NPBeaconForestRegion.swift in Sources */,
 				B5C082E51CDB9257006CE400 /* DeviceInstallation.swift in Sources */,
 				B5CBB14C1CBFF84E000DBA34 /* NPRecipeReactionContent.swift in Sources */,
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,

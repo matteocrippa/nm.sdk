@@ -6,13 +6,15 @@
 //  Copyright © 2016 Near srl. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import CoreLocation
+import NMCache
 import NMPlug
 import NMJSON
 import NMNet
 
 class NPBeaconForest: Plugin, CLLocationManagerDelegate {
+    private var rangedBeacons = [CLBeacon: Int]()
     private var forceForestNavigation = false
     private var locationManager = CLLocationManager()
     private lazy var navigator: NPBeaconForestNavigator = {
@@ -72,7 +74,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             Console.infoLine("nodes saved: \(nodes.count)")
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
-            self.startMonitoring()
+            self.startLocationUpdates()
         }
         
         return PluginResponse.ok(command: "sync")
@@ -102,7 +104,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         }
         
         let regions = (when == "enter" ? navigator.enter(id) : navigator.exit(id))
-        return PluginResponse.ok(JSON(dictionary: ["monitored-regions": regions]), command: "read-next-nodes")
+        return PluginResponse.ok(JSON(dictionary: ["monitored-regions": Array(regions)]), command: "read-next-nodes")
     }
     private func nodes() -> [[String: AnyObject]] {
         let resources: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
@@ -132,11 +134,25 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     }
     
     // MARK: CoreLocation
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        startMonitoring()
+        startRanging()
+    }
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
         enter(region)
     }
     func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
         exit(region)
+    }
+    func locationManager(manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], inRegion region: CLBeaconRegion) {
+        let sortedBeacons = beacons.sort { (a, b) -> Bool in return a.accuracy < b.accuracy }
+        guard let beacon = sortedBeacons.first else {
+            forceEnterRegionAfterRanging()
+            return
+        }
+        
+        rangedBeacons[beacon] = (rangedBeacons[beacon] != nil ? rangedBeacons[beacon]! + 1 : 1)
+        forceEnterRegionAfterRanging()
     }
     func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
         if !forceForestNavigation {
@@ -154,25 +170,40 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             break
         }
     }
-    func locationManager(manager: CLLocationManager, monitoringDidFailForRegion region: CLRegion?, withError error: NSError) {
-        guard let monitoredRegion = region, beaconRegion = monitoredRegion as? CLBeaconRegion else {
+    func forceEnterRegionAfterRanging() {
+        if UIApplication.sharedApplication().backgroundTimeRemaining > 3 {
             return
         }
         
-        var dictionary: [String: AnyObject] = [
-            "id": beaconRegion.identifier,
-            "proximity-uuid": beaconRegion.proximityUUID.UUIDString
-        ]
-        if let major = beaconRegion.major, minor = beaconRegion.minor {
-            dictionary["major"] = major.integerValue
-            dictionary["minor"] = minor.integerValue
+        var maxCount = 0
+        var bestBeacon: CLBeacon?
+        
+        for (beacon, count) in rangedBeacons {
+            if count > maxCount {
+                bestBeacon = beacon
+                maxCount = count
+            }
         }
         
-        hub?.dispatch(event: NearSDKError.RegionMonitoringDidFail.pluginEvent(name, message: "Region monitoring did fail for region \(monitoredRegion.identifier)", command: nil, details: ["region": dictionary]))
+        guard let beacon = bestBeacon, nodes: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? []) where nodes.count > 0 else {
+            stopRanging()
+            return
+        }
+        
+        for node in nodes where
+            node.proximityUUID.UUIDString == beacon.proximityUUID.UUIDString &&
+                node.major == beacon.major.integerValue &&
+                node.minor == beacon.minor.integerValue {
+                    if let region = navigator.identifierToRegion(node.id) {
+                        enter(region)
+                        stopRanging()
+                        return
+                    }
+        }
     }
     
-    // MARK: Region monitoring
-    func startMonitoring() {
+    // MARK: Location updates
+    func startLocationUpdates() {
         let authorizationStatus = CLLocationManager.authorizationStatus()
         if ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus)  {
             Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
@@ -184,47 +215,83 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             return
         }
         
-        Console.info(NPBeaconForest.self, text: "Stopping monitoring regions...")
-        let monitoredRegions = locationManager.monitoredRegions
-        for region in  monitoredRegions {
-            Console.infoLine("region \(region.identifier)")
-            locationManager.stopMonitoringForRegion(region)
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.startUpdatingLocation()
+    }
+    
+    // MARK: Region ranging
+    private func startRanging() {
+        rangedBeacons = [: ]
+        
+        let regions = regionsToRange()
+        for region in regions {
+            locationManager.startRangingBeaconsInRegion(region)
+        }
+    }
+    private func stopRanging() {
+        rangedBeacons = [: ]
+        
+        let regions = regionsToRange()
+        for region in regions {
+            locationManager.stopRangingBeaconsInRegion(region)
+        }
+    }
+    private func regionsToRange() -> Set<CLBeaconRegion> {
+        guard let nodes: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? []) else {
+            return Set()
         }
         
-        let regions = navigator.identifiersToRegions(Set(navigator.defaultRegionIdentifiers))
+        var proximityUUIDs = Set<NSUUID>()
+        for node in nodes {
+            proximityUUIDs.insert(node.proximityUUID)
+        }
+        
+        var regions = Set<CLBeaconRegion>()
+        for uuid in proximityUUIDs {
+            regions.insert(CLBeaconRegion(proximityUUID: uuid, identifier: uuid.UUIDString))
+        }
+        
+        return regions
+    }
+    
+    // MARK: Region monitoring
+    func startMonitoring() {
+        var identifiers = currentRegionIdentifiers()
+        identifiers = identifiers.count > 0 ? identifiers : navigator.defaultRegionIdentifiers
+        
+        let regions = navigator.identifiersToRegions(identifiers)
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
             hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", command: "start-monitoring"))
             return
         }
         
+        Console.info(NPBeaconForest.self, text: "Stopping monitoring regions...")
+        for region in regions {
+            Console.infoLine("region \(region.identifier)")
+            locationManager.stopMonitoringForRegion(region)
+        }
+        
         Console.info(NPBeaconForest.self, text: "Starting monitoring regions...")
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         forceForestNavigation = true
+        persistCurrentRegionIdentifiers(identifiers)
         for region in regions {
             Console.infoLine("region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
         }
     }
-    private func updateMonitoredRegions(targetIdentifiers: [String]) {
-        var acceptedIdentifiers = Set(targetIdentifiers)
-        let monitoredRegions = Array(locationManager.monitoredRegions)
-        Console.info(NPBeaconForest.self, text: "Updating regions monitored...")
+    private func updateMonitoredRegions(targetIdentifiers: Set<String>) {
+        let regions = processTargetRegionIdentifiers(targetIdentifiers)
+        persistCurrentRegionIdentifiers(targetIdentifiers)
         
-        for region in monitoredRegions {
-            // Regions not contained in target will not be monitored
-            if !targetIdentifiers.contains(region.identifier) {
-                Console.infoLine("stopping monitoring region \(region.identifier)")
-                locationManager.stopMonitoringForRegion(region)
-                continue
-            }
-            
-            acceptedIdentifiers.remove(region.identifier)
+        Console.info(NPBeaconForest.self, text: "Updating regions monitored...")
+        for region in regions.discarded {
+            Console.infoLine("stopping monitoring region \(region.identifier)")
+            locationManager.stopMonitoringForRegion(region)
         }
         
-        let acceptedRegions = navigator.identifiersToRegions(acceptedIdentifiers)
-        for region in acceptedRegions {
+        for region in regions.accepted {
             Console.infoLine("starting monitoring region \(region.identifier)")
             locationManager.startMonitoringForRegion(region)
         }
@@ -236,12 +303,55 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
     }
     private func exit(region: CLRegion) {
-        // If the region left by the device is being monitored, the navigator should update monitored regions
-        for monitoredRegion in locationManager.monitoredRegions where monitoredRegion.identifier == region.identifier {
-            updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
-            return
+        updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
+        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier)")
+    }
+    private func isMonitoredRegion(id: String) -> Bool {
+        guard let _: NPBeaconForestRegion = hub?.cache.resource(id, inCollection: "RegionIdentifiers", forPlugin: self) else {
+            return false
         }
         
-        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier)")
+        return true
+    }
+    
+    // MARK: Support
+    private func persistCurrentRegionIdentifiers(newIdentifiers: Set<String>) {
+        hub?.cache.removeResourcesFrom(collection: "RegionIdentifiers", forPlugin: self)
+        for id in newIdentifiers {
+            hub?.cache.store(NPBeaconForestRegion(json: JSON(dictionary: ["id": id]))!, inCollection: "RegionIdentifiers", forPlugin: self)
+        }
+    }
+    private func currentRegionIdentifiers() -> Set<String> {
+        guard let resources: [NPBeaconForestRegion] = hub?.cache.resourcesIn(collection: "RegionIdentifiers", forPlugin: self) else {
+            return Set()
+        }
+        
+        var identifiers = Set<String>()
+        for resource in resources {
+            identifiers.insert(resource.id)
+        }
+        
+        return identifiers
+    }
+    private func processTargetRegionIdentifiers(newIdentifiers: Set<String>) -> (accepted: Set<CLBeaconRegion>, discarded: Set<CLBeaconRegion>) {
+        guard let resources: [NPBeaconForestRegion] = hub?.cache.resourcesIn(collection: "RegionIdentifiers", forPlugin: self) else {
+            return (accepted: navigator.identifiersToRegions(newIdentifiers), discarded: Set())
+        }
+        
+        var currentIdentifiers = Set<String>()
+        for resource in resources {
+            currentIdentifiers.insert(resource.id)
+        }
+        
+        let acceptedSet = newIdentifiers.subtract(currentIdentifiers)
+        let discardedSet = currentIdentifiers.subtract(newIdentifiers)
+        
+        let event = PluginEvent(
+            from: name,
+            content: JSON(dictionary: ["source-regions": Array(newIdentifiers), "accepted-regions": Array(acceptedSet), "discarded-regions": Array(discardedSet)]),
+            pluginCommand: "-")
+        hub?.dispatch(event: event)
+        
+        return (accepted: navigator.identifiersToRegions(acceptedSet), discarded: navigator.identifiersToRegions(discardedSet))
     }
 }
