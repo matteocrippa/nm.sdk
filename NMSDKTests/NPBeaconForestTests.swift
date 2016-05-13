@@ -84,7 +84,7 @@ class NPBeaconForestTests: XCTestCase {
     }
     func testSimulateEnterRegion() {
         THStubs.stubConfigurationAPIResponse()
-        let expectation = expectationWithDescription("test read configuration")
+        let expectation = expectationWithDescription("test simulate enter")
         
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
@@ -112,12 +112,12 @@ class NPBeaconForestTests: XCTestCase {
     }
     func testSimulateExitRegion() {
         THStubs.stubConfigurationAPIResponse()
-        let expectation = expectationWithDescription("test read configuration")
+        let expectation = expectationWithDescription("test simulate exit")
         
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let enterTests: [(id: String, target: [String])] = [
+            let exitTests: [(id: String, target: [String])] = [
                 ("R1_1", ["R1_1", "R1_2"]),
                 ("C10_1", ["R1_1", "R1_2", "C10_1", "C10_2"]),
                 ("C20_2", ["R1_1", "R1_2", "C20_1", "C20_2"]),
@@ -125,7 +125,7 @@ class NPBeaconForestTests: XCTestCase {
                 ("C1000_1", ["C1000_1", "C101_1", "C101_2"])
             ]
             
-            for test in enterTests {
+            for test in exitTests {
                 let response = NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "read-next-nodes", withArguments: JSON(dictionary: ["when": "exit", "node-id": test.id]))
                 XCTAssertEqual(response.content.stringArray("monitored-regions", emptyIfNil: true)!.sort(), test.target.sort())
             }
