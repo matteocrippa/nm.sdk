@@ -175,31 +175,32 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             return
         }
         
-        var maxCount = 0
-        var bestBeacon: CLBeacon?
-        
-        for (beacon, count) in rangedBeacons {
-            if count > maxCount {
-                bestBeacon = beacon
-                maxCount = count
-            }
-        }
-        
-        guard let beacon = bestBeacon, nodes: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? []) where nodes.count > 0 else {
+        guard let
+            nodes: [APBeaconForestNode] = (hub?.cache.resourcesIn(collection: "Regions", forPlugin: self) ?? [])
+            where nodes.count > 0 && rangedBeacons.count > 0 else {
             stopRanging()
             return
         }
         
-        for node in nodes where
-            node.proximityUUID.UUIDString == beacon.proximityUUID.UUIDString &&
-                node.major == beacon.major.integerValue &&
-                node.minor == beacon.minor.integerValue {
-                    if let region = navigator.identifierToRegion(node.id) {
-                        enter(region)
-                        stopRanging()
-                        return
-                    }
+        var targets = [(beacon: CLBeacon, count: Int)]()
+        for (beacon, count) in rangedBeacons {
+            targets.append((beacon, count))
         }
+        
+        var maxCandidatesCount = 3
+        for target in targets where maxCandidatesCount > 0 {
+            for node in nodes where
+                node.proximityUUID.UUIDString == target.beacon.proximityUUID.UUIDString &&
+                    node.major == target.beacon.major.integerValue &&
+                    node.minor == target.beacon.minor.integerValue {
+                        if let region = navigator.identifierToRegion(node.id) {
+                            enter(region)
+                            maxCandidatesCount -= 1
+                        }
+            }
+        }
+        
+        stopRanging()
     }
     
     // MARK: Location updates
