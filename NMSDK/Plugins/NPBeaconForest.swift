@@ -14,7 +14,10 @@ import NMJSON
 import NMNet
 
 class NPBeaconForest: Plugin, CLLocationManagerDelegate {
-    private var rangedBeacons = [CLBeacon: Int]()
+    private static let rangedBeaconsCandidatesUpperLimit = 3
+    private static let rangedBeaconsBackgroundUpperLimit = 3
+    private static let rangedBeaconsActiveUpperLimit = 10
+    private var rangedBeacons = [String: (beacon: CLBeacon, count: Int)]()
     private var forceForestNavigation = false
     private var locationManager = CLLocationManager()
     private lazy var navigator: NPBeaconForestNavigator = {
@@ -151,7 +154,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             return
         }
         
-        rangedBeacons[beacon] = (rangedBeacons[beacon] != nil ? rangedBeacons[beacon]! + 1 : 1)
+        tackRangedBeacon(beacon)
         forceEnterRegionAfterRanging()
     }
     func locationManager(manager: CLLocationManager, didDetermineState state: CLRegionState, forRegion region: CLRegion) {
@@ -171,7 +174,12 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         }
     }
     func forceEnterRegionAfterRanging() {
-        if UIApplication.sharedApplication().backgroundTimeRemaining > 3 {
+        let app = UIApplication.sharedApplication()
+        if app.applicationState == .Background && rangedBeacons.count < NPBeaconForest.rangedBeaconsBackgroundUpperLimit {
+            return
+        }
+        
+        if app.applicationState == .Active && rangedBeacons.count < NPBeaconForest.rangedBeaconsActiveUpperLimit {
             return
         }
         
@@ -182,21 +190,22 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             return
         }
         
+        Console.info(NPBeaconForest.self, text: "Will force \"enter region\" event after ranging")
+        Console.infoLine("beacons found: \(rangedBeacons.count)")
         var targets = [(beacon: CLBeacon, count: Int)]()
-        for (beacon, count) in rangedBeacons {
-            targets.append((beacon, count))
+        for (key, info) in rangedBeacons {
+            Console.infoLine("    beacon: \(key)")
+            Console.infoLine("detections: \(info.count)")
+            targets.append(info)
         }
         
-        var maxCandidatesCount = 3
-        for target in targets where maxCandidatesCount > 0 {
-            for node in nodes where
-                node.proximityUUID.UUIDString == target.beacon.proximityUUID.UUIDString &&
-                    node.major == target.beacon.major.integerValue &&
-                    node.minor == target.beacon.minor.integerValue {
-                        if let region = navigator.identifierToRegion(node.id) {
-                            enter(region)
-                            maxCandidatesCount -= 1
-                        }
+        var candidatesLeft = NPBeaconForest.rangedBeaconsCandidatesUpperLimit
+        for target in targets where candidatesLeft > 0 {
+            for node in nodes where cachedNode(node, representsBeacon: target.beacon) {
+                if let region = navigator.identifierToRegion(node.id) {
+                    enter(region)
+                    candidatesLeft -= 1
+                }
             }
         }
         
@@ -270,7 +279,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Stopping monitoring regions...")
         for region in regions {
-            Console.infoLine("region \(region.identifier)")
+            Console.infoLine("region \(region.identifier) - node name \(nodeName(region))")
             locationManager.stopMonitoringForRegion(region)
         }
         
@@ -278,7 +287,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         forceForestNavigation = true
         persistCurrentRegionIdentifiers(identifiers)
         for region in regions {
-            Console.infoLine("region \(region.identifier)")
+            Console.infoLine("region \(region.identifier) - node name \(nodeName(region))")
             locationManager.startMonitoringForRegion(region)
         }
     }
@@ -288,12 +297,12 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         
         Console.info(NPBeaconForest.self, text: "Updating regions monitored...")
         for region in regions.discarded {
-            Console.infoLine("stopping monitoring region \(region.identifier)")
+            Console.infoLine("stopping monitoring region \(region.identifier) - node name \(nodeName(region))")
             locationManager.stopMonitoringForRegion(region)
         }
         
         for region in regions.accepted {
-            Console.infoLine("starting monitoring region \(region.identifier)")
+            Console.infoLine("starting monitoring region \(region.identifier) - node name \(nodeName(region))")
             locationManager.startMonitoringForRegion(region)
         }
     }
@@ -301,11 +310,13 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier, forceForestNavigation: &forceForestNavigation))
-        Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier)")
+        
+        Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier) - node name \(nodeName(region))")
     }
     private func exit(region: CLRegion) {
         updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
-        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier)")
+        
+        Console.info(NPBeaconForest.self, text: "Left region \(region.identifier) - node name \(nodeName(region))")
     }
     private func isMonitoredRegion(id: String) -> Bool {
         guard let _: NPBeaconForestRegion = hub?.cache.resource(id, inCollection: "RegionIdentifiers", forPlugin: self) else {
@@ -316,6 +327,26 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     }
     
     // MARK: Support
+    private func nodeName(region: CLRegion) -> String {
+        guard let node: APBeaconForestNode = hub?.cache.resource(region.identifier, inCollection: "Regions", forPlugin: self), name = node.name else {
+            return "?"
+        }
+        
+        return name
+    }
+    private func cachedNode(node: APBeaconForestNode, representsBeacon beacon: CLBeacon) -> Bool {
+        return (
+            node.proximityUUID.UUIDString == beacon.proximityUUID.UUIDString &&
+                node.major == beacon.major.integerValue &&
+                node.minor == beacon.minor.integerValue)
+    }
+    private func tackRangedBeacon(beacon: CLBeacon) {
+        let key = "\(beacon.proximityUUID.UUIDString).\(beacon.major.integerValue).\(beacon.minor.integerValue)"
+        var trackedInfo = rangedBeacons[key] ?? (beacon, 0)
+        
+        trackedInfo.count += 1
+        rangedBeacons[key] = trackedInfo
+    }
     private func persistCurrentRegionIdentifiers(newIdentifiers: Set<String>) {
         hub?.cache.removeResourcesFrom(collection: "RegionIdentifiers", forPlugin: self)
         for id in newIdentifiers {
