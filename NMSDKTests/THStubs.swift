@@ -66,7 +66,7 @@ class THStubs {
                 "data": [
                     "id": "installation-id",
                     "type": "installations",
-                    "attributes": ["platform": "test", "platform_version": "0", "sdk_version": "0", "device_identifier": "00000000-0000-0000-0000-000000000000", "app_id": "app-id"],
+                    "attributes": ["platform": "test", "platform_version": "0", "sdk_version": "0", "device_identifier": "00000000000000000000000000000000", "app_id": "app-id"],
                 ]
             ]
             
