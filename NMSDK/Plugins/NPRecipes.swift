@@ -55,9 +55,17 @@ class NPRecipes: Plugin {
                 Console.infoLine("     pulse plugin: \(recipe.pulse(.Plugin))", symbol: .Space)
                 Console.infoLine("     pulse bundle: \(recipe.pulse(.Bundle))", symbol: .Space)
                 Console.infoLine("     pulse action: \(recipe.pulse(.Action))", symbol: .Space)
-                Console.infoLine(" operation plugin: \(recipe.operation(.Plugin))", symbol: .Space)
-                Console.infoLine(" operation bundle: \(recipe.operation(.Bundle))", symbol: .Space)
-                Console.infoLine(" operation action: \(recipe.operation(.Action))", symbol: .Space)
+                
+                if let string = recipe.operation(.Plugin) {
+                    Console.infoLine(" operation plugin: \(string)", symbol: .Space)
+                }
+                if let string = recipe.operation(.Bundle) {
+                    Console.infoLine(" operation bundle: \(string)", symbol: .Space)
+                }
+                if let string = recipe.operation(.Action) {
+                    Console.infoLine(" operation action: \(string)", symbol: .Space)
+                }
+                
                 Console.infoLine("  reaction plugin: \(recipe.reaction(.Plugin))", symbol: .Space)
                 Console.infoLine("  reaction bundle: \(recipe.reaction(.Bundle))", symbol: .Space)
                 Console.infoLine("  reaction action: \(recipe.reaction(.Action))", symbol: .Space)
