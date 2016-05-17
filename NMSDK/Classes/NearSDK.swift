@@ -19,7 +19,7 @@ import NMPlug
 /// Apps linked to nearit.com apps can:
 ///
 /// - detect iBeacon™s
-/// - evaluate (i.e. return) contents, notifications or polls (reactions) when an "enter region" event is detected for an iBeacon™ registered on nearit.com
+/// - evaluate (i.e. return) contents or polls (reactions) when an "enter region" event is detected for an iBeacon™ registered on nearit.com
 /// NearSDK should be configured and started as soon as possible, for example in app's delegate method `application(_:didFinishLaunchingWithOprions:)`.
 ///
 /// To configure NearSDK, a valid nearit.com token must be obtained from nearit.com and must be passed to NearSDK as an argument at startup time.
@@ -30,7 +30,7 @@ import NMPlug
 /// 
 /// If NearSDK is started by calling start(), app's `Info.plist` file must include nearit.com app token for key `NearSDKToken`.
 /// 
-/// If the app needs to use reactions (i.e. contents, polls or notifications) evaluated by NearSDK, one or more of its classes must implement `NearSDKDelegate` protocol's methods; `delegate` property of NearSDK must be set to the class(es) implementing `NearSDKDelegate` which should use reactions evaluated in response to the detection of a beacon.
+/// If the app needs to use reactions (i.e. contents or polls) evaluated by NearSDK, one or more of its classes must implement `NearSDKDelegate` protocol's methods; `delegate` property of NearSDK must be set to the class(es) implementing `NearSDKDelegate` which should use reactions evaluated in response to the detection of a beacon.
 ///
 /// The source code of NearSDK is open source and distributed with MIT license: for more informations, check the [NearSDK GitHub repository](https://github.com/nearit/nm.sdk)
 @objc
@@ -58,7 +58,7 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionNotification(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
@@ -175,7 +175,7 @@ public class NearSDK: NSObject, Extensible {
         
         syncDidEnd = false
         syncincErrors = []
-        syncingCorePlugins = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents, CorePlugin.Notifications]
+        syncingCorePlugins = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents]
         
         let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval])
         for plugin in syncingCorePlugins {
@@ -204,6 +204,106 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
+    /// Touches a push notification.
+    ///
+    /// This method marks a notification as "opened" or "touched" on nearit.com.
+    /// The input parameter `userInfo` must include at least the key `push_id`, otherwise no push will be touched.
+    /// If `downloadRecipe` is set to `true`, `userInfo` must also include key `recipe_id`.
+    /// This method will read the current installation identifier and will not touch the push notification if no installation identifier can be found.
+    /// An installation identifier can be obtained by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
+    ///
+    /// - parameters:
+    ///   - userInfo: the userInfo dictionary of the remote push notification
+    ///   - action: the touch action - `Received` or `Opened`
+    ///   - downloadRecipe: if `true`, this method will try to download the recipe linked to the push notification; the identifier of the recipe must be define in `userInfo` key `recipe_id`. The default value of this flag is `false`
+    ///   - completionHandler: an optional handler which informs if the push notification has been touched on nearit.com
+    /// - seealso: `refreshInstallationID(APNSToken:didRefresh:)`
+    public class func touchPushNotification(userInfo userInfo: [NSObject: AnyObject], action: PushNotificationAction, downloadRecipe: Bool = false, completionHandler: DidTouchNotification? = nil) {
+        let response = plugins.run(CorePlugin.Device.name, command: "read")
+        guard let pushID = userInfo["push_id"] as? String, installationID = response.content.string("installation-id") where response.status == PluginResponseStatus.OK else {
+            completionHandler?(success: false, notificationTouched: false, recipeDownloaded: false)
+            return
+        }
+        
+        switch action {
+        case .Received:
+            PushNotificationsAPI.touchReceived(pushID, installationID: installationID, response: { (data, status) in
+                downloadPushNotificationRecipe(
+                    touchStatus: status,
+                    recipeID: userInfo["recipe_id"] as? String,
+                    downloadRecipe: downloadRecipe,
+                    completionHandler: completionHandler)
+            })
+        case .Opened:
+            PushNotificationsAPI.touchOpened(pushID, installationID: installationID, response: { (data, status) in
+                downloadPushNotificationRecipe(touchStatus: status,
+                    recipeID: userInfo["recipe_id"] as? String,
+                    downloadRecipe: downloadRecipe,
+                    completionHandler: completionHandler)
+            })
+        }
+    }
+    private class func downloadPushNotificationRecipe(touchStatus status: HTTPStatusCode, recipeID: String?, downloadRecipe flag: Bool, completionHandler: DidTouchNotification?) {
+        if status.codeClass != HTTPStatusCodeClass.Successful {
+            completionHandler?(success: false, notificationTouched: true, recipeDownloaded: false)
+            return
+        }
+        
+        if !flag {
+            completionHandler?(success: true, notificationTouched: true, recipeDownloaded: false)
+            return
+        }
+        
+        guard let id = recipeID else {
+            completionHandler?(success: false, notificationTouched: true, recipeDownloaded: false)
+            return
+        }
+        
+        downloadRecipe(id, completionHandler: { (success) in
+            completionHandler?(success: success, notificationTouched: true, recipeDownloaded: success)
+        })
+    }
+    
+    /// Downloads a recipe.
+    ///
+    /// This method should be used whenever the download of a recipe is preferred, for example in response to a remote notification.
+    /// - parameters:
+    ///   - id: the identifier of the recipe which should be downloaded
+    ///   - completionHandler: an optional handler which informs if the download succeeded or not
+    public class func downloadRecipe(id: String, completionHandler: DidCompleteOperation? = nil) {
+        plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": id])) { (response) in
+            completionHandler?(success: response.status == .OK)
+        }
+    }
+    /// Evaluates a recipe.
+    ///
+    /// This method evaluates a recipe immediately if it has been downloaded previously, otherwise it will download it before attempting to evaluate it again.
+    /// The result of the evaluation will be forwarded to `nearSDKDidEvaluateRecipe(_:)` method of `NearSDKDelegate` protocol.
+    /// - parameters:
+    ///   - id: the identifier of the recipe which should be evaluated
+    ///   - downloadAgain: if `true`, the recipe will be downloaded again; the default value of this flag is `false` - this option will overwrite the recipe which was cached for the given identifier, including its contents; if the download fails, the old copy of the recipe will be evaluated
+    ///   - completionHandler: an optionalHandler which informs if the evaluation succeeded and if the recipe has been downloaded
+    public class func evaluateRecipe(id: String, downloadAgain: Bool = false, completionHandler: DidEvaluateRecipe? = nil) {
+        if downloadAgain {
+            downloadAndEvaluateRecipe(id, completionHandler: completionHandler)
+            return
+        }
+        
+        let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": id]))
+        if response.status == PluginResponseStatus.OK {
+            completionHandler?(success: true, didDownloadRecipe: false)
+            return
+        }
+        
+        downloadAndEvaluateRecipe(id, completionHandler: completionHandler)
+    }
+    private class func downloadAndEvaluateRecipe(id: String, completionHandler: DidEvaluateRecipe?) {
+        downloadRecipe(id) { (success) in
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": id]))
+            completionHandler?(success: (response.status == PluginResponseStatus.OK), didDownloadRecipe: success)
+        }
+    }
+    
     /// Returns some `UIImage` instances asynchronously for a given array of image identifiers.
     ///
     /// This method will download and cache images not found, previously cached images will not be downloaded again.
@@ -214,7 +314,7 @@ public class NearSDK: NSObject, Extensible {
     ///   - identifiers: the identifiers of requested images; those identifiers must be linked to content reactions
     ///   - didFetchImages: the closure which should be exectude when images have been fetched
     /// - seealso: `Content` class
-    public class func imagesWithIdentifiers(identifiers: [String], didFetchImages: ((images: [String: UIImage], downloaded: [String], notFound: [String]) -> Void)?) {
+    public class func imagesWithIdentifiers(identifiers: [String], didFetchImages: DidFetchImages? = nil) {
         var fetched = [String: UIImage]()
         var notFound = Set<String>()
         
@@ -256,7 +356,7 @@ public class NearSDK: NSObject, Extensible {
         
         return true
     }
-    private class func download(notFound: Set<String>, found: [String: UIImage], completionHandler: ((images: [String: UIImage], downloaded: [String], notFound: [String]) -> Void)?) {
+    private class func download(notFound: Set<String>, found: [String: UIImage], completionHandler: DidFetchImages?) {
         Console.info(NearSDK.self, text: "Downloading images (\(notFound.count))...")
         MediaAPI.getImages(Array(notFound)) { (images, identifiersNotFound, status) in
             var result = images
@@ -291,7 +391,7 @@ public class NearSDK: NSObject, Extensible {
     /// - parameters:
     ///   - APNSToken: the optional Apple Push Notification token which should be associated to the device installation
     ///   - didRefresh: the closure which should be executed when the refresh of the installation identifier ends
-    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: ((status: DeviceInstallationStatus, installation: DeviceInstallation?) -> Void)?) {
+    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: DidRefreshInstallationIdentifier?) {
         var dictionary = [String: AnyObject]()
         dictionary["app-token"] = NearSDK.appToken
         dictionary["timeout-interval"]  = NearSDK.timeoutInterval
@@ -317,13 +417,19 @@ public class NearSDK: NSObject, Extensible {
     
     // MARK: Communicating with NearSDK
     /// Sends an event to a registered plugin.
+    /// 
+    /// The plugin must support "post" asynchronous command and its response must include the raw (Int) value of a HTTPStatusCode case in response content for key `HTTPStatusCode`.
+    /// The result of the action will be `SendEventResult.Success` if the class of the HTTP status code is `HTTPStatusCodeClass.Successful`.
     ///
     /// - parameters:
     ///   - event: the event being sent
     ///   - response: the handler which will be executed when `event`'s recipient will end processing `event`
-    public class func sendEvent(event: EventSerializable, response handler: ((response: PluginResponse, status: HTTPStatusCode) -> Void)?) {
+    public class func sendEvent(event: EventSerializable, response handler: DidSendEvent?) {
         plugins.runAsync(CorePlugin.Polls.name, command: "post", withArguments: event.body) { (response) in
-            handler?(response: response, status: HTTPStatusCode(rawValue: response.content.int("HTTPStatusCode", fallback: -1)!))
+            let status = HTTPStatusCode(rawValue: response.content.int("HTTPStatusCode", fallback: -1)!)
+            let result = (status.codeClass == HTTPStatusCodeClass.Successful ? SendEventResult.Success : SendEventResult.Failure)
+            
+            handler?(response: response, status: status, result: result)
         }
     }
     /// Sends an answer for a given poll to nearit.com.
@@ -334,10 +440,8 @@ public class NearSDK: NSObject, Extensible {
     ///   - answer: the answer
     ///   - poll: the identifier of the target poll
     ///   - response: the handler which will be executed when the answer is sent to nearit.com or when an error occurs
-    public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: ((response: JSON, result: SendEventResult) -> Void)?) {
-        sendEvent(PollAnswer(poll: poll, answer: answer)) { (response, status) in
-            handler?(response: response.content, result: (status == .Created ? .Success : .Failure))
-        }
+    public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: DidSendEvent?) {
+        sendEvent(PollAnswer(poll: poll, answer: answer), response: handler)
     }
     
     /// Manages plugins sent from registered plugins to `NearSDK`.
@@ -348,31 +452,18 @@ public class NearSDK: NSObject, Extensible {
     private func manageRecipeReaction(event: PluginEvent) {
         switch event.from {
         case CorePlugin.Recipes.name:
-            guard let contentJSON = event.content.json("reaction"), recipeJSON = event.content.json("recipe"), type = event.content.string("type") else {
+            guard let contentJSON = event.content.json("reaction"), recipeJSON = event.content.json("recipe"), recipe = APRecipe(json: recipeJSON), type = event.content.string("type") else {
                 return
             }
             
-            manageReaction(contentJSON, recipe: APRecipe(json: recipeJSON), type: type)
+            manageReaction(contentJSON, recipe: recipe, type: type)
         default:
             break
         }
     }
-    private func manageReaction(reactionJSON: JSON, recipe: APRecipe?, type: String) {
-        switch type {
-        case "content-notification":
-            if let reaction = APRecipeContent(json: reactionJSON)  {
-                delegate?.nearSDKDidEvaluate?(contents: [Content(content: reaction, recipe: recipe)])
-            }
-        case "simple-notification":
-            if let reaction = APRecipeNotification(json: reactionJSON) {
-                delegate?.nearSDKDidEvaluate?(notifications: [Notification(notification: reaction, recipe: recipe)])
-            }
-        case "poll-notification":
-            if let reaction = APRecipePoll(json: reactionJSON) {
-                delegate?.nearSDKDidEvaluate?(polls: [Poll(poll: reaction, recipe: recipe)])
-            }
-        default:
-            break
+    private func manageReaction(reactionJSON: JSON, recipe: APRecipe, type: String) {
+        if type == "content-notification" || type == "poll-notification" {
+            delegate?.nearSDKDidEvaluateRecipe?(Recipe(recipe: recipe, contentReaction: APRecipeContent(json: reactionJSON), pollReaction: APRecipePoll(json: reactionJSON)))
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {

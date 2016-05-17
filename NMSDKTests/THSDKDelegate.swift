@@ -6,7 +6,8 @@
 //  Copyright © 2016 Near srl. All rights reserved.
 //
 
-import Foundation
+import UIKit
+import NMJSON
 import NMNet
 import NMSDK
 import NMPlug
@@ -14,9 +15,7 @@ import NMPlug
 class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
     var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
-    var didReceiveNotifications: ((notifications: [Notification]) -> Void)?
-    var didReceiveContents: ((contents: [Content]) -> Void)?
-    var didReceivePolls: ((polls: [Poll]) -> Void)?
+    var didEvaluateRecipe: ((recipe: Recipe) -> Void)?
     var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
     var sdkPluginDidSync: ((plugin: CorePlugin, error: CorePluginError?) -> Void)?
     
@@ -27,9 +26,6 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func clearHandlers() {
         didReceiveEvent = nil
         didReceiveError = nil
-        didReceiveNotifications = nil
-        didReceiveContents = nil
-        didReceivePolls = nil
         sdkDidSync = nil
         sdkPluginDidSync = nil
     }
@@ -46,13 +42,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func nearSDKDidFail(error error: NearSDKError, message: String) {
         didReceiveError?(error: error, message: message)
     }
-    func nearSDKDidEvaluate(polls collection: [Poll]) {
-        didReceivePolls?(polls: collection)
-    }
-    func nearSDKDidEvaluate(contents collection: [Content]) {
-        didReceiveContents?(contents: collection)
-    }
-    func nearSDKDidEvaluate(notifications collection: [Notification]) {
-        didReceiveNotifications?(notifications: collection)
+    func nearSDKDidEvaluateRecipe(recipe: Recipe) {
+        didEvaluateRecipe?(recipe: recipe)
     }
 }

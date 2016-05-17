@@ -16,9 +16,6 @@ public class Content: NSObject {
     /// The identifier of the content.
     public private (set) var id = ""
     
-    /// The recipe which evaluated the content.
-    public private (set) var recipe: Recipe?
-    
     /// The title of the content.
     public private (set) var title = ""
     
@@ -42,8 +39,7 @@ public class Content: NSObject {
     ///
     /// - parameters:
     ///   - content: the source `APRecipeContent` instance
-    ///   - recipe: the source `APRecipe` which evaluated the content
-    public init(content: APRecipeContent, recipe evaluatedRecipe: APRecipe?) {
+    public init(content: APRecipeContent) {
         super.init()
         
         id = content.id
@@ -51,34 +47,14 @@ public class Content: NSObject {
         text = content.text
         imageIdentifiers = content.imageIdentifiers
         videoURL = content.videoURL
+        
         creationDate = content.creationDate
         lastUpdate = content.lastUpdate
-        
-        if let r = evaluatedRecipe {
-            recipe = Recipe(recipe: r)
-        }
     }
     
     // MARK: Properties
     /// Human-readable description of `Self`.
     public override var description: String {
-        return Console.describe(Notification.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL), ("recipe", recipe?.evaluation))
-    }
-    
-    // MARK: Methods
-    /// Returns an instance of a UILocalNotification.
-    ///
-    /// The alert body of the local notification will be equal to `text`, while its title will be equal to `title`.
-    ///
-    /// - parameters:
-    ///   - fireDate: defines the fire date of the local notification
-    public func makeLocalNotification(fireDate fireDate: NSDate) -> UILocalNotification {
-        let notification = UILocalNotification()
-        
-        notification.alertTitle = title
-        notification.alertBody = text
-        notification.fireDate = fireDate
-        
-        return notification
+        return Console.describe(Content.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL))
     }
 }

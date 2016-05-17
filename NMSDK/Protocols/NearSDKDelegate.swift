@@ -40,22 +40,10 @@ public protocol NearSDKDelegate {
     ///   - message: a `String` which better describes the error
     optional func nearSDKDidFail(error error: NearSDKError, message: String)
     
-    // MARK: Evaluating reactions
-    /// This method is executed whenever `NearSDK` evaluates one or more notification reactions.
-    /// 
-    /// - parameters:
-    ///   - notifications: notification reactions evaluated by `NearSDK`
-    optional func nearSDKDidEvaluate(notifications collection: [Notification])
-    
-    /// This method is executed whenever `NearSDK` evaluates one or more content reactions.
-    /// 
-    /// - parameters:
-    ///   - contents: content reactions evaluated by `NearSDK`
-    optional func nearSDKDidEvaluate(contents collection: [Content])
-    
-    /// This method is executed whenever `NearSDK` evaluates one or more poll reactions.
+    // MARK: Evaluations
+    /// This method is executed whenever `NearSDK` evaluates a recipe.
     ///
     /// - parameters:
-    ///   - polls: poll reactions evaluated by `NearSDK`
-    optional func nearSDKDidEvaluate(polls collection: [Poll])
+    ///   - recipe: the recipe evaluated by `NearSDK`
+    optional func nearSDKDidEvaluateRecipe(recipe: Recipe)
 }

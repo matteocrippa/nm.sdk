@@ -20,7 +20,7 @@ class NPRecipeReactionPoll: Plugin {
         return "0.4"
     }
     override var commands: [String: RunHandler] {
-        return ["sync": sync, "index": index, "read": read]
+        return ["sync": sync, "index": index, "read": read, "store-online-resource": storeOnlineResource]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
         return ["post": post]
@@ -34,7 +34,7 @@ class NPRecipeReactionPoll: Plugin {
             return
         }
         
-        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (status) in
+        APRecipeReactions.postPollNotificationAnswer(answer, withPollID: pollID) { (data, status) in
             handler?(response: (
                 status == .Created ?
                     PluginResponse.ok(JSON(dictionary: ["HTTPStatusCode": status.rawValue]), command: "post") :
@@ -106,5 +106,22 @@ class NPRecipeReactionPoll: Plugin {
         }
         
         return resource
+    }
+    
+    // MARK: Store
+    private func storeOnlineResource(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let resource = arguments.object("resource") as? APIResource, content = APRecipePoll.makeWithResource(resource) else {
+            Console.commandError(NPRecipeReactionPoll.self, command: "store-online-resource", requiredParameters: ["resource"])
+            return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"])
+        }
+        
+        guard let pluginHub = hub else {
+            Console.commandError(NPRecipeReactionPoll.self, command: "store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
+            return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
+        }
+        
+        Console.info(NPRecipeReactionPoll.self, text: "Poll reaction \(resource.id) has been stored")
+        pluginHub.cache.store(content, inCollection: "Reactions", forPlugin: self)
+        return PluginResponse.ok(command: "store-online-resource")
     }
 }

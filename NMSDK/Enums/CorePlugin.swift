@@ -24,7 +24,7 @@ public enum CorePlugin: Int, CustomStringConvertible {
     
     /// `Recipes` manages the evaluation of iBeacon™s into reactions configured on nearit.com.
     ///
-    /// The evaluation of a recipe is executed offline and, if successfull, requests a reaction to `Polls`, `Contents` or `Notification`.
+    /// The evaluation of a recipe is executed offline and, if successfull, requests a reaction to `Polls` or `Contents`.
     /// This plugin synchronizes itself with nearit.com when `NearSDK.start()` or `NearSDK.start(token:)` is called
     case Recipes
     
@@ -38,11 +38,6 @@ public enum CorePlugin: Int, CustomStringConvertible {
     ///
     /// This plugin synchronizes itself with nearit.com when `NearSDK.start()` or `NearSDK.start(token:)` is called
     case Contents
-    
-    /// `Notifications` returns a notification reaction in response to a successful evaluation of a recipe.
-    ///
-    /// This plugin synchronizes itself with nearit.com when `NearSDK.start()` or `NearSDK.start(token:)` is called
-    case Notifications
     
     /// `Device` synchronizes app's installation identifier with nearit.com.
     ///
@@ -64,8 +59,6 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "com.nearit.sdk.plugin.np-polls"
         case .Contents:
             return "com.nearit.sdk.plugin.np-contents"
-        case .Notifications:
-            return "com.nearit.sdk.plugin.np-notifications"
         case .Device:
             return "com.nearit.sdk.plugin.np-device"
         }
@@ -83,8 +76,6 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "Polls"
         case .Contents:
             return "Contents"
-        case .Notifications:
-            return "Notifications"
         case .Device:
             return "Device"
         }
@@ -99,11 +90,10 @@ public enum CorePlugin: Int, CustomStringConvertible {
     /// - com.nearit.sdk.plugin.np-recipes       = *Recipes*
     /// - com.nearit.sdk.plugin.np-polls         = *Polls*
     /// - com.nearit.sdk.plugin.np-contents      = *Contents*
-    /// - com.nearit.sdk.plugin.np-notifications = *Notifications*
     /// - com.nearit.sdk.plugin.np-device        = *Device*
     ///
     /// - parameters:
-    ///   - name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "image-cache", "recipes", "polls", "contents", "notifications" or "device"
+    ///   - name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "image-cache", "recipes", "polls", "contents" or "device"
     ///   - returns: `nil` if name is not a valid core plugin name
     public init?(name: String) {
         switch name {
@@ -117,8 +107,6 @@ public enum CorePlugin: Int, CustomStringConvertible {
             self = .Polls
         case "com.nearit.sdk.plugin.np-contents":
             self = .Contents
-        case "com.nearit.sdk.plugin.np-notifications":
-            self = .Notifications
         case "com.nearit.sdk.plugin.np-device":
             self = .Device
         default:

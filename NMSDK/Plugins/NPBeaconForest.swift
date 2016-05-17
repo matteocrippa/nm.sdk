@@ -133,7 +133,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             "evaluate",
             fromPluginNamed: name,
             toPluginNamed: CorePlugin.Recipes.name,
-            withArguments: JSON(dictionary: ["in-case": "beacon-forest", "in-target": region.identifier, "trigger": "enter_region"]))
+            withArguments: JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": region.identifier, "pulse-action": "enter_region"]))
     }
     
     // MARK: CoreLocation

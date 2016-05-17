@@ -137,13 +137,13 @@ class NPBeaconForestTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
-    // MARK: Contents, polls, notifications, events
+    // MARK: Contents, polls, events
     func testEnterRegionReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test read configuration")
         
-        SDKDelegate.didReceiveContents = { (contents) in
-            XCTAssertEqual(contents.count, 1)
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
             expectation.fulfill()
         }
         SDKDelegate.sdkDidSync = { (errors) in

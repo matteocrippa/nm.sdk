@@ -18,19 +18,19 @@ public enum NearSDKError: Int, CustomStringConvertible {
     
     /// Thrown when `NearSDK` is started, but the configuration of `BeaconForest` plugin cannot be downloaded.
     ///
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
     case CannotDownloadRegionMonitoringConfiguration = 1000
     
     /// Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways` or `CLAuthorizationStatus.AuthorizedWhenInUse`.
     ///
     /// Appropriate authorization levels should be obtained before starting `NearSDK`.
     /// 
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
     case RegionMonitoringIsNotAuthorized = 1001
     
     /// Thrown when `NearSDK` is started, the user authorized the app to monitor region changes in background, but no regions can be monitored because the configuration of `BeaconForest` plugin is empty.
     /// 
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content, a notification or a poll.
+    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
     case NoRegionsToMonitor = 1002
     
     /// Thrown when `NearSDK` fails at monitoring a certain region
@@ -38,31 +38,27 @@ public enum NearSDKError: Int, CustomStringConvertible {
     
     /// Thrown when `NearSDK` is started, but recipes cannot be downloaded.
     /// 
-    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate any content, notification or poll reaction.
+    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate any content or poll reaction.
     case CannotDownloadRecipes = 2000
     
-    /// Thrown when the `NarSDK` cannot evaluate correctly an event.
+    /// Thrown when `NarSDK` cannot evaluate correctly an event.
     case CannotEvaluateRecipe = 3000
     
-    /// Thrown when the `NearSDK` is started, but notification reactions cannot be downloaded.
-    ///
-    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate notification reactions.
-    /// 
-    /// `NearSDK` will be able to evaluate contents and polls when an iBeacon™ is detected.
-    case CannotDownloadNotificationReactions = 4000
+    /// Thrown when `NearSDK` cannot evaluate a recipe online or other errors occur when the online evaluation of a recipe is requested
+    case CannotEvaluateRecipeOnline = 3001
     
     /// Thrown when `NearSDK` is started, but content reactions cannot be downloaded.
     ///
     /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate content reactions.
     ///
-    /// `NearSDK` will be able to evaluate notifications and polls when an iBeacon™ is detected.
+    /// `NearSDK` will be able to evaluate polls when an iBeacon™ is detected.
     case CannotDownloadContentReactions = 5000
     
     /// Thrown when `NearSDK` is started, but poll reactions cannot be downloaded.
     ///
     /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate poll reactions.
     /// 
-    /// `NearSDK` will be able to evaluate contents and notifications when an iBeacon™ is detected.
+    /// `NearSDK` will be able to evaluate contents when an iBeacon™ is detected.
     case CannotDownloadPollReactions = 6000
     
     /// Thrown when `NearSDK` cannot request an installation identifier.
@@ -87,10 +83,10 @@ public enum NearSDKError: Int, CustomStringConvertible {
             return "Region monitoring did fail"
         case .CannotDownloadRecipes:
             return "Cannot download recipes"
+        case .CannotEvaluateRecipeOnline:
+            return "Cannot evaluate recipe online"
         case .CannotEvaluateRecipe:
             return "Cannot evaluate recipe"
-        case .CannotDownloadNotificationReactions:
-            return "Cannot download notification reactions"
         case .CannotDownloadContentReactions:
             return "Cannot download content reactions"
         case .CannotDownloadPollReactions:
@@ -106,8 +102,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /// Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
     /// 
     /// - parameters:
-    ///   - rawValue: must be either 1, 1000, 1001, 1002, 1003, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
-    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 1003, 2000, 3000, 4000, 5000, 6000, 7000 or 7001
+    ///   - rawValue: must be either 1, 1000, 1001, 1002, 2000, 3000, 3001, 5000, 6000, 7000 or 7001
+    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 2000, 3000, 3001, 5000, 6000, 7000 or 7001
     public init?(rawValue: Int) {
         switch rawValue {
         case 1:
@@ -124,8 +120,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
             self = .CannotDownloadRecipes
         case 3000:
             self = .CannotEvaluateRecipe
-        case 4000:
-            self = .CannotDownloadNotificationReactions
+        case 3001:
+            self = .CannotEvaluateRecipeOnline
         case 5000:
             self = .CannotDownloadContentReactions
         case 6000:
