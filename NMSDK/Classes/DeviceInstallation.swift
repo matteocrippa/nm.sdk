@@ -25,7 +25,7 @@ public class DeviceInstallation: NSObject {
     public var sdkVersion = ""
     
     /// The APNS token associated to the device
-    public private (set) var apnsToken: NSUUID?
+    public private (set) var apnsToken: String?
     
     // MARK: Initializers
     /// Initializes a new `DeviceInstallation`.
