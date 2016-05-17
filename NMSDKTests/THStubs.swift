@@ -134,7 +134,7 @@ class THStubs {
     }
     private class func attributes(name: String, notification: String, pulsePlugin: String, pulseBundle: String, reactionPlugin: String, reactionBundle: String) -> [String: AnyObject] {
         return [
-            "name": name, "notification": notification,
+            "name": name, "notification": ["title": "Notification title", "body": notification],
             "pulse_plugin_id": pulsePlugin,
             "pulse_bundle_id": pulseBundle,
             "operation_plugin_id": "OP-PLUGIN",

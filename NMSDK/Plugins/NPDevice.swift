@@ -74,6 +74,10 @@ class NPDevice: Plugin {
         Console.info(NPDevice.self, text: "Installation identifier \(didRequestNewID ? "received" : "updated")")
         Console.infoLine("identifier: \(object.id)")
         
+        if let token = object.APNSToken {
+            Console.infoLine("APNS token: \(token)")
+        }
+        
         hub?.cache.removeAllResourcesWithPlugin(self)
         hub?.cache.store(object, inCollection: "Installations", forPlugin: self)
         

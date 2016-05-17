@@ -19,6 +19,9 @@ public class Recipe: NSObject {
     /// The name of the recipe.
     public private (set) var name = ""
     
+    /// The title of the notification associated to the recipe.
+    public private (set) var notificationTitle: String?
+    
     /// The text of the notification associated to the recipe.
     public private (set) var notificationText: String?
     
@@ -80,6 +83,7 @@ public class Recipe: NSObject {
         id = recipe.id
         name = recipe.name
         notificationText = recipe.notificationText
+        notificationTitle = recipe.notificationTitle
         
         pulsePlugin = recipe.pulse(.Plugin)
         pulseBundle = recipe.pulse(.Bundle)
@@ -119,15 +123,15 @@ public class Recipe: NSObject {
     // MARK: Methods
     /// Returns an instance of a UILocalNotification.
     ///
-    /// The alert body of the local notification will be equal to `text`, while its title will be equal to `title`.
+    /// The alert body of the local notification will be equal to `notificationText`, while its title will be equal to `notificationTitle`.
     ///
     /// - parameters:
-    ///   - title: the title of the notification
+    ///   - overrideTitle: if not nil, this value will be used as the the title of the notification
     ///   - fireDate: defines the fire date of the local notification
-    public func makeLocalNotification(title title: String?, fireDate: NSDate) -> UILocalNotification {
+    public func makeLocalNotification(overrideTitle title: String? = nil, fireDate: NSDate) -> UILocalNotification {
         let notification = UILocalNotification()
         
-        notification.alertTitle = title
+        notification.alertTitle = title ?? notificationTitle
         notification.alertBody = notificationText
         notification.fireDate = fireDate
         
