@@ -92,23 +92,20 @@ Because `NearSDK` uses iBeacon™ technology, apps should start the SDK after ap
 
 *Using nearit.com contents*
 
-`NearSDK` can detect iBeacon™s registered for nearit.com apps: whenever a beacon is detected, a content, a notification or a poll may be evaluated by the SDK.
+`NearSDK` can detect iBeacon™s registered for nearit.com apps: whenever a beacon is detected, a content or a poll may be evaluated by the SDK.
 
-Contents, notifications and polls (more simply, "reactions") must be configured on nearit.com and must be linked to specific beacons.
+Contents and polls (more simply, "reactions") must be configured on nearit.com and must be linked to specific beacons.
 
 The app which adopts `NearSDK` can receive such reactions by implementing some of the methods defined in `NearSDKDelegate` protocol:
 
-- `nearSDKDidEvaluate(notifications:)` will return a collection of `Notification` instances
-  - a notification reaction is described by one property, i.e. `text`
-- `nearSDKDidEvaluate(contents:)` will return a collection of `Content` instances
-  - a content reaction is described by some properties:
+- `nearSDKDidRecipe(recipe:)` will return the evaluated `Recipe`, which may include a notification text and a reaction
+  - a `Content` reaction is described by some properties:
     - `title`
     - `text`
     - `videoURL` (optional)
     - `imageIdentifiers`
         - images can be downloaded by calling `NearSDK`'s class method `imagesWithIdentifiers(_:didFetchImages:)`
-- `nearSDKDidEvaluate(polls:)` will return a collection of `Poll` instances
-  - a poll reaction is described by some properties:
+  - a `Poll` reaction is described by some properties:
     - `question`
     - `text`
     - `answer1`

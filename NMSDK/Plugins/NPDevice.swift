@@ -19,8 +19,20 @@ class NPDevice: Plugin {
     override var version: String {
         return "0.3"
     }
+    override var commands: [String: RunHandler] {
+        return ["read": read]
+    }
     override var asyncCommands: [String: RunAsyncHandler] {
         return ["refresh": refresh]
+    }
+    
+    // MARK: Read
+    func read(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
+            return PluginResponse.cannotRun("read", requiredParameters: [], optionalParameters: [], cause: "No installation identifier can be found")
+        }
+        
+        return PluginResponse.ok(JSON(dictionary: ["installation-id": installation.id]), command: "read")
     }
     
     // MARK: Refresh

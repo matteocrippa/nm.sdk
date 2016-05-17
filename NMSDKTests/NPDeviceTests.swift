@@ -64,6 +64,8 @@ class NPDeviceTests: XCTestCase {
         NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
             XCTAssertEqual(status, DeviceInstallationStatus.Updated)
             XCTAssertNotNil(installation)
+            XCTAssertNotNil(installation?.apnsToken)
+            
             expectation.fulfill()
         }
         
@@ -99,6 +101,8 @@ class NPDeviceTests: XCTestCase {
         NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
             XCTAssertEqual(status, DeviceInstallationStatus.Received)
             XCTAssertNotNil(installation)
+            XCTAssertNotNil(installation?.apnsToken)
+            
             expectation.fulfill()
         }
         

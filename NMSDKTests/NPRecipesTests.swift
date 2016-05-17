@@ -27,31 +27,6 @@ class NPRecipesTests: XCTestCase {
     }
     
     // MARK: Successful evaluations
-    func testEvaluateBeaconForestNotificationReaction() {
-        THStubs.stubConfigurationAPIResponse()
-        let expectation = expectationWithDescription("test evaluate notification reaction with NPRecipes")
-        
-        SDKDelegate.sdkDidSync = { (errors) in
-            XCTAssertEqual(errors.count, 0)
-            
-            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C10_2", "trigger": "EVENT-2"])
-            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
-            XCTAssertEqual(response.status, PluginResponseStatus.OK)
-        }
-        
-        SDKDelegate.didReceiveNotifications = { (notifications) in
-            XCTAssertEqual(notifications.count, 1)
-            XCTAssertNotNil(notifications[0].recipe)
-            XCTAssertNotNil(notifications[0].creationDate)
-            XCTAssertNotNil(notifications[0].lastUpdate)
-            XCTAssertNotNil(notifications[0].recipe?.creationDate)
-            XCTAssertNotNil(notifications[0].recipe?.lastUpdate)
-            expectation.fulfill()
-        }
-        
-        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
     func testEvaluateBeaconForestContentReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate content reaction with NPRecipes")
@@ -59,17 +34,13 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C10_1", "trigger": "enter_region"])
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C10_1", "pulse-action": "enter_region"])
             let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
         }
-        SDKDelegate.didReceiveContents = { (contents) in
-            XCTAssertEqual(contents.count, 1)
-            XCTAssertNotNil(contents[0].recipe)
-            XCTAssertNotNil(contents[0].creationDate)
-            XCTAssertNotNil(contents[0].lastUpdate)
-            XCTAssertNotNil(contents[0].recipe?.creationDate)
-            XCTAssertNotNil(contents[0].recipe?.lastUpdate)
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
+            XCTAssertNil(recipe.poll)
             expectation.fulfill()
         }
         
@@ -83,17 +54,13 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C20_1", "trigger": "EVENT-3"])
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C20_1", "pulse-action": "EVENT-3"])
             let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
         }
-        SDKDelegate.didReceivePolls = { (polls) in
-            XCTAssertEqual(polls.count, 1)
-            XCTAssertNotNil(polls[0].recipe)
-            XCTAssertNotNil(polls[0].creationDate)
-            XCTAssertNotNil(polls[0].lastUpdate)
-            XCTAssertNotNil(polls[0].recipe?.creationDate)
-            XCTAssertNotNil(polls[0].recipe?.lastUpdate)
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.poll)
+            XCTAssertNil(recipe.content)
             expectation.fulfill()
         }
         
@@ -114,7 +81,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C0_0", "trigger": "EVENT-X"])
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C0_0", "pulse-action": "EVENT-X"])
             let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.Warning)
         }
@@ -134,7 +101,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            let args = JSON(dictionary: ["in-case": "beacon-forest", "in-target": "C1000_1", "trigger": "EVENT-1"])
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C1000_1", "pulse-action": "EVENT-1"])
             let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
             XCTAssertEqual(response.status, PluginResponseStatus.Warning)
         }
@@ -157,7 +124,7 @@ class NPRecipesTests: XCTestCase {
                 return
             }
             
-            XCTAssertEqual(triggers.count, 5)
+            XCTAssertEqual(triggers.count, 4)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             expectation.fulfill()
         }
@@ -175,9 +142,10 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1), response: { (response, status) in
+            NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1), response: { (response, status, result) in
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
                 XCTAssertEqual(status.codeClass, HTTPStatusCodeClass.Successful)
+                XCTAssertEqual(result, SendEventResult.Success)
                 expectation.fulfill()
             })
         }
@@ -193,9 +161,9 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id") { (response, result) in
+            NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id") { (response, status, result) in
                 XCTAssertEqual(result, SendEventResult.Success)
-                XCTAssertTrue(response.containsInt("HTTPStatusCode"))
+                XCTAssertTrue(response.content.containsInt("HTTPStatusCode"))
                 expectation.fulfill()
             }
         }
@@ -204,9 +172,190 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Download recipes
+    func testDownloadRecipeContentReaction() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test download recipe - content reaction")
+        
+        NearSDK.plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": "CONTENT-RECIPE"])) { (response) in
+            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testDownloadRecipePollReaction() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test download recipe - poll reaction")
+        
+        NearSDK.plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": "POLL-RECIPE"])) { (response) in
+            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testDownloadRecipeContentReactionViaSDK() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test download recipe - content reaction via SDK")
+        
+        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testDownloadRecipePollReactionViaSDK() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test download recipe - poll reaction via SDK")
+        
+        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Evaluate recipes by identifier
+    func testEvaluateRecipeByIDContentReaction() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test evaluate downloaded recipe - content reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": "CONTENT-RECIPE"]))
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testEvaluateRecipeByIDPollReaction() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test evaluate downloaded recipe - poll reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.poll)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": "POLL-RECIPE"]))
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testEvaluateRecipeByIDContentReactionViaSDK() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - content reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            
+            NearSDK.evaluateRecipe("CONTENT-RECIPE") { (success, didDownloadRecipe) in
+                XCTAssertTrue(success)
+                XCTAssertFalse(didDownloadRecipe)
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testEvaluateRecipeByIDPollReactionViaSDK() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - poll reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.poll)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+            XCTAssertTrue(success)
+            
+            NearSDK.evaluateRecipe("POLL-RECIPE") { (success, didDownloadRecipe) in
+                XCTAssertTrue(success)
+                XCTAssertFalse(didDownloadRecipe)
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testDownloadAndEvaluateRecipeByIDContentReactionViaSDK() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test download and evaluate recipe via SDK - content reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
+            expectation.fulfill()
+        }
+        NearSDK.evaluateRecipe("CONTENT-RECIPE") { (success, didDownloadRecipe) in
+            XCTAssertTrue(success)
+            XCTAssertTrue(didDownloadRecipe)
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testDownloadAndEvaluateRecipeByIDPollReactionViaSDK() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test download and evaluate recipe via SDK - poll reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.poll)
+            expectation.fulfill()
+        }
+        NearSDK.evaluateRecipe("POLL-RECIPE") { (success, didDownloadRecipe) in
+            XCTAssertTrue(success)
+            XCTAssertTrue(didDownloadRecipe)
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testForceDownloadAndEvaluateRecipeByIDContentReactionViaSDK() {
+        THStubs.stubOnlineContentEvaluation()
+        let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - content reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.content)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+            NearSDK.evaluateRecipe("CONTENT-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
+                XCTAssertTrue(success)
+                XCTAssertTrue(didDownloadRecipe)
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testForceDownloadAndEvaluateRecipeByIDPollReactionViaSDK() {
+        THStubs.stubOnlinePollEvaluation()
+        let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - poll reaction")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNotNil(recipe.poll)
+            expectation.fulfill()
+        }
+        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+            NearSDK.evaluateRecipe("POLL-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
+                XCTAssertTrue(success)
+                XCTAssertTrue(didDownloadRecipe)
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()
+        NearSDK.plugins.clearCache(pluginNamed: CorePlugin.Recipes.name)
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate

@@ -27,24 +27,6 @@ class NPRecipeReactionsTests: XCTestCase {
     }
     
     // MARK: Index command tests
-    func testIndexNotifications() {
-        THStubs.stubConfigurationAPIResponse()
-        let expectation = expectationWithDescription("test index notifications")
-        
-        SDKDelegate.sdkDidSync = { (errors) in
-            XCTAssertEqual(errors.count, 0)
-            
-            let response = NearSDK.plugins.run(CorePlugin.Notifications.name, command: "index")
-            XCTAssertEqual(response.status, PluginResponseStatus.OK)
-            XCTAssertNotNil(response.content.stringArray("reactions"))
-            XCTAssertEqual(response.content.stringArray("reactions")?.count, 2)
-            
-            expectation.fulfill()
-        }
-        
-        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
     func testIndexContents() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test index contents")

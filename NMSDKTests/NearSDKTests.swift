@@ -83,7 +83,7 @@ class NearSDKTests: XCTestCase {
         }
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
-            XCTAssertEqual(syncedPlugins.count, 5)
+            XCTAssertEqual(syncedPlugins.count, 4)
             expectation.fulfill()
         }
         
@@ -150,6 +150,41 @@ class NearSDKTests: XCTestCase {
             XCTAssertEqual(notFound.count, 2)
             
             expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Push notifications
+    func testTouchPushNotificationReceivedDoNotDownloadRecipe() {
+        THStubs.stubTouchPushNotification("push-id")
+        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
+        let expectation = expectationWithDescription("test touch push notification, do not download recipe")
+        
+        NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
+            NearSDK.touchPushNotification(userInfo: ["push_id": "push-id"], action: PushNotificationAction.Received) { (success, notificationTouched, recipeDownloaded) in
+                XCTAssertTrue(success)
+                XCTAssertTrue(notificationTouched)
+                XCTAssertFalse(recipeDownloaded)
+                expectation.fulfill()
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testTouchPushNotificationReceivedDownloadRecipe() {
+        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubTouchPushNotification("push-id")
+        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
+        let expectation = expectationWithDescription("test touch push notification, download recipe")
+        
+        NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
+            NearSDK.touchPushNotification(userInfo: ["push_id": "push-id", "recipe_id": "CONTENT-RECIPE"], action: PushNotificationAction.Received, downloadRecipe: true) { (success, notificationTouched, recipeDownloaded) in
+                XCTAssertTrue(success)
+                XCTAssertTrue(notificationTouched)
+                XCTAssertTrue(recipeDownloaded)
+                expectation.fulfill()
+            }
         }
         
         waitForExpectationsWithTimeout(1, handler: nil)
