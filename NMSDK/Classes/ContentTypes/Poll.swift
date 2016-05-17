@@ -20,9 +20,6 @@ public class Poll: NSObject {
     /// The question of the poll.
     public var question = ""
     
-    /// The text of the poll: this may be a short title.
-    public var text = ""
-    
     /// The text of the first answer.
     public var answer1 = ""
     
@@ -45,7 +42,6 @@ public class Poll: NSObject {
         
         id = poll.id
         question = poll.question
-        text = poll.text
         answer1 = poll.answer1
         answer2 = poll.answer2
         
@@ -56,6 +52,6 @@ public class Poll: NSObject {
     // MARK: Properties
     /// Human-readable description of `Self`.
     public override var description: String {
-        return Console.describe(Poll.self, properties: ("id", id), ("text", text), ("question", question), ("answer1", answer1), ("answer2", answer2))
+        return Console.describe(Poll.self, properties: ("id", id), ("question", question), ("answer1", answer1), ("answer2", answer2))
     }
 }

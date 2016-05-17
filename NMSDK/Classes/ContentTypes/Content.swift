@@ -16,11 +16,11 @@ public class Content: NSObject {
     /// The identifier of the content.
     public private (set) var id = ""
     
-    /// The title of the content.
-    public private (set) var title = ""
-    
     /// The text of the content.
     public private (set) var text = ""
+    
+    /// The attributed text of the content - it is assumed that the value of `text` is a valid HTML string
+    public private (set) var attributedText: NSAttributedString?
     
     /// The identifiers of image contents associated to the content.
     public var imageIdentifiers = [String]()
@@ -43,8 +43,8 @@ public class Content: NSObject {
         super.init()
         
         id = content.id
-        title = content.title
         text = content.text
+        attributedText = content.attributedText
         imageIdentifiers = content.imageIdentifiers
         videoURL = content.videoURL
         
@@ -55,6 +55,6 @@ public class Content: NSObject {
     // MARK: Properties
     /// Human-readable description of `Self`.
     public override var description: String {
-        return Console.describe(Content.self, properties: ("id", id), ("title", title), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL))
+        return Console.describe(Content.self, properties: ("id", id), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL))
     }
 }
