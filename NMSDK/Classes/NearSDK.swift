@@ -463,7 +463,17 @@ public class NearSDK: NSObject, Extensible {
     }
     private func manageReaction(reactionJSON: JSON, recipe: APRecipe, type: String) {
         if type == "content-notification" || type == "poll-notification" {
-            delegate?.nearSDKDidEvaluateRecipe?(Recipe(recipe: recipe, contentReaction: APRecipeContent(json: reactionJSON), pollReaction: APRecipePoll(json: reactionJSON)))
+            var content: APRecipeContent?
+            if let json = reactionJSON.json("content") {
+                content = APRecipeContent(json: json)
+            }
+            
+            var poll: APRecipePoll?
+            if let json = reactionJSON.json("poll") {
+                poll = APRecipePoll(json: json)
+            }
+            
+            delegate?.nearSDKDidEvaluateRecipe?(Recipe(recipe: recipe, contentReaction: content, pollReaction: poll))
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {

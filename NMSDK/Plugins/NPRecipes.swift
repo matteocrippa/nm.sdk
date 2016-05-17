@@ -138,7 +138,7 @@ class NPRecipes: Plugin {
             Console.infoLine("content id: \(recipe.reaction(.Bundle))")
             Console.infoLine("      type: \(recipe.reaction(.Plugin))")
             
-            let reaction = JSON(dictionary: ["reaction": response.content.dictionary, "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
+            let reaction = JSON(dictionary: ["reaction": [command.contentType: response.content.dictionary], "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
             return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
                 PluginResponse.ok(command: "evaluate") :
                 PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot send evaluation request to \(command.evaluator) for evaluation key \(evaluationKey)")
@@ -164,7 +164,7 @@ class NPRecipes: Plugin {
                 return PluginResponse.cannotRun("evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
         }
         
-        let reaction = JSON(dictionary: ["reaction": response.content.dictionary, "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
+        let reaction = JSON(dictionary: ["reaction": [command.contentType: response.content.dictionary], "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
         return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
             PluginResponse.ok(command: "evaluate") :
             PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot send evaluation request to \(command.evaluator) for recipe \(recipe.id)")
@@ -194,28 +194,28 @@ class NPRecipes: Plugin {
             
             // Store contents
             pluginHub.cache.store(evaluatedRecipe, inCollection: "Recipes", forPlugin: self)
-            completionHandler?(response: pluginHub.send("store-online-resource", fromPluginNamed: self.name, toPluginNamed: evaluator, withArguments: JSON(dictionary: ["resource": evaluatedReaction])).status == .OK ?
+            completionHandler?(response: pluginHub.send("store-online-resource", fromPluginNamed: self.name, toPluginNamed: evaluator.name, withArguments: JSON(dictionary: ["resource": evaluatedReaction])).status == .OK ?
                 PluginResponse.ok(JSON(dictionary: ["id": id]), command: "download") :
                 PluginResponse.cannotRun("download", requiredParameters: ["id"], cause: "Recipe \(id) has been downloaded, but recipe's reaction could not be stored offline")
             )
         }
     }
     
-    private func evaluatorName(recipe: APRecipe) -> String? {
+    private func evaluatorName(recipe: APRecipe) -> (name: String, contentType: String)? {
         switch recipe.reaction(.Plugin) {
         case "poll-notification":
-            return CorePlugin.Polls.name
+            return (CorePlugin.Polls.name, "poll")
         case "content-notification":
-            return CorePlugin.Contents.name
+            return (CorePlugin.Contents.name, "content")
         default:
             return nil
         }
     }
-    private func evaluatorCommand(recipe: APRecipe) -> (command: String, args: JSON, evaluator: String)? {
+    private func evaluatorCommand(recipe: APRecipe) -> (command: String, args: JSON, evaluator: String, contentType: String)? {
         guard let evaluator = evaluatorName(recipe) else {
             return nil
         }
         
-        return ("read", JSON(dictionary: ["content-id": recipe.reaction(.Bundle)]), evaluator)
+        return ("read", JSON(dictionary: ["content-id": recipe.reaction(.Bundle)]), evaluator.name, evaluator.contentType)
     }
 }

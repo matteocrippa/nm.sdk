@@ -175,15 +175,15 @@ class THStubs {
     private class func stubAPRecipeContentReactions() {
         let content1 = [
             "id": "CONTENT-1", "type": "notifications",
-            "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+            "attributes": ["content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         let content2 = [
             "id": "CONTENT-2", "type": "notifications",
-            "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+            "attributes": ["content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         let content3 = [
             "id": "CONTENT-3", "type": "notifications",
-            "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+            "attributes": ["content": "<content's text>", "images_ids": ["IMAGE-1", "IMAGE-2"], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         
         stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/contents")) { (request) -> OHHTTPStubsResponse in
@@ -193,11 +193,11 @@ class THStubs {
     private class func stubAPRecipePollReactions() {
         let poll1 = [
             "id": "POLL-1", "type": "notifications",
-            "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+            "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         let poll2 = [
             "id": "POLL-2", "type": "notifications",
-            "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+            "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         
         stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/polls")) { (request) -> OHHTTPStubsResponse in
@@ -207,7 +207,7 @@ class THStubs {
     
     class func stubOnlineContentEvaluation() {
         let onlineRecipe = recipe("CONTENT-RECIPE", nodeIdentifier: "X", contentIdentifier: "CONTENT-ONLINE-EVALUATION", contentType: "content-notification", trigger: "online")
-        let content = ["id": "CONTENT-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["text": "<content's title>", "content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
+        let content = ["id": "CONTENT-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["content": "<content's text>", "images_ids": [], "video_link": NSNull()]]
         
         stub(isHost("api.nearit.com") && isPath("/recipes/CONTENT-RECIPE")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": onlineRecipe, "included": [content]], statusCode: 200, headers: nil)
@@ -215,7 +215,7 @@ class THStubs {
     }
     class func stubOnlinePollEvaluation() {
         let onlineRecipe = recipe("POLL-RECIPE", nodeIdentifier: "X", contentIdentifier: "POLL-ONLINE-EVALUATION", contentType: "poll-notification", trigger: "online")
-        let poll = ["id": "POLL-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["text": "<poll's text>", "question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        let poll = ["id": "POLL-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
         
         stub(isHost("api.nearit.com") && isPath("/recipes/POLL-RECIPE")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": onlineRecipe, "included": [poll]], statusCode: 200, headers: nil)
