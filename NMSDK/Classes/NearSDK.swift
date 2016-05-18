@@ -58,7 +58,7 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
-        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice()]
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice(), NPSegmentation()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)
@@ -505,5 +505,98 @@ public class NearSDK: NSObject, Extensible {
         }
         
         return false
+    }
+    
+    // MARK: Segmentation
+    /// Gets or sets the current profile identifier.
+    ///
+    /// If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `NearSDK.requestNewProfileID(_:)`.
+    public static var profileID: String? {
+        get {
+            let response = plugins.run(CorePlugin.Segmentation.name, command: "read")
+            guard let id = response.content.string("profile-id") where response.status == .OK else {
+                return nil
+            }
+            
+            return id
+        }
+        set(newValue) {
+            guard let id = newValue else {
+                plugins.run(CorePlugin.Segmentation.name, command: "clear")
+                return
+            }
+            
+            plugins.run(CorePlugin.Segmentation.name, command: "save", withArguments: JSON(dictionary: ["id": id]))
+        }
+    }
+    /// Gets the current installation identifier.
+    ///
+    /// This value can be refreshed by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
+    public static var installationID: String? {
+        let response = plugins.run(CorePlugin.Device.name, command: "read")
+        guard let id = response.content.string("installation-id") where response.status == .OK else {
+            return nil
+        }
+        
+        return id
+    }
+    /// Requests a new profile identifier.
+    ///
+    /// This method requires `NearSDK.installationID` to be not nil and will return the cached profile identifier, if found.
+    /// - parameters:
+    ///   - response: the response handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
+    public class func requestNewProfileID(response: ((id: String?) -> Void)?) {
+        if let id = profileID {
+            Console.info(NearSDK.self, text: "A cached profile identifier has been found and will be returned instead of requesting a new one")
+            response?(id: id)
+            return
+        }
+        
+        guard let id = installationID else {
+            Console.error(NearSDK.self, text: "No installation identifier can be found")
+            Console.errorLine("an installation identifier must be obtained before calling this method")
+            response?(id: nil)
+            return
+        }
+        
+        APSegmentation.requestProfileID(appID: API.appID, installationID: id) { (id, status) in
+            NearSDK.profileID = id
+            response?(id: id)
+        }
+    }
+    /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com if both values are not nil.
+    ///
+    /// - parameters:
+    ///   - response: the response handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
+    public class func linkProfileToInstallation(response: ((success: Bool) -> Void)?) {
+        guard let profile = profileID, installation = installationID else {
+            Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
+            Console.errorLine("both installation and profile identifiers must be obtained before calling this method")
+            response?(success: false)
+            return
+        }
+        
+        APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
+            response?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
+    /// Adds data points to the current profile identifier on nearit.com.
+    ///
+    /// This method fails if `NearSDK.profileID` is nil.
+    ///
+    /// - parameters:
+    ///   - points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
+    ///   - response: the response handler which will be called asynchronously when data points have been added to the current profile identifier.
+    public class func addProfileDataPoints(points: [String: String], response: ((success: Bool) -> Void)?) {
+        guard let profile = profileID else {
+            Console.error(NearSDK.self, text: "No profile identifier can be found")
+            Console.errorLine("a profile identifier must be obtained or set before calling this method")
+            response?(success: false)
+            return
+        }
+        
+        APSegmentation.addDataPoints(points, toProfileID: profile) { (status) in
+            response?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
     }
 }
