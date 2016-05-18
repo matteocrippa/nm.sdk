@@ -561,4 +561,18 @@ public class NearSDK: NSObject, Extensible {
             response?(id: id)
         }
     }
+    /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com servers if both values are not nil
+    ///
+    /// - parameters:
+    ///   - response: the response handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
+    public class func linkProfileToInstallation(response: ((success: Bool) -> Void)?) {
+        guard let profile = profileID, installation = installationID else {
+            response?(success: false)
+            return
+        }
+        
+        APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
+            response?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
 }

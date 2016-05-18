@@ -56,6 +56,27 @@ class NPSegmentationTests: XCTestCase {
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testUpdateInstallationID() {
+        THStubs.storeSampleDeviceInstallation()
+        NearSDK.profileID = "00000000-0000-0000-0000-000000000000"
+        stub(isHost("api.nearit.com") && isPath("/plugins/congrego/profiles/00000000-0000-0000-0000-000000000000/installations")) { (request) -> OHHTTPStubsResponse in
+            let response = [
+                "data": [
+                    "id": "00000000-0000-0000-0000-000000000000", "type": "profiles", "attributes": ["app_id": "00000000-0000-0000-0000-000000000000"],
+                    "relationships": ["data_points": ["data": []], "installations": ["data": []]]]
+            ]
+            
+            return OHHTTPStubsResponse(JSONObject: response, statusCode: 201, headers: nil)
+        }
+        
+        let expectation = expectationWithDescription("test update installation identifier")
+        NearSDK.linkProfileToInstallation { (success) in
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     
     // MARK: Helper functions
     private func reset() {
