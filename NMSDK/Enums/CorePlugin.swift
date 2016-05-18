@@ -45,6 +45,12 @@ public enum CorePlugin: Int, CustomStringConvertible {
     /// This plugin should be used by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
     case Device
     
+    /// `Segmentation` manages all segmentation (user-profile) related operations which can be done with nearit.com.
+    ///
+    /// This plugin can assign or read the cached profile identifier or request a new one.
+    /// `Segmentation` can set data points for an existing profile identifier
+    case Segmentation
+    
     // MARK: Properties
     /// The name used to plug `Self` into `NearSDK`'s plugin hub.
     public var name: String {
@@ -61,6 +67,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "com.nearit.sdk.plugin.np-contents"
         case .Device:
             return "com.nearit.sdk.plugin.np-device"
+        case .Segmentation:
+            return "com.nearit.sdk.plugin.np-segmentation"
         }
     }
     /// Human-readable description of `Self`.
@@ -78,6 +86,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "Contents"
         case .Device:
             return "Device"
+        case .Segmentation:
+            return "Segmentation"
         }
     }
     
@@ -91,9 +101,10 @@ public enum CorePlugin: Int, CustomStringConvertible {
     /// - com.nearit.sdk.plugin.np-polls         = *Polls*
     /// - com.nearit.sdk.plugin.np-contents      = *Contents*
     /// - com.nearit.sdk.plugin.np-device        = *Device*
+    /// - com.nearit.sdk.plugin.np-segmentation  = *Segmentation*
     ///
     /// - parameters:
-    ///   - name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "image-cache", "recipes", "polls", "contents" or "device"
+    ///   - name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "image-cache", "recipes", "polls", "contents", "device" or "segmentation"
     ///   - returns: `nil` if name is not a valid core plugin name
     public init?(name: String) {
         switch name {
@@ -109,6 +120,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             self = .Contents
         case "com.nearit.sdk.plugin.np-device":
             self = .Device
+        case "com.nearit.sdk.plugin.np-segmentation":
+            self = .Segmentation
         default:
             return nil
         }
