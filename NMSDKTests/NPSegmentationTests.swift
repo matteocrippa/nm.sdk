@@ -77,6 +77,19 @@ class NPSegmentationTests: XCTestCase {
         
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testAddDataPoints() {
+        NearSDK.profileID = "00000000-0000-0000-0000-000000000000"
+        stub(isHost("api.nearit.com") && isPath("/plugins/congrego/profiles/00000000-0000-0000-0000-000000000000/data_points")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
+        }
+        
+        let expectation = expectationWithDescription("test add data points")
+        NearSDK.addProfileDataPoints(["key": "value"]) { (success) in
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     
     // MARK: Helper functions
     private func reset() {

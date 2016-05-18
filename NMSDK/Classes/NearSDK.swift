@@ -547,11 +547,14 @@ public class NearSDK: NSObject, Extensible {
     ///   - response: the response handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
     public class func requestNewProfileID(response: ((id: String?) -> Void)?) {
         if let id = profileID {
+            Console.info(NearSDK.self, text: "A cached profile identifier has been found and will be returned instead of requesting a new one")
             response?(id: id)
             return
         }
         
         guard let id = installationID else {
+            Console.error(NearSDK.self, text: "No installation identifier can be found")
+            Console.errorLine("an installation identifier must be obtained before calling this method")
             response?(id: nil)
             return
         }
@@ -561,17 +564,38 @@ public class NearSDK: NSObject, Extensible {
             response?(id: id)
         }
     }
-    /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com servers if both values are not nil
+    /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com if both values are not nil.
     ///
     /// - parameters:
     ///   - response: the response handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
     public class func linkProfileToInstallation(response: ((success: Bool) -> Void)?) {
         guard let profile = profileID, installation = installationID else {
+            Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
+            Console.errorLine("both installation and profile identifiers must be obtained before calling this method")
             response?(success: false)
             return
         }
         
         APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
+            response?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
+    /// Adds data points to the current profile identifier on nearit.com.
+    ///
+    /// This method fails if `NearSDK.profileID` is nil.
+    ///
+    /// - parameters:
+    ///   - points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
+    ///   - response: the response handler which will be called asynchronously when data points have been added to the current profile identifier.
+    public class func addProfileDataPoints(points: [String: String], response: ((success: Bool) -> Void)?) {
+        guard let profile = profileID else {
+            Console.error(NearSDK.self, text: "No profile identifier can be found")
+            Console.errorLine("a profile identifier must be obtained or set before calling this method")
+            response?(success: false)
+            return
+        }
+        
+        APSegmentation.addDataPoints(points, toProfileID: profile) { (status) in
             response?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
         }
     }
