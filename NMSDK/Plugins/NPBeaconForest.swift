@@ -57,20 +57,20 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for node in nodes {
                 Console.infoLine(node.id, symbol: .Add)
-                Console.infoLine("beacon UUID: \(node.proximityUUID.UUIDString)", symbol: .Space)
+                Console.infoLine("beacon UUID: \(node.proximityUUID.UUIDString)")
                 
                 if let name = node.name {
-                    Console.infoLine("       name: \(name)", symbol: .Space)
+                    Console.infoLine("       name: \(name)")
                 }
                 
                 if let major = node.major, minor = node.minor {
-                    Console.infoLine("      major: \(major)", symbol: .Space)
-                    Console.infoLine("      minor: \(minor)", symbol: .Space)
+                    Console.infoLine("      major: \(major)")
+                    Console.infoLine("      minor: \(minor)")
                 }
                 
                 self.hub?.cache.store(node, inCollection: "Regions", forPlugin: self)
                 if node.isRoot {
-                    Console.infoLine("saved as default region", symbol: .Space)
+                    Console.infoLine("saved as default region")
                     self.hub?.cache.store(node, inCollection: "DefaultRegions", forPlugin: self)
                 }
             }
