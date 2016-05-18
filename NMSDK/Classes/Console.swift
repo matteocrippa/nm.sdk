@@ -28,20 +28,20 @@ class Console {
     }
     class func commandError(sourceClass: AnyClass, command: String, cause: String? = nil, requiredParameters: [String] = [], optionalParameters: [String] = []) {
         error(sourceClass, text: "Cannot run \(command)", symbol: .Error)
-        errorLine("required parameters: \(requiredParameters.sort())", symbol: .Space)
-        errorLine("optional parameters: \(optionalParameters.sort())", symbol: .Space)
+        errorLine("required parameters: \(requiredParameters.sort())", symbol: .AlternateSpace)
+        errorLine("optional parameters: \(optionalParameters.sort())", symbol: .AlternateSpace)
         
         if let message = cause {
-            errorLine("              cause: \(message)", symbol: .Space)
+            errorLine("              cause: \(message)", symbol: .AlternateSpace)
         }
     }
     class func commandWarning(sourceClass: AnyClass, command: String, cause: String) {
         warning(sourceClass, text: "Command \(command) produced a warning", symbol: .Error)
-        warningLine("message: \(cause)", symbol: .Space)
+        warningLine("message: \(cause)")
     }
     class func commandNotSupportedError(sourceClass: AnyClass, supportedCommands: Set<String>) {
-        error(sourceClass, text: "Command not supported")
-        errorLine("Supported commands: \(supportedCommands.sort())")
+        error(sourceClass, text: "Command not supported", symbol: .Error)
+        errorLine("Supported commands: \(supportedCommands.sort())", symbol: .AlternateSpace)
     }
     class func errorLine(line: String, symbol: ConsoleSymbol = .Space) {
         log(line, type: .Error, symbol: symbol)

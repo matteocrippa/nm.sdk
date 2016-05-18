@@ -10,6 +10,7 @@ import Foundation
 
 enum ConsoleSymbol {
     case Space
+    case AlternateSpace
     case Add
     case To
     case Download
@@ -21,6 +22,8 @@ enum ConsoleSymbol {
         switch self {
         case .Space:
             return "🔹"
+        case .AlternateSpace:
+            return "🔸"
         case .Add:
             return "➕"
         case .To:

@@ -50,26 +50,35 @@ class NPRecipes: Plugin {
                 self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
                 
                 Console.infoLine(recipe.id, symbol: .Add)
-                Console.infoLine("             name: \(recipe.name)", symbol: .Space)
-                Console.infoLine("notification text: \(recipe.notificationText)", symbol: .Space)
-                Console.infoLine("     pulse plugin: \(recipe.pulse(.Plugin))", symbol: .Space)
-                Console.infoLine("     pulse bundle: \(recipe.pulse(.Bundle))", symbol: .Space)
-                Console.infoLine("     pulse action: \(recipe.pulse(.Action))", symbol: .Space)
+                Console.infoLine("             name: \(recipe.name)")
+                Console.infoLine("     pulse plugin: \(recipe.pulse(.Plugin))")
+                Console.infoLine("     pulse bundle: \(recipe.pulse(.Bundle))")
+                Console.infoLine("     pulse action: \(recipe.pulse(.Action))")
                 
                 if let string = recipe.operation(.Plugin) {
-                    Console.infoLine(" operation plugin: \(string)", symbol: .Space)
+                    Console.infoLine(" operation plugin: \(string)")
                 }
                 if let string = recipe.operation(.Bundle) {
-                    Console.infoLine(" operation bundle: \(string)", symbol: .Space)
+                    Console.infoLine(" operation bundle: \(string)")
                 }
                 if let string = recipe.operation(.Action) {
-                    Console.infoLine(" operation action: \(string)", symbol: .Space)
+                    Console.infoLine(" operation action: \(string)")
                 }
                 
-                Console.infoLine("  reaction plugin: \(recipe.reaction(.Plugin))", symbol: .Space)
-                Console.infoLine("  reaction bundle: \(recipe.reaction(.Bundle))", symbol: .Space)
-                Console.infoLine("  reaction action: \(recipe.reaction(.Action))", symbol: .Space)
+                Console.infoLine("  reaction plugin: \(recipe.reaction(.Plugin))")
+                Console.infoLine("  reaction bundle: \(recipe.reaction(.Bundle))")
+                Console.infoLine("  reaction action: \(recipe.reaction(.Action))")
                 
+                if recipe.notificationTitle != nil || recipe.notificationText != nil {
+                    Console.infoLine("     notification:")
+                    
+                    if let string = recipe.notificationTitle {
+                        Console.infoLine("            title: \(string)")
+                    }
+                    if let string = recipe.notificationText {
+                        Console.infoLine("             text: \(string)")
+                    }
+                }
             }
             Console.infoLine("recipes saved: \(recipes.count)")
             
@@ -153,7 +162,7 @@ class NPRecipes: Plugin {
         }
         
         Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(evaluationKey)")
-        Console.warningLine("content type may be invalid or no content can be found for the given recipe", symbol: .Space)
+        Console.warningLine("content type may be invalid or no content can be found for the given recipe")
         self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" cannot be evaluated", command: "evaluate"))
         return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
     }
