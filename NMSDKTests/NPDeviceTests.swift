@@ -29,14 +29,10 @@ class NPDeviceTests: XCTestCase {
     
     // MARK: Update existing installation identifier
     func testUpdateInstallationIdentifier() {
-        storeSampleDeviceInstallation()
+        THStubs.storeSampleDeviceInstallation()
         
         THStubs.stubRequestDeviceInstallation("installation-id", expectedHTTPStatusCode: .OK)
         let expectation = expectationWithDescription("test update installation identifier")
-        
-        SDKDelegate.didReceiveEvent = { (event) in
-            
-        }
         
         NearSDK.plugins.runAsync(
             CorePlugin.Device.name,
@@ -56,7 +52,7 @@ class NPDeviceTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testUpdateInstallationIdentifierViaSDK() {
-        storeSampleDeviceInstallation()
+        THStubs.storeSampleDeviceInstallation()
         
         THStubs.stubRequestDeviceInstallation("installation-id", expectedHTTPStatusCode: .OK)
         let expectation = expectationWithDescription("test update installation identifier via SDK")
@@ -89,6 +85,7 @@ class NPDeviceTests: XCTestCase {
                 }
                 
                 XCTAssertEqual(DeviceInstallationStatus(rawValue: statusValue), DeviceInstallationStatus.Received)
+                XCTAssertNotNil(NearSDK.installationID)
                 expectation.fulfill()
         }
         
@@ -110,13 +107,6 @@ class NPDeviceTests: XCTestCase {
     }
     
     // MARK: Helper functions
-    private func storeSampleDeviceInstallation() {
-        if let
-            plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name),
-            sample = APDeviceInstallation(json: JSON(dictionary: ["id": "installation-id", "app-id": "app-id", "operating-system": "os", "operating-system-version": "test", "sdk-version": "test"])) {
-                NearSDK.plugins.cache.store(sample, inCollection: "Installations", forPlugin: plugin)
-        }
-    }
     private func reset() {
         if let plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name) {
             NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)

@@ -28,6 +28,13 @@ class THStubs {
         stubAPRecipePollReactions()
     }
     
+    class func storeSampleDeviceInstallation() {
+        if let
+            plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name),
+            sample = APDeviceInstallation(json: JSON(dictionary: ["id": "installation-id", "app-id": "app-id", "operating-system": "os", "operating-system-version": "test", "sdk-version": "test"])) {
+            NearSDK.plugins.cache.store(sample, inCollection: "Installations", forPlugin: plugin)
+        }
+    }
     class func stubTouchPushNotification(pushID: String) {
         stub(isHost("api.nearit.com") && isPath("/plugins/push-machine/pushes/\(pushID)/received")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
