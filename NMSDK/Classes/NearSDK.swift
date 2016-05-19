@@ -204,6 +204,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
+    // MARK: Notifications
     /// Touches a push notification.
     ///
     /// This method marks a notification as "opened" or "touched" on nearit.com.
@@ -264,6 +265,7 @@ public class NearSDK: NSObject, Extensible {
         })
     }
     
+    // MARK: Recipes
     /// Downloads a recipe.
     ///
     /// This method should be used whenever the download of a recipe is preferred, for example in response to a remote notification.
@@ -304,6 +306,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
+    // MARK: Contents' images
     /// Returns some `UIImage` instances asynchronously for a given array of image identifiers.
     ///
     /// This method will download and cache images not found, previously cached images will not be downloaded again.
@@ -384,6 +387,18 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
+    // MARK: Installation
+    /// Gets the current installation identifier.
+    ///
+    /// This value can be refreshed by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
+    public static var installationID: String? {
+        let response = plugins.run(CorePlugin.Device.name, command: "read")
+        guard let id = response.content.string("installation-id") where response.status == .OK else {
+            return nil
+        }
+        
+        return id
+    }
     /// Refreshes an existing installation identifier or requests a new one.
     ///
     /// If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
@@ -507,8 +522,12 @@ public class NearSDK: NSObject, Extensible {
         return false
     }
     
+    // MARK: -
+    // MARK: Experimental
     // MARK: Segmentation
     /// Gets or sets the current profile identifier.
+    ///
+    /// - warning: Experimental
     ///
     /// If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `NearSDK.requestNewProfileID(_:)`.
     public static var profileID: String? {
@@ -529,18 +548,9 @@ public class NearSDK: NSObject, Extensible {
             plugins.run(CorePlugin.Segmentation.name, command: "save", withArguments: JSON(dictionary: ["id": id]))
         }
     }
-    /// Gets the current installation identifier.
-    ///
-    /// This value can be refreshed by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
-    public static var installationID: String? {
-        let response = plugins.run(CorePlugin.Device.name, command: "read")
-        guard let id = response.content.string("installation-id") where response.status == .OK else {
-            return nil
-        }
-        
-        return id
-    }
     /// Requests a new profile identifier.
+    ///
+    /// - warning: Experimental
     ///
     /// This method requires `NearSDK.installationID` to be not nil and will return the cached profile identifier, if found.
     /// - parameters:
@@ -566,6 +576,7 @@ public class NearSDK: NSObject, Extensible {
     }
     /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com if both values are not nil.
     ///
+    /// - warning: Experimental
     /// - parameters:
     ///   - response: the response handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
     public class func linkProfileToInstallation(response: ((success: Bool) -> Void)?) {
@@ -582,8 +593,9 @@ public class NearSDK: NSObject, Extensible {
     }
     /// Adds data points to the current profile identifier on nearit.com.
     ///
-    /// This method fails if `NearSDK.profileID` is nil.
+    /// - warning: Experimental
     ///
+    /// This method fails if `NearSDK.profileID` is nil.
     /// - parameters:
     ///   - points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
     ///   - response: the response handler which will be called asynchronously when data points have been added to the current profile identifier.
