@@ -113,3 +113,30 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
 
 All reactions evaluated by `NearSDK` may include a reference to the evaluating `Recipe`, i.e. the transformation of an input event into an output reaction.
+
+*Push notifications and NearSDK*
+
+`NearSDK` can manage push notifications sent from nearit.com backend.
+
+If this scenario must be supported by apps with `NearSDK`, two informations must be obtained:
+
+- a valid Apple Push Notification Token
+- a valid installation identifier from nearit.com
+
+As the name implies, the *installation identifier* is what uniquely identifies a specific installation of a `NearSDK`-powered app and such identifier could be tied to an APNS token.
+
+Installation identifiers can be only refreshed by calling `refreshInstallationID(APNSToken:didRefresh:)` class method of `NearSDK`.
+
+Because this method accepts an optional `APNSToken`, it should be called either when an APNS token has been obtained or not.
+
+**Code snippet** - *refresh installation id with APNS token*
+
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+      NearSDK.refreshInstallationID(APNSToken: deviceToken, didRefresh: nil)
+    }
+
+**Code snippet** - *refresh installation id without APNS token*
+
+    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
+      NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
+    }
