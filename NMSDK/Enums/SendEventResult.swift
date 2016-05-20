@@ -8,17 +8,27 @@
 
 import Foundation
 
-/// The result of a "send event" action executed by calling `NearSDK.sendEvent(_:response:)`
+/**
+ The result of a "send event" action executed by calling `NearSDK.sendEvent(_:response:)`.
+ 
+ - seealso: `NearSDK.sendEvent(_:response:)`
+ */
 @objc
 public enum SendEventResult: Int, CustomStringConvertible {
-    /// Returned whenever an event is successfully sent to nearit.com
+    /**
+     Returned whenever an event is successfully sent to nearit.com.
+     */
     case Success = 1
     
-    /// Returned whenever an event is not sent to nearit.com
+    /**
+     Returned whenever an event is not sent to nearit.com.
+     */
     case Failure = 0
     
     // MARK: Properties
-    /// Human-readable description of `Self`.
+    /**
+     Human-readable description of `Self`.
+     */
     public var description: String {
         switch self {
         case Success:

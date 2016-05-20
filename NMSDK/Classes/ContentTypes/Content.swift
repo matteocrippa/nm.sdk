@@ -9,36 +9,55 @@
 import Foundation
 import NMNet
 
-/// A content reaction.
+/**
+ A content reaction.
+ */
 @objc
 public class Content: NSObject {
     // MARK: Properties
-    /// The identifier of the content.
+    /**
+     The identifier of the content.
+     */
     public private (set) var id = ""
     
-    /// The text of the content.
+    /**
+     The text of the content.
+     */
     public private (set) var text = ""
     
-    /// The attributed text of the content - it is assumed that the value of `text` is a valid HTML string
+    /**
+     The attributed text of the content.
+     
+     - note: It is assumed that the value of `text` is a valid HTML string.
+     */
     public private (set) var attributedText: NSAttributedString?
     
-    /// The identifiers of image contents associated to the content.
+    /**
+     The identifiers of image contents associated to the content.
+     */
     public var imageIdentifiers = [String]()
     
-    /// The URL of the video associated to the content.
+    /**
+     The URL of the video associated to the content.
+     */
     public var videoURL: NSURL?
     
-    /// The creation date of the content
+    /**
+     The creation date of the content.
+     */
     public private (set) var creationDate: NSDate?
     
-    /// The last update date of the content
+    /**
+     The last update date of the content.
+     */
     public private (set) var lastUpdate: NSDate?
     
     // MARK: Initializers
-    /// Initializes a new `Content`.
-    ///
-    /// - parameters:
-    ///   - content: the source `APRecipeContent` instance
+    /**
+     Initializes a new `Content`.
+     
+     - parameter content: the source `APRecipeContent` instance
+     */
     public init(content: APRecipeContent) {
         super.init()
         
@@ -53,7 +72,9 @@ public class Content: NSObject {
     }
     
     // MARK: Properties
-    /// Human-readable description of `Self`.
+    /**
+     Human-readable description of `Self`.
+     */
     public override var description: String {
         return Console.describe(Content.self, properties: ("id", id), ("text", text), ("imageIdentifiers", imageIdentifiers.joinWithSeparator(", ")), ("video", videoURL))
     }

@@ -10,65 +10,98 @@ import Foundation
 import NMPlug
 import NMJSON
 
-/// Errors of the SDK.
+/**
+ Errors produced by `NearSDK`.
+ */
 @objc
 public enum NearSDKError: Int, CustomStringConvertible {
-    /// Thrown when `NearSDK.tokenInAppConfiguration` is `true` and app's `Info.plist` file does not include key `NearSDKToken`, which must be a valid JWT token issued for an app registered on nearit.com.
+    /**
+     Thrown when `NearSDK.start(appToken:)` is called when `appToken` parameter is nil or omitted and app's `Info.plist` file does not include key `NearSDKToken`: the token must be a valid JWT token issued for an app registered on nearit.com.
+     
+     - seealso: `NearSDK.start(appToken:)`
+     */
     case TokenNotFoundInAppConfiguration = 1
     
-    /// Thrown when `NearSDK` is started, but the configuration of `BeaconForest` plugin cannot be downloaded.
-    ///
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
+    /**
+     Thrown when `NearSDK` is started, but the configuration of `BeaconForest` plugin cannot be downloaded.
+     
+     If this error occurs, `NearSDK` will never be able to evaluate reactions when an iBeacon™ is detected.
+     */
     case CannotDownloadRegionMonitoringConfiguration = 1000
     
-    /// Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways` or `CLAuthorizationStatus.AuthorizedWhenInUse`.
-    ///
-    /// Appropriate authorization levels should be obtained before starting `NearSDK`.
-    /// 
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
+    /**
+     Thrown when `NearSDK` is started, but `CLLocationManager.authorizationStatus()` is not `CLAuthorizationStatus.AuthorizedAlways` or `CLAuthorizationStatus.AuthorizedWhenInUse`.
+     
+     Appropriate authorization levels should be obtained before starting `NearSDK`.
+     
+     If this error occurs, `NearSDK` will never be able to evaluate reactions when an iBeacon™ is detected.
+     */
     case RegionMonitoringIsNotAuthorized = 1001
     
-    /// Thrown when `NearSDK` is started, the user authorized the app to monitor region changes in background, but no regions can be monitored because the configuration of `BeaconForest` plugin is empty.
-    /// 
-    /// If this error occurs, `NearSDK` will never be able to evaluate any type of content when an iBeacon™ is detected, be it a content or a poll.
+    /**
+     Thrown when `NearSDK` is started, the user authorized the app to monitor region changes in background, but no regions can be monitored because the configuration of `BeaconForest` plugin is empty.
+     
+     If this error occurs, `NearSDK` will never be able to evaluate reactions when an iBeacon™ is detected.
+     */
     case NoRegionsToMonitor = 1002
     
-    /// Thrown when `NearSDK` fails at monitoring a certain region
+    /**
+     Thrown when `NearSDK` fails at monitoring a certain region.
+     */
     case RegionMonitoringDidFail = 1003
     
-    /// Thrown when `NearSDK` is started, but recipes cannot be downloaded.
-    /// 
-    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate any content or poll reaction.
+    /**Thrown when `NearSDK` is started, but recipes cannot be downloaded.
+     
+     While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate reactions.
+     */
     case CannotDownloadRecipes = 2000
     
-    /// Thrown when `NarSDK` cannot evaluate correctly an event.
+    /**
+     Thrown when `NarSDK` cannot evaluate correctly an event.
+     */
     case CannotEvaluateRecipe = 3000
     
-    /// Thrown when `NearSDK` cannot evaluate a recipe online or other errors occur when the online evaluation of a recipe is requested
+    /**
+     Thrown when `NearSDK` cannot evaluate a recipe online or other errors occur when the online evaluation of a recipe is requested.
+     */
     case CannotEvaluateRecipeOnline = 3001
     
-    /// Thrown when `NearSDK` is started, but content reactions cannot be downloaded.
-    ///
-    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate content reactions.
-    ///
-    /// `NearSDK` will be able to evaluate polls when an iBeacon™ is detected.
+    /**
+     Thrown when `NearSDK` is started, but `Content` reactions cannot be downloaded from nearit.com.
+     
+     While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate `Content` reactions.
+     
+     `NearSDK` will be able to evaluate contents when an iBeacon™ is detected.
+     
+     - seealso: `Content`
+     */
     case CannotDownloadContentReactions = 5000
     
-    /// Thrown when `NearSDK` is started, but poll reactions cannot be downloaded.
-    ///
-    /// While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate poll reactions.
-    /// 
-    /// `NearSDK` will be able to evaluate contents when an iBeacon™ is detected.
+    /**
+     Thrown when `NearSDK` is started, but `Poll` reactions cannot be downloaded.
+     
+     While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate `Poll` reactions.
+     
+     `NearSDK` will be able to evaluate polls when an iBeacon™ is detected.
+     
+     - seealso: `Poll`
+     */
     case CannotDownloadPollReactions = 6000
     
-    /// Thrown when `NearSDK` cannot request an installation identifier.
+    /**
+     Thrown when `NearSDK` cannot request an installation identifier.
+     */
     case CannotReceiveInstallationID = 7000
     
-    /// Thrown when `NearSDK` cannot update an existing installation identifier.
+    /**
+     Thrown when `NearSDK` cannot update an existing installation identifier.
+     */
     case CannotUpdateInstallationID = 7001
     
     // MARK: Properties
-    /// Human-readable description of `Self`.
+    /**
+     Human-readable description of `Self`.
+     */
     public var description: String {
         switch self {
         case TokenNotFoundInAppConfiguration:
@@ -99,11 +132,12 @@ public enum NearSDKError: Int, CustomStringConvertible {
     }
     
     // MARK: Initializers
-    /// Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
-    /// 
-    /// - parameters:
-    ///   - rawValue: must be either 1, 1000, 1001, 1002, 2000, 3000, 3001, 5000, 6000, 7000 or 7001
-    ///   - returns: `nil` if rawValue is not 1, 1000, 1001, 1002, 2000, 3000, 3001, 5000, 6000, 7000 or 7001
+    /**
+     Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
+     
+     - parameter rawValue: must be either `1`, `1000`, `1001`, `1002`, `2000`, `3000`, `3001`, `5000`, `6000`, `7000` or `7001`
+     - returns: `nil` if `rawValue` is not `1`, `1000`, `1001`, `1002`, `2000`, `3000`, `3001`, `5000`, `6000`, `7000` or `7001`
+     */
     public init?(rawValue: Int) {
         switch rawValue {
         case 1:

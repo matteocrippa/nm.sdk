@@ -12,31 +12,34 @@ import NMNet
 import NMJSON
 import NMPlug
 
-/// nearit.com iOS SDK.
-///
-/// NearSDK is designed to work with nearit.com platform.
-/// 
-/// Apps linked to nearit.com apps can:
-///
-/// - detect iBeacon™s
-/// - evaluate (i.e. return) contents or polls (reactions) when an "enter region" event is detected for an iBeacon™ registered on nearit.com
-/// NearSDK should be configured and started as soon as possible, for example in app's delegate method `application(_:didFinishLaunchingWithOprions:)`.
-///
-/// To configure NearSDK, a valid nearit.com token must be obtained from nearit.com and must be passed to NearSDK as an argument at startup time.
-///
-/// NearSDK can be started by one out of two class methods:
-/// - start()
-/// - start(appToken:)
-/// 
-/// If NearSDK is started by calling start(), app's `Info.plist` file must include nearit.com app token for key `NearSDKToken`.
-/// 
-/// If the app needs to use reactions (i.e. contents or polls) evaluated by NearSDK, one or more of its classes must implement `NearSDKDelegate` protocol's methods; `delegate` property of NearSDK must be set to the class(es) implementing `NearSDKDelegate` which should use reactions evaluated in response to the detection of a beacon.
-///
-/// The source code of NearSDK is open source and distributed with MIT license: for more informations, check the [NearSDK GitHub repository](https://github.com/nearit/nm.sdk)
+/**
+ nearit.com iOS SDK.
+ 
+ NearSDK is designed to work with nearit.com platform.
+ 
+ Apps linked to nearit.com apps can:
+ 
+ - detect iBeacon™s
+ - evaluate (i.e. return) contents or polls (reactions) when an "enter region" event is detected for an iBeacon™ registered on nearit.com
+ 
+ NearSDK should be configured and started as soon as possible, for example in app's delegate method `application(_:didFinishLaunchingWithOprions:)`.
+ 
+ To configure NearSDK, a valid nearit.com token must be obtained from nearit.com and must be passed to NearSDK as an argument at startup time.
+ 
+ NearSDK can be started by calling class method `start(appToken:)`.
+ 
+ If `appToken` parameter of `start(appToken:)` is omitted or it is `nil`, app's `Info.plist` file must include nearit.com app token for key `NearSDKToken`.
+ 
+ If the app needs to use reactions (i.e. contents or polls) evaluated by NearSDK, one or more of its classes must implement `NearSDKDelegate` protocol's methods; `delegate` property of NearSDK must be set to the class(es) implementing `NearSDKDelegate` which should use reactions evaluated in response to the detection of a beacon.
+ 
+ The source code of NearSDK is open source and distributed with MIT license: for more informations, check the [NearSDK GitHub repository](https://github.com/nearit/nm.sdk).
+ */
 @objc
 public class NearSDK: NSObject, Extensible {
     // MARK: Static constants
-    /// A `String` representing the current version of `NearSDK`.
+    /**
+     A `String` representing the current version of `NearSDK`.
+    */
     static let currentVersion = "0.8"
     
     private static let sharedSDK = NearSDK()
@@ -66,11 +69,13 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Class properties
-    /// The delegate object which will receive SDK's events.
-    /// 
-    /// The SDK will produce easy to process events whenever a core plugin will produce an event.
-    /// 
-    /// Events produced by 3rd party plugins will be sent to the delegate as they are received.
+    /**
+     The delegate object which will receive SDK's events.
+     
+     The SDK will produce easy to process events whenever a core plugin will produce an event.
+     
+     Events produced by 3rd party plugins will be sent to the delegate as they are received.
+     */
     public class var delegate: NearSDKDelegate? {
         get {
             return sharedSDK.delegate
@@ -85,11 +90,13 @@ public class NearSDK: NSObject, Extensible {
         return sharedSDK.pluginHub
     }
     
-    /// The app token linked to an app registered on nearit.com.
-    ///
-    /// The token must be a valid JSON Web Token.
-    /// 
-    /// If the token is a valid nearit.com token, `API.appID` property will return the app identifier of an app registered on nearit.com for which the authorization token has been issued, otherwise, `API.appID` will be empty, but `API.authorizationToken` will be equal to the new value.
+    /**
+     The app token linked to an app registered on nearit.com.
+     
+     The token must be a valid JSON Web Token.
+     
+     If the token is a valid nearit.com token, `appID` property will return the app identifier of an app registered on nearit.com for which the authorization token has been issued, otherwise it will be empty, but `authorizationToken` will be equal to the new value.
+     */
     public class var appToken: String {
         get {
             return  API.authorizationToken
@@ -98,15 +105,19 @@ public class NearSDK: NSObject, Extensible {
             API.authorizationToken = newToken
         }
     }
-    /// The app identifier defined by `NearSDK.app`.
+    /**
+     The app identifier defined in defined by `appToken`.
+     */
     public class var appID: String {
         return API.appID
     }
-    /// The timeout interval of web requests sent to nearit.com servers.
-    ///
-    /// The default value is `10` seconds.
-    /// 
-    /// This value must be greater than `0`: assigning a value less than or equal to `0` will reset the timeout interval to `10` seconds.
+    /**
+     The timeout interval of web requests sent to nearit.com servers.
+     
+     The default value is `10` seconds.
+     
+     This value must be greater than `0`: assigning a value less than or equal to `0` will reset the timeout interval to `10` seconds.
+     */
     public class var timeoutInterval: NSTimeInterval {
         get {
             return sharedSDK.timeoutInterval
@@ -115,9 +126,11 @@ public class NearSDK: NSObject, Extensible {
             sharedSDK.timeoutInterval = (newTimeoutInterval <= 0 ? 10 : newTimeoutInterval)
         }
     }
-    /// A flag controlling the console output of `NearSDK`.
-    /// 
-    /// If true, NearSDK will output some informations on Xcode's console: the default value is `false`.
+    /**
+     A flag controlling the console output of `NearSDK`.
+     
+     If true, NearSDK will output some informations on Xcode's console: the default value is `false`.
+     */
     public class var consoleOutput: Bool {
         get {
             return sharedSDK.consoleOutput
@@ -126,9 +139,11 @@ public class NearSDK: NSObject, Extensible {
             sharedSDK.consoleOutput = newFlag
         }
     }
-    /// A flag which controls if events generate by `NearSDK`'s core plugin are forwarded to the object implementing `NearSDKDelegate` protocol, which is set via `NearSDK.delegate` property.
-    ///
-    /// If `true`, all events generated by core plugins will be forwarded to delegate "as-is", otherwise they will be silenced - the delegate will not receive any of these events.
+    /**
+     A flag which controls if events generate by `NearSDK`'s core plugin are forwarded to the object implementing `NearSDKDelegate` protocol, which is set via `delegate` property.
+     
+     If `true`, all events generated by core plugins will be forwarded to delegate "as-is", otherwise they will be silenced: the delegate will not receive any of these events.
+     */
     public class var forwardCoreEvents: Bool {
         get {
             return sharedSDK.forwardCoreEvents
@@ -137,25 +152,29 @@ public class NearSDK: NSObject, Extensible {
             sharedSDK.forwardCoreEvents = newFlag
         }
     }
-    /// The names of the core plugins used by `NearSDK`.
+    /**
+     The names of the core plugins used by `NearSDK`.
+     */
     public class var corePluginNames: [String] {
         return sharedSDK.corePluginNames
     }
     
     // MARK: Controlling `NearSDK`
-    /// Starts the SDK.
-    ///
-    /// - parameters:
-    ///   - appToken: the app token used by `NearSDK`; if nil or not defined, it must be configured in app's `Info.plist` file for key `NearSDKToken`
-    /// - returns: `true` if `appToken` is valid and all core plugins have been started successfully, `false` otherwise
+    /**
+     Starts the SDK.
+     
+     - note: If `appToken` parameter is omitted, app's `Info.plist` file must include nearit.com app token for key `NearSDKToken`.
+     - parameter appToken: the app token used by `NearSDK`; if `nil` or not defined, it must be configured in app's `Info.plist` file for key `NearSDKToken`
+     - returns: `true` if `appToken` is valid and all core plugins have been started successfully, `false` otherwise
+     */
     public class func start(appToken token: String? = nil) -> Bool {
-        // token is defined
+        // Token has been defined
         if let aToken = token {
             NearSDK.appToken = aToken
             return startCorePlugins()
         }
         
-        // token is not defined (nil): use value NearSDKToken configured in app's Info.plist
+        // Token is nil: use value NearSDKToken configured in app's Info.plist
         guard let aToken = NSBundle.mainBundle().objectForInfoDictionaryKey("NearSDKToken") as? String else {
             delegate?.nearSDKDidFail?(
                 error: NearSDKError.TokenNotFoundInAppConfiguration,
@@ -204,7 +223,9 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
-    /// Clears the cache of all core plugins.
+    /**
+     Clears the cache of all core plugins.
+     */
     public class func clearCorePluginsCache() {
         for name in corePluginNames {
             if let plugin: Plugin = plugins.pluginNamed(name) {
@@ -214,20 +235,25 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Notifications
-    /// Touches a push notification.
-    ///
-    /// This method marks a notification as "opened" or "touched" on nearit.com.
-    /// The input parameter `userInfo` must include at least the key `push_id`, otherwise no push will be touched.
-    /// If `downloadRecipe` is set to `true`, `userInfo` must also include key `recipe_id`.
-    /// This method will read the current installation identifier and will not touch the push notification if no installation identifier can be found.
-    /// An installation identifier can be obtained by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
-    ///
-    /// - parameters:
-    ///   - userInfo: the userInfo dictionary of the remote push notification
-    ///   - action: the touch action - `Received` or `Opened`
-    ///   - downloadRecipe: if `true`, this method will try to download the recipe linked to the push notification; the identifier of the recipe must be define in `userInfo` key `recipe_id`. The default value of this flag is `false`
-    ///   - completionHandler: an optional handler which informs if the push notification has been touched on nearit.com
-    /// - seealso: `refreshInstallationID(APNSToken:didRefresh:)`
+    /**
+     Touches a push notification.
+     
+     This method marks a notification as "opened" or "touched" on nearit.com.
+     
+     The input parameter `userInfo` must include at least the key `push_id`, otherwise no push will be touched.
+     
+     If `downloadRecipe` is set to `true`, `userInfo` must also include key `recipe_id`.
+     
+     This method will read the current installation identifier and will not touch the push notification if no installation identifier can be found.
+     
+     An installation identifier can be obtained by calling `refreshInstallationID(APNSToken:didRefresh:)`.
+     
+     - parameter userInfo: the userInfo dictionary of the remote push notification
+     - parameter action: the touch action - `Received` or `Opened`
+     - parameter downloadRecipe: if `true`, this method will try to download the recipe linked to the push notification; the identifier of the recipe must be define in `userInfo` key `recipe_id`. The default value of this flag is `false`
+     - parameter completionHandler: an optional handler which informs if the push notification has been touched on nearit.com
+     - seealso: `refreshInstallationID(APNSToken:didRefresh:)`
+     */
     public class func touchPushNotification(userInfo userInfo: [NSObject: AnyObject], action: PushNotificationAction, downloadRecipe: Bool = false, completionHandler: DidTouchNotification? = nil) {
         let response = plugins.run(CorePlugin.Device.name, command: "read")
         guard let pushID = userInfo["push_id"] as? String, installationID = response.content.string("installation-id") where response.status == PluginResponseStatus.OK else {
@@ -275,25 +301,30 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Recipes
-    /// Downloads a recipe.
-    ///
-    /// This method should be used whenever the download of a recipe is preferred, for example in response to a remote notification.
-    /// - parameters:
-    ///   - id: the identifier of the recipe which should be downloaded
-    ///   - completionHandler: an optional handler which informs if the download succeeded or not
+    /**
+     Downloads a recipe.
+     
+     This method should be used whenever the download of a recipe is preferred, for example in response to a remote notification.
+     
+     - parameter id: the identifier of the recipe which should be downloaded
+     - parameter completionHandler: an optional handler which informs if the download succeeded or not
+     */
     public class func downloadRecipe(id: String, completionHandler: DidCompleteOperation? = nil) {
         plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval])) { (response) in
             completionHandler?(success: response.status == .OK)
         }
     }
-    /// Evaluates a recipe.
-    ///
-    /// This method evaluates a recipe immediately if it has been downloaded previously, otherwise it will download it before attempting to evaluate it again.
-    /// The result of the evaluation will be forwarded to `nearSDKDidEvaluateRecipe(_:)` method of `NearSDKDelegate` protocol.
-    /// - parameters:
-    ///   - id: the identifier of the recipe which should be evaluated
-    ///   - downloadAgain: if `true`, the recipe will be downloaded again; the default value of this flag is `false` - this option will overwrite the recipe which was cached for the given identifier, including its contents; if the download fails, the old copy of the recipe will be evaluated
-    ///   - completionHandler: an optionalHandler which informs if the evaluation succeeded and if the recipe has been downloaded
+    /**
+     Evaluates a recipe.
+     
+     This method evaluates a recipe immediately if it has been downloaded previously, otherwise it will download it before attempting to evaluate it again.
+     
+     The result of the evaluation will be forwarded to `nearSDKDidEvaluateRecipe(_:)` method of `NearSDKDelegate` protocol.
+     
+     - parameter id: the identifier of the recipe which should be evaluated
+     - parameter downloadAgain: if `true`, the recipe will be downloaded again; the default value of this flag is `false` - this option will overwrite the recipe which was cached for the given identifier, including its contents; if the download fails, the old copy of the recipe will be evaluated
+     - parameter completionHandler: an optionalHandler which informs if the evaluation succeeded and if the recipe has been downloaded
+     */
     public class func evaluateRecipe(id: String, downloadAgain: Bool = false, completionHandler: DidEvaluateRecipe? = nil) {
         if downloadAgain {
             downloadAndEvaluateRecipe(id, completionHandler: completionHandler)
@@ -316,16 +347,17 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Contents' images
-    /// Returns some `UIImage` instances asynchronously for a given array of image identifiers.
-    ///
-    /// This method will download and cache images not found, previously cached images will not be downloaded again.
-    ///
-    /// When executed, the asynchronous handler `didFetchImages(images:downloaded:notFound:)` will return a `[String: UIImage]` dictionary of all images which have been found (`images`), the array of identifiers of downloaded images (`downloaded`: those images are included in `images`) and an array indicating the identifiers of images which cannot be found locally or downloaded.
-    ///
-    /// - parameters:
-    ///   - identifiers: the identifiers of requested images; those identifiers must be linked to content reactions
-    ///   - didFetchImages: the closure which should be exectude when images have been fetched
-    /// - seealso: `Content` class
+    /**
+     Returns some `UIImage` instances asynchronously for a given array of image identifiers.
+     
+     This method will download and cache images not found, previously cached images will not be downloaded again.
+     
+     When executed, the asynchronous handler `didFetchImages(images:downloaded:notFound:)` will return a `[String: UIImage]` dictionary of all images which have been found (`images`), the array of identifiers of downloaded images (`downloaded`: those images are included in `images`) and an array indicating the identifiers of images which cannot be found locally or downloaded.
+     
+     - parameter identifiers: the identifiers of requested images; those identifiers must be linked to content reactions
+     - parameter didFetchImages: the closure which should be exectude when images have been fetched
+     - seealso: `Content`
+    */
     public class func imagesWithIdentifiers(identifiers: [String], didFetchImages: DidFetchImages? = nil) {
         var fetched = [String: UIImage]()
         var notFound = Set<String>()
@@ -382,11 +414,14 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
-    /// Clears all cached images.
-    /// 
-    /// All subsequent calls to `NearSDK.imagesWithIdentifiers(_:didFetchImages:)` may download images again.
-    ///
-    /// - returns: `true` if the cache has been cleared, `false` otherwise
+    /**
+     Clears all cached images.
+     
+     All subsequent calls to `imagesWithIdentifiers(_:didFetchImages:)` may download images again.
+     
+     - returns: `true` if the cache has been cleared, `false` otherwise
+     - seealso: `imagesWithIdentifiers(_:didFetchImages:)`
+     */
     public class func clearImageCache() -> Bool {
         let didClearImageCache = (plugins.run(CorePlugin.ImageCache.name, command: "clear").status == .OK)
         if !didClearImageCache {
@@ -397,9 +432,13 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Installation
-    /// Gets the current installation identifier.
-    ///
-    /// This value can be refreshed by calling `NearSDK.refreshInstallationID(APNSToken:didRefresh:)`.
+    /**
+     Gets the current installation identifier.
+     
+     This value can be refreshed by calling `refreshInstallationID(APNSToken:didRefresh:)`.
+     
+     - seealso: `refreshInstallationID(APNSToken:didRefresh:)`
+     */
     public static var installationID: String? {
         let response = plugins.run(CorePlugin.Device.name, command: "read")
         guard let id = response.content.string("installation-id") where response.status == .OK else {
@@ -408,13 +447,14 @@ public class NearSDK: NSObject, Extensible {
         
         return id
     }
-    /// Refreshes an existing installation identifier or requests a new one.
-    ///
-    /// If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
-    ///
-    /// - parameters:
-    ///   - APNSToken: the optional Apple Push Notification token which should be associated to the device installation
-    ///   - didRefresh: the closure which should be executed when the refresh of the installation identifier ends
+    /**
+     Refreshes an existing installation identifier or requests a new one.
+     
+     If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
+     
+     - parameter APNSToken: the optional Apple Push Notification token which should be associated to the device installation
+     - parameter didRefresh: the closure which should be executed when the refresh of the installation identifier ends
+     */
     public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: DidRefreshInstallationIdentifier?) {
         var dictionary = [String: AnyObject]()
         dictionary["app-token"] = NearSDK.appToken
@@ -440,14 +480,16 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Communicating with NearSDK
-    /// Sends an event to a registered plugin.
-    /// 
-    /// The plugin must support "post" asynchronous command and its response must include the raw (Int) value of a HTTPStatusCode case in response content for key `HTTPStatusCode`.
-    /// The result of the action will be `SendEventResult.Success` if the class of the HTTP status code is `HTTPStatusCodeClass.Successful`.
-    ///
-    /// - parameters:
-    ///   - event: the event being sent
-    ///   - response: the handler which will be executed when `event`'s recipient will end processing `event`
+    /**
+     Sends an event to a registered plugin.
+     
+     The plugin must support "post" asynchronous command and its response must include the raw (Int) value of a HTTPStatusCode case in response content for key `HTTPStatusCode`.
+     
+     The result of the action will be `SendEventResult.Success` if the class of the HTTP status code is `HTTPStatusCodeClass.Successful`.
+     
+     - parameter event: the event being sent
+     - parameter response: the handler which will be executed when `event`'s recipient will end processing `event`
+     */
     public class func sendEvent(event: EventSerializable, response handler: DidSendEvent?) {
         plugins.runAsync(CorePlugin.Polls.name, command: "post", withArguments: event.body) { (response) in
             let status = HTTPStatusCode(rawValue: response.content.int("HTTPStatusCode", fallback: -1)!)
@@ -456,19 +498,23 @@ public class NearSDK: NSObject, Extensible {
             handler?(response: response, status: status, result: result)
         }
     }
-    /// Sends an answer for a given poll to nearit.com.
-    ///
-    /// This is a facility method which sends a `PollAnswer` instance by calling `NearSDK.sendEvent(_:response:)`.
-    ///
-    /// - parameters:
-    ///   - answer: the answer
-    ///   - poll: the identifier of the target poll
-    ///   - response: the handler which will be executed when the answer is sent to nearit.com or when an error occurs
+    /**
+     Sends an answer for a given poll to nearit.com.
+     
+     This is a facility method which sends a `PollAnswer` instance by calling `sendEvent(_:response:)`.
+     
+     - parameter answer: the answer
+     - parameter poll: the identifier of the target poll
+     - parameter response: the handler which will be executed when the answer is sent to nearit.com or when an error occurs
+     - seealso: `sendEvent(_:response:)`
+     */
     public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: DidSendEvent?) {
         sendEvent(PollAnswer(poll: poll, answer: answer), response: handler)
     }
     
-    /// Manages plugins sent from registered plugins to `NearSDK`.
+    /**
+     Manages plugins sent from registered plugins to `NearSDK`.
+     */
     public func didReceivePluginEvent(event: PluginEvent) {
         manageRecipeReaction(event)
         manageCoreEventForwarding(event)
@@ -534,12 +580,17 @@ public class NearSDK: NSObject, Extensible {
     // MARK: -
     // MARK: Experimental
     // MARK: Recipes
-    /// Downloads processed recipes from nearit.com backend.
-    ///
-    /// This method will use cached profile and installation identifiers and will fail if one or both of them are nil.
-    /// Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
-    /// - parameters:
-    ///   - completionHandler: the handler which will be called when download process ends or when an error occurs
+    /**
+     Downloads processed recipes from nearit.com backend.
+     
+     - warning: **Experimental**
+     
+     This method will use cached profile and installation identifiers and will fail if one or both of them are `nil`.
+     
+     Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
+     
+     - parameter completionHandler: the handler which will be called when download process ends or when an error occurs
+     */
     public class func downloadProcessedRecipes(completionHandler: DidDownloadProcessedRecipes?) {
         guard let profile = profileID, installation = installationID else {
             completionHandler?(success: false, recipes: [], contents: [], polls: [])
@@ -602,11 +653,15 @@ public class NearSDK: NSObject, Extensible {
     }
     
     // MARK: Segmentation
-    /// Gets or sets the current profile identifier.
-    ///
-    /// - warning: Experimental
-    ///
-    /// If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `NearSDK.requestNewProfileID(_:)`.
+    /**
+     Gets or sets the current profile identifier.
+     
+     - warning: **Experimental**
+     
+     If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `requestNewProfileID(_:)`.
+     
+     - seealso: `requestNewProfileID(_:)`
+     */
     public static var profileID: String? {
         get {
             let response = plugins.run(CorePlugin.Segmentation.name, command: "read")
@@ -625,13 +680,16 @@ public class NearSDK: NSObject, Extensible {
             plugins.run(CorePlugin.Segmentation.name, command: "save", withArguments: JSON(dictionary: ["id": id]))
         }
     }
-    /// Requests a new profile identifier.
-    ///
-    /// - warning: Experimental
-    ///
-    /// This method requires `NearSDK.installationID` to be not nil and will return the cached profile identifier, if found.
-    /// - parameters:
-    ///   - completionHandler: the handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
+    /**
+     Requests a new profile identifier.
+     
+     - warning: **Experimental**
+     
+     This method requires `installationID` to be not `nil` and will return the cached profile identifier, if found.
+     
+     - parameter completionHandler: the handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
+     - seealso: `installationID`
+     */
     public class func requestNewProfileID(completionHandler: DidRefreshIdentifier?) {
         if let id = profileID {
             Console.info(NearSDK.self, text: "A cached profile identifier has been found and will be returned instead of requesting a new one")
@@ -651,11 +709,22 @@ public class NearSDK: NSObject, Extensible {
             completionHandler?(id: id)
         }
     }
-    /// Links the `NearSDK.profileID` to `NearSDK.installationID` on nearit.com if both values are not nil.
-    ///
-    /// - warning: Experimental
-    /// - parameters:
-    ///   - completionHandler: the handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
+    /**
+     Links the `profileID` to `installationID` on nearit.com if both values are not `nil`.
+     
+     - warning: **Experimental**
+     
+     This method requires two values to be cached, i.e. a profile identifier and an installation identifier.
+     
+     If such values could not be found locally, they must be requested (profile identifier) or refreshed (installation identifier).
+     
+     - parameter completionHandler: the handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
+     - seealso:
+       - `profileID`
+       - `requestNewProfileID(_:)`
+       - `installationID`
+       - `refreshInstallationID(APNSToken:didRefresh:)`
+     */
     public class func linkProfileToInstallation(completionHandler: DidCompleteOperation?) {
         guard let profile = profileID, installation = installationID else {
             Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
@@ -668,14 +737,17 @@ public class NearSDK: NSObject, Extensible {
             completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
         }
     }
-    /// Adds data points to the current profile identifier on nearit.com.
-    ///
-    /// - warning: Experimental
-    ///
-    /// This method fails if `NearSDK.profileID` is nil.
-    /// - parameters:
-    ///   - points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
-    ///   - completionHandler: the handler which will be called asynchronously when data points have been added to the current profile identifier.
+    /**
+     Adds data points to the current profile identifier on nearit.com.
+     
+     - warning: **Experimental**
+     
+     This method fails if `profileID` is `nil`.
+     
+     - parameter points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
+     - parameter completionHandler: the handler which will be called asynchronously when data points have been added to the current profile identifier.
+     - seealso: `profileID`
+     */
     public class func addProfileDataPoints(points: [String: String], completionHandler: DidCompleteOperation?) {
         guard let profile = profileID else {
             Console.error(NearSDK.self, text: "No profile identifier can be found")
