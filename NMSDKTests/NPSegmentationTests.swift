@@ -95,7 +95,8 @@ class NPSegmentationTests: XCTestCase {
     private func reset() {
         NearSDK.profileID = nil
         SDKDelegate.clearHandlers()
-        NearSDK.clearImageCache()
+        NearSDK.clearCorePluginsCache()
+        NearSDK.profileID = nil
         NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

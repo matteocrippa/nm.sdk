@@ -20,10 +20,10 @@ class NPRecipes: Plugin {
         return "0.3"
     }
     override var commands: [String: RunHandler] {
-        return ["sync": sync, "index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID]
+        return ["sync": sync, "index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
-        return ["download": download]
+        return ["download": download, "download-processed-recipes": downloadProcessedRecipes]
     }
     
     // MARK: Sync
@@ -44,57 +44,19 @@ class NPRecipes: Plugin {
                 return
             }
             
-            Console.info(NPRecipes.self, text: "Saving recipes...")
             self.hub?.cache.removeAllResourcesWithPlugin(self)
-            for recipe in recipes {
-                self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
-                
-                Console.infoLine(recipe.id, symbol: .Add)
-                Console.infoLine("             name: \(recipe.name)")
-                Console.infoLine("     pulse plugin: \(recipe.pulse(.Plugin))")
-                Console.infoLine("     pulse bundle: \(recipe.pulse(.Bundle))")
-                Console.infoLine("     pulse action: \(recipe.pulse(.Action))")
-                
-                if let string = recipe.operation(.Plugin) {
-                    Console.infoLine(" operation plugin: \(string)")
-                }
-                if let string = recipe.operation(.Bundle) {
-                    Console.infoLine(" operation bundle: \(string)")
-                }
-                if let string = recipe.operation(.Action) {
-                    Console.infoLine(" operation action: \(string)")
-                }
-                
-                Console.infoLine("  reaction plugin: \(recipe.reaction(.Plugin))")
-                Console.infoLine("  reaction bundle: \(recipe.reaction(.Bundle))")
-                Console.infoLine("  reaction action: \(recipe.reaction(.Action))")
-                
-                if recipe.notificationTitle != nil || recipe.notificationText != nil {
-                    Console.infoLine("     notification:")
-                    
-                    if let string = recipe.notificationTitle {
-                        Console.infoLine("            title: \(string)")
-                    }
-                    if let string = recipe.notificationText {
-                        Console.infoLine("             text: \(string)")
-                    }
-                }
-            }
-            Console.infoLine("recipes saved: \(recipes.count)")
-            
-            Console.info(NPRecipes.self, text: "Saving events-to-recipes mappings...")
-            for map in recipeMaps {
-                Console.infoLine("  event: \(map.id)", symbol: .To)
-                Console.infoLine("maps to: \(map.recipes.joinWithSeparator(", "))")
-                
-                self.hub?.cache.store(map, inCollection: "RecipesMaps", forPlugin: self)
-            }
-            Console.infoLine("mappings saved: \(recipes.count)")
-            
-            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
+            self.storeRecipes(recipes, recipeMaps: recipeMaps, command: "sync", dispatchEvent: true)
         }
         
         return PluginResponse.ok(command: "sync")
+    }
+    private func clear(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let pluginHub = hub else {
+            return PluginResponse.cannotRun("clear")
+        }
+        
+        pluginHub.cache.removeAllResourcesWithPlugin(self)
+        return PluginResponse.ok(command: "clear")
     }
     
     // MARK: Index
@@ -186,7 +148,18 @@ class NPRecipes: Plugin {
             PluginResponse.ok(command: "evaluate") :
             PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot send evaluation request to \(command.evaluator) for recipe \(recipe.id)")
     }
+    
+    // MARK: Download
     private func download(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipes.self, command: "download", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+            completionHandler?(response: PluginResponse.cannotRun("download", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"]))
+            return
+        }
+        
+        API.authorizationToken = appToken
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
+        
         guard let id = arguments.string("id") else {
             Console.commandError(NPRecipes.self, command: "Cannot download recipe", requiredParameters: ["recipe-id"])
             completionHandler?(response: PluginResponse.cannotRun("download", requiredParameters: ["recipe-id"]))
@@ -217,7 +190,52 @@ class NPRecipes: Plugin {
             )
         }
     }
+    private func downloadProcessedRecipes(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipes.self, command: "download-processed-recipes", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "options"])
+            completionHandler?(response: PluginResponse.cannotRun("download-processed-recipes", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "options"]))
+            return
+        }
+        
+        API.authorizationToken = appToken
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
+        
+        APRecipes.processed(options: arguments.dictionary("options", emptyIfNil: true)!) { (recipes, recipeMaps, status) in
+            if status != .OK {
+                Console.error(NPRecipes.self, text: "Cannot download recipes")
+                completionHandler?(response: PluginResponse.cannotRun("download-processed-recipes", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "options"], cause: "HTTPStatusCode \(status.rawValue)"))
+                return
+            }
+            
+            self.storeRecipes(recipes, recipeMaps: recipeMaps, command: "download-processed-recipes", dispatchEvent: false)
+            
+            func append(id: String, inout toDictionary dictionary: [String: [String]], forKey key: String) {
+                if var array = dictionary[key] where !array.contains(id) {
+                    array.append(id)
+                    dictionary[key] = array
+                }
+                else {
+                    dictionary[key] = [id]
+                }
+            }
+            
+            var reactions = ["contents": [String](), "polls": [String]()]
+            var recipeIDs = Set<String>()
+            for recipe in recipes {
+                recipeIDs.insert(recipe.id)
+                
+                guard let evaluator = self.evaluatorName(recipe) else {
+                    continue
+                }
+                
+                append(recipe.reaction(.Bundle), toDictionary: &reactions, forKey: "\(evaluator.contentType)s")
+            }
+            
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["recipes": Array(recipeIDs), "reactions": reactions]), command: "download-processed-recipes"))
+        }
+    }
     
+    // MARK: Support
     private func evaluatorName(recipe: APRecipe) -> (name: String, contentType: String)? {
         switch recipe.reaction(.Plugin) {
         case "poll-notification":
@@ -234,5 +252,56 @@ class NPRecipes: Plugin {
         }
         
         return ("read", JSON(dictionary: ["content-id": recipe.reaction(.Bundle)]), evaluator.name, evaluator.contentType)
+    }
+    private func storeRecipes(recipes: [APRecipe], recipeMaps: [APRecipeMap], command: String, dispatchEvent: Bool) {
+        Console.info(NPRecipes.self, text: "Saving recipes...")
+        for recipe in recipes {
+            self.hub?.cache.store(recipe, inCollection: "Recipes", forPlugin: self)
+            
+            Console.infoLine(recipe.id, symbol: .Add)
+            Console.infoLine("             name: \(recipe.name)")
+            Console.infoLine("     pulse plugin: \(recipe.pulse(.Plugin))")
+            Console.infoLine("     pulse bundle: \(recipe.pulse(.Bundle))")
+            Console.infoLine("     pulse action: \(recipe.pulse(.Action))")
+            
+            if let string = recipe.operation(.Plugin) {
+                Console.infoLine(" operation plugin: \(string)")
+            }
+            if let string = recipe.operation(.Bundle) {
+                Console.infoLine(" operation bundle: \(string)")
+            }
+            if let string = recipe.operation(.Action) {
+                Console.infoLine(" operation action: \(string)")
+            }
+            
+            Console.infoLine("  reaction plugin: \(recipe.reaction(.Plugin))")
+            Console.infoLine("  reaction bundle: \(recipe.reaction(.Bundle))")
+            Console.infoLine("  reaction action: \(recipe.reaction(.Action))")
+            
+            if recipe.notificationTitle != nil || recipe.notificationText != nil {
+                Console.infoLine("     notification:")
+                
+                if let string = recipe.notificationTitle {
+                    Console.infoLine("            title: \(string)")
+                }
+                if let string = recipe.notificationText {
+                    Console.infoLine("             text: \(string)")
+                }
+            }
+        }
+        Console.infoLine("recipes saved: \(recipes.count)")
+        
+        Console.info(NPRecipes.self, text: "Saving events-to-recipes mappings...")
+        for map in recipeMaps {
+            Console.infoLine("  event: \(map.id)", symbol: .To)
+            Console.infoLine("maps to: \(map.recipes.joinWithSeparator(", "))")
+            
+            self.hub?.cache.store(map, inCollection: "RecipesMaps", forPlugin: self)
+        }
+        Console.infoLine("mappings saved: \(recipes.count)")
+        
+        if dispatchEvent {
+            self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: command))
+        }
     }
 }

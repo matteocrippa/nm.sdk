@@ -108,12 +108,9 @@ class NPDeviceTests: XCTestCase {
     
     // MARK: Helper functions
     private func reset() {
-        if let plugin: NPDevice = NearSDK.plugins.pluginNamed(CorePlugin.Device.name) {
-            NearSDK.plugins.cache.removeAllResourcesWithPlugin(plugin)
-        }
-        
         SDKDelegate.clearHandlers()
-        NearSDK.clearImageCache()
+        NearSDK.clearCorePluginsCache()
+        NearSDK.profileID = nil
         NearSDK.forwardCoreEvents = true
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

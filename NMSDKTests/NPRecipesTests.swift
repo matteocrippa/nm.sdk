@@ -177,8 +177,8 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineContentEvaluation()
         let expectation = expectationWithDescription("test download recipe - content reaction")
         
-        NearSDK.plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": "CONTENT-RECIPE"])) { (response) in
-            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+            XCTAssertTrue(success)
             expectation.fulfill()
         }
         
@@ -187,28 +187,6 @@ class NPRecipesTests: XCTestCase {
     func testDownloadRecipePollReaction() {
         THStubs.stubOnlinePollEvaluation()
         let expectation = expectationWithDescription("test download recipe - poll reaction")
-        
-        NearSDK.plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": "POLL-RECIPE"])) { (response) in
-            XCTAssertEqual(response.status, PluginResponseStatus.OK)
-            expectation.fulfill()
-        }
-        
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
-    func testDownloadRecipeContentReactionViaSDK() {
-        THStubs.stubOnlineContentEvaluation()
-        let expectation = expectationWithDescription("test download recipe - content reaction via SDK")
-        
-        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
-            XCTAssertTrue(success)
-            expectation.fulfill()
-        }
-        
-        waitForExpectationsWithTimeout(1, handler: nil)
-    }
-    func testDownloadRecipePollReactionViaSDK() {
-        THStubs.stubOnlinePollEvaluation()
-        let expectation = expectationWithDescription("test download recipe - poll reaction via SDK")
         
         NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
             XCTAssertTrue(success)
@@ -352,11 +330,77 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Segmentation
+    func testProcessedRecipes() {
+        THStubs.storeSampleDeviceInstallation()
+        THStubs.stubAPProcessedRecipesResponse()
+        THStubs.stubAPProcessedRecipesReactions()
+        NearSDK.profileID = "profile"
+        
+        let expectation = expectationWithDescription("test download processed recipes")
+        
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            switch recipe.id {
+            case "RC":
+                XCTAssertNotNil(recipe.content)
+                NearSDK.evaluateRecipe("RP") { (success, didDownloadRecipe) in
+                    XCTAssertTrue(success)
+                }
+            case "RP":
+                XCTAssertNotNil(recipe.poll)
+                expectation.fulfill()
+            default:
+                XCTFail("unknown recipe")
+            }
+        }
+        NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
+            XCTAssertTrue(success)
+            XCTAssertEqual(recipes.count, 2)
+            XCTAssertEqual(contents.count, 1)
+            XCTAssertEqual(polls.count, 1)
+            XCTAssertTrue(contents[0].downloaded)
+            XCTAssertTrue(polls[0].downloaded)
+            
+            NearSDK.evaluateRecipe("RC") { (success, didDownloadRecipe) in
+                XCTAssertTrue(success)
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testProcessedRecipesPartiallyCachedReactions() {
+        THStubs.storeSampleDeviceInstallation()
+        THStubs.stubAPProcessedRecipesResponse()
+        THStubs.stubAPProcessedRecipesReactions()
+        NearSDK.profileID = "profile"
+        
+        let resource = APIResource(
+            type: "notifications",
+            id: "CONTENT",
+            attributes: JSON(dictionary: ["content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]), relationships: [ :])
+        NearSDK.plugins.run(CorePlugin.Contents.name, command: "store-online-resource", withArguments: JSON(dictionary: ["resource": resource]))
+        
+        let expectation = expectationWithDescription("test download processed recipes - partially cached reactions")
+        
+        NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
+            XCTAssertTrue(success)
+            XCTAssertEqual(recipes.count, 2)
+            XCTAssertEqual(contents.count, 1)
+            XCTAssertEqual(polls.count, 1)
+            XCTAssertFalse(contents[0].downloaded)
+            XCTAssertTrue(polls[0].downloaded)
+            
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()
-        NearSDK.plugins.clearCache(pluginNamed: CorePlugin.Recipes.name)
-        NearSDK.clearImageCache()
+        NearSDK.clearCorePluginsCache()
+        NearSDK.profileID = nil
         NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

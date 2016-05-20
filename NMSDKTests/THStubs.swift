@@ -169,14 +169,40 @@ class THStubs {
             "relationships": relationships(pulseAction: trigger, pulseBundle: nodeIdentifier, reactionAction: "SHOW", reactionBundle: contentIdentifier)
         ]
     }
-    private class func stubAPRecipesResponse() {
+    class func stubAPProcessedRecipesReactions() {
+        let content = [
+            "id": "CONTENT", "type": "notifications",
+            "attributes": ["content": "<content's text>", "images_ids": [], "video_link": NSNull(), "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+        ]
+        let poll = [
+            "id": "POLL", "type": "notifications",
+            "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+        ]
+        
+        stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/contents/CONTENT")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": content], statusCode: 200, headers: nil)
+        }
+        stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/polls/POLL")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": poll], statusCode: 200, headers: nil)
+        }
+    }
+    
+    class func stubAPRecipesResponse() {
         let recipe1 = recipe("R1", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT-1",      contentType: "content-notification", trigger: "enter_region")
-        let recipe3 = recipe("R3", nodeIdentifier: "C20_1",   contentIdentifier: "POLL-1",         contentType: "poll-notification",    trigger: "EVENT-3")
-        let recipe4 = recipe("R4", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "EVENT-1")
-        let recipe5 = recipe("R5", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "EVENT-1")
+        let recipe3 = recipe("R2", nodeIdentifier: "C20_1",   contentIdentifier: "POLL-1",         contentType: "poll-notification",    trigger: "EVENT-3")
+        let recipe4 = recipe("R41", nodeIdentifier: "C10_1",   contentIdentifier: "UNKNOWN",        contentType: "unknown",              trigger: "EVENT-1")
+        let recipe5 = recipe("R51", nodeIdentifier: "C1000_1", contentIdentifier: "CONTENT-1",      contentType: "unknown",              trigger: "EVENT-1")
         
         stub(isHost("api.nearit.com") && isPath("/recipes")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe3, recipe4, recipe5]], statusCode: 200, headers: nil)
+        }
+    }
+    class func stubAPProcessedRecipesResponse() {
+        let recipe1 = recipe("RC", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT",      contentType: "content-notification", trigger: "enter_region")
+        let recipe2 = recipe("RP", nodeIdentifier: "C10_2",   contentIdentifier: "POLL",         contentType: "poll-notification",    trigger: "enter_region")
+        
+        stub(isHost("api.nearit.com") && isPath("/recipes/process")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeContentReactions() {
