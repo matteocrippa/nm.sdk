@@ -67,7 +67,8 @@ class NPRecipeReactionsTests: XCTestCase {
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()
-        NearSDK.clearImageCache()
+        NearSDK.clearCorePluginsCache()
+        NearSDK.profileID = nil
         NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate
         THStubs.clear()

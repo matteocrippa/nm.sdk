@@ -22,6 +22,9 @@ class NPRecipeReactionContent: Plugin {
     override var commands: [String: RunHandler] {
         return ["sync": sync, "index": index, "read": read, "store-online-resource": storeOnlineResource]
     }
+    override var asyncCommands: [String: RunAsyncHandler] {
+        return ["download-reaction-if-missing": downloadIfMissing]
+    }
     
     // MARK: Sync
     private func sync(arguments: JSON, sender: String?) -> PluginResponse {
@@ -34,7 +37,7 @@ class NPRecipeReactionContent: Plugin {
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         Console.info(NPRecipeReactionContent.self, text: "Downloading content reactions...", symbol: .Download)
-        APRecipeReactions.getContentNotifications { (contents, status) in
+        APRecipeReactions.getContents { (contents, status) in
             if status != .OK {
                 Console.error(NPRecipeReactionContent.self, text: "Cannot download content reactions")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadContentReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
@@ -91,6 +94,33 @@ class NPRecipeReactionContent: Plugin {
     }
     
     // MARK: Store
+    private func downloadIfMissing(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
+        guard let pluginHub = hub, id = arguments.string("id"), appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipeReactionContent.self, command: "download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
+            completionHandler?(response: PluginResponse.cannotRun("download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"]))
+            return
+        }
+        
+        if let _: APRecipeContent = pluginHub.cache.resource(id, inCollection: "Reactions", forPlugin: self) {
+            Console.info(NPRecipeReactionContent.self, text: "Cache did contain content \(id)")
+            Console.infoLine("skipping download")
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "downloaded": false]), command: "download-reaction-if-missing"))
+            return
+        }
+        
+        API.authorizationToken = appToken
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
+        APRecipeReactions.getContent(id) { (content, status) in
+            guard let c = content where status.codeClass == .Successful else {
+                completionHandler?(response: PluginResponse.cannotRun("download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"], cause: "HTTPStatusCode \(status.rawValue)"))
+                return
+            }
+            
+            Console.info(NPRecipeReactionContent.self, text: "Content reaction \(c.id) has been downloaded and cached")
+            pluginHub.cache.store(c, inCollection: "Reactions", forPlugin: self)
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "downloaded": true]), command: "download-reaction-if-missing"))
+        }
+    }
     private func storeOnlineResource(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resource = arguments.object("resource") as? APIResource, content = APRecipeContent.makeWithResource(resource) else {
             Console.commandError(NPRecipeReactionContent.self, command: "store-online-resource", requiredParameters: ["resource"])
