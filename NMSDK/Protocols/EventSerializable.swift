@@ -9,17 +9,27 @@
 import Foundation
 import NMJSON
 
-/// This protocol defines "action" objects which can be sent to nearit.com APIs through `NearSDK` as a response to user actions or other events.
+/**
+ This protocol defines "action" objects which can be sent to nearit.com APIs through `NearSDK` as a response to user actions or other events.
+ */
 @objc
 public protocol EventSerializable {
     // MARK: Properties
-    /// The name of the recipient plugin, i.e. the plugin which should manage the event.
+    /**
+     The name of the recipient plugin, i.e. the plugin which should manage the event.
+     */
     var pluginName: String { get }
     
-    /// The dictionary which holds event's data.
+    /**
+     The dictionary which holds event's data.
+     */
     var body: JSON { get }
     
     // MARK: Initializers
-    /// The failable initializer of any EventSerializable object.
+    /**
+     The failable initializer of any EventSerializable object.
+     
+     - parameter body: the JSON instance which defines the body of the event 
+     */
     init?(body: JSON)
 }

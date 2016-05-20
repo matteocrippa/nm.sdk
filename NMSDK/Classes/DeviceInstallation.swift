@@ -9,29 +9,42 @@
 import Foundation
 import NMNet
 
-/// An object which represents a nearit.com device installation
+/**
+ An object which represents a nearit.com device installation.
+ */
 @objc
 public class DeviceInstallation: NSObject {
-    /// The installation identifier
+    /**
+     The installation identifier.
+     */
     public private (set) var id = ""
     
-    /// The device operating system
+    /**
+     The device operating system.
+     */
     public private (set) var operatingSystem = ""
     
-    /// The device operating system version
+    /**
+     The device operating system version.
+     */
     public private (set) var operatingSystemVersion = ""
     
-    /// The NearSDK version
+    /**
+     The version of NearSDK.
+     */
     public var sdkVersion = ""
     
-    /// The APNS token associated to the device
+    /**
+     The APNS token associated to the device.
+     */
     public private (set) var apnsToken: String?
     
     // MARK: Initializers
-    /// Initializes a new `DeviceInstallation`.
-    ///
-    /// - parameters:
-    ///   - installation: the source `APDeviceInstallation` instance
+    /**
+     Initializes a new `DeviceInstallation`.
+     
+     - parameter installation: the source `APDeviceInstallation` instance
+     */
     public init(installation: APDeviceInstallation) {
         super.init()
         

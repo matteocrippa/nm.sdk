@@ -5,13 +5,15 @@ nearit.com iOS SDK
 
 This is a pre-release software and is not production-ready - code snippets contained in this README are Swift 2.2.
 
+Methods marked as "experimental" may not work.
+
 **Installation**
 
 `NearSDK` is available as a CocoaPod for iOS 8 and later and can be easily integrated into existing iOS apps by adding `pod 'NMSDK'` command to your `Podfile`.
 
 The following code snippet may be used as a template of a `Podfile`
 
-**sample Podfile**
+**Code snippet** - *sample `Podfile`*
 
     use_frameworks!
 

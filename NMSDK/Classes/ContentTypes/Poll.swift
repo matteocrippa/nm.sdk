@@ -10,33 +10,48 @@ import Foundation
 import NMCache
 import NMNet
 
-/// A content reaction.
+/**
+ A poll reaction.
+ */
 @objc
 public class Poll: NSObject {
     // MARK: Properties
-    /// The identifier of the poll.
+    /**
+     The identifier of the poll.
+     */
     public private (set) var id = ""
     
-    /// The question of the poll.
+    /**
+     The question of the poll.
+     */
     public var question = ""
     
-    /// The text of the first answer.
+    /**
+     The text of the first answer.
+     */
     public var answer1 = ""
     
-    /// The text of the second answer.
+    /**
+     The text of the second answer.
+     */
     public var answer2 = ""
     
-    /// The creation date of the poll
+    /**
+     The creation date of the poll.
+     */
     public private (set) var creationDate: NSDate?
     
-    /// The last update date of the poll
+    /**
+     The last update date of the poll.
+     */
     public private (set) var lastUpdate: NSDate?
     
     // MARK: Initializers
-    /// Initializes a new `Poll`.
-    ///
-    /// - parameters:
-    ///   - poll: the source `APRecipePoll` instance
+    /**
+     Initializes a new `Poll`.
+     
+     - parameter poll: the source `APRecipePoll` instance
+     */
     public init(poll: APRecipePoll) {
         super.init()
         
@@ -50,7 +65,9 @@ public class Poll: NSObject {
     }
     
     // MARK: Properties
-    /// Human-readable description of `Self`.
+    /**
+     Human-readable description of `Self`.
+     */
     public override var description: String {
         return Console.describe(Poll.self, properties: ("id", id), ("question", question), ("answer1", answer1), ("answer2", answer2))
     }

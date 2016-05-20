@@ -8,27 +8,37 @@
 
 import Foundation
 
-/// Describes the status of a device installation refresh operation.
+/**
+ Describes the status of a device installation refresh operation.
+ */
 @objc
 public enum DeviceInstallationStatus: Int {
-    /// A new installation identifier has been received.
+    /**
+     A new installation identifier has been received.
+     */
     case Received = 10
     
-    /// An existing installation identifier has been updated.
+    /**
+     An existing installation identifier has been updated.
+     */
     case Updated = 20
     
-    /// The installation identifier cannot be received or updated.
+    /**
+     The installation identifier cannot be received or updated.
+     */
     case NotRefreshed = 0
     
-    /// An unsupported status value
+    /**An unsupported status value.
+     */
     case Unknown = -1
     
     // MARK: Initializers
-    /// Converts `rawValue` in `Self`.
-    ///
-    /// - parameters:
-    ///   - rawValue: must be either 10, 20 or 0
-    ///   - returns: .Unknown if rawValue is not 10, 20 or 0
+    /**
+     Converts `rawValue` in `Self`.
+     
+     - parameter rawValue: must be either `10`, `20` or `0`
+     - returns: .Unknown if `rawValue` is not `10`, `20` or `0`
+     */
     public init(rawValue: Int) {
         switch rawValue {
         case 10:
