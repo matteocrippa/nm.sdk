@@ -52,6 +52,13 @@ public class Content: NSObject {
      */
     public private (set) var lastUpdate: NSDate?
     
+    /**
+     Indicates if the content is empty, i.e. if `text` is an empty string, `imageIdentifiers` is empty and `videoURL` is `nil`.
+     */
+    public var isEmpty: Bool {
+        return (text.isEmpty && imageIdentifiers.count <= 0 && videoURL == nil)
+    }
+    
     // MARK: Initializers
     /**
      Initializes a new `Content`.
