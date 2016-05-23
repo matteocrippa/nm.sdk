@@ -15,14 +15,26 @@ class THSamplePlugin: Plugin {
         return "com.near.sampleplugin"
     }
     override var commands: [String: RunHandler] {
-        return ["nearSDKDidEvaluateRecipe": nearSDKDidEvaluateRecipe]
+        return [
+            "nearSDKDidEvaluateRecipe": nearSDKDidEvaluateRecipe,
+            "beaconForestDidEnterRegion": beaconForestDidEnterRegion,
+            "beaconForestDidExitRegion": beaconForestDidExitRegion
+        ]
     }
     override var observedBroadcastKeys: [String] {
-        return ["nearSDKDidEvaluateRecipe"]
+        return ["nearSDKDidEvaluateRecipe", "beaconForestDidEnterRegion", "beaconForestDidExitRegion"]
     }
     
     private func nearSDKDidEvaluateRecipe(arguments: JSON, sender: String?) -> PluginResponse {
         hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "nearSDKDidEvaluateRecipe"))
         return PluginResponse.ok(arguments, command: "nearSDKDidEvaluateRecipe")
+    }
+    private func beaconForestDidEnterRegion(arguments: JSON, sender: String?) -> PluginResponse {
+        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "beaconForestDidEnterRegion"))
+        return PluginResponse.ok(arguments, command: "beaconForestDidEnterRegion")
+    }
+    private func beaconForestDidExitRegion(arguments: JSON, sender: String?) -> PluginResponse {
+        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "beaconForestDidExitRegion"))
+        return PluginResponse.ok(arguments, command: "beaconForestDidExitRegion")
     }
 }

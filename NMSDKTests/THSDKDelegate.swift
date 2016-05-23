@@ -17,6 +17,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     var didEvaluateRecipe: ((recipe: Recipe) -> Void)?
     var didReceiveDidEvaluateRecipeCommand: ((arguments: JSON) -> Void)?
+    var didReceiveDidDetectRegionEvent: ((arguments: JSON) -> Void)?
     var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
     var sdkPluginDidSync: ((plugin: CorePlugin, error: CorePluginError?) -> Void)?
     
@@ -29,6 +30,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceiveError = nil
         didEvaluateRecipe = nil
         didReceiveDidEvaluateRecipeCommand = nil
+        didReceiveDidDetectRegionEvent = nil
         sdkDidSync = nil
         sdkPluginDidSync = nil
     }
@@ -40,8 +42,17 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         sdkPluginDidSync?(plugin: plugin, error: error)
     }
     func nearSDKDidReceiveEvent(event: PluginEvent) {
-        if event.from == "com.near.sampleplugin" && event.command == "nearSDKDidEvaluateRecipe" {
-            didReceiveDidEvaluateRecipeCommand?(arguments: event.content)
+        if let command = event.command where event.from == "com.near.sampleplugin" {
+            switch command {
+            case "nearSDKDidEvaluateRecipe":
+                didReceiveDidEvaluateRecipeCommand?(arguments: event.content)
+            case "beaconForestDidEnterRegion":
+                didReceiveDidDetectRegionEvent?(arguments: event.content)
+            case "beaconForestDidExitRegion":
+                didReceiveDidDetectRegionEvent?(arguments: event.content)
+            default:
+                break
+            }
         }
         
         didReceiveEvent?(event: event)

@@ -29,7 +29,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.5"
+        return "0.5.1"
     }
     override var commands: [String: RunHandler] {
         return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
@@ -310,14 +310,23 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         APBeaconForest.postBeaconDetected(region.identifier, response: nil)
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier, forceForestNavigation: &forceForestNavigation))
+        broadcastRegionEvent(enter: true, region: region)
         
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier) - node name \(nodeName(region))")
     }
     private func exit(region: CLRegion) {
         updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
+        broadcastRegionEvent(enter: false, region: region)
         
         Console.info(NPBeaconForest.self, text: "Left region \(region.identifier) - node name \(nodeName(region))")
     }
+    private func broadcastRegionEvent(enter enter: Bool, region: CLRegion) {
+        let command = (enter ? "beaconForestDidEnterRegion" : "beaconForestDidExitRegion")
+        let arguments = JSON(dictionary: ["region-id": region.identifier, "event": (enter ? "enter" : "exit"), "region-name": nodeName(region)])
+        
+        hub?.broadcast(command, fromPluginNamed: name, toKey: command, withArguments: arguments)
+    }
+    
     private func isMonitoredRegion(id: String) -> Bool {
         guard let _: NPBeaconForestRegion = hub?.cache.resource(id, inCollection: "RegionIdentifiers", forPlugin: self) else {
             return false
