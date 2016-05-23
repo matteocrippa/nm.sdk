@@ -364,7 +364,6 @@ class NPRecipesTests: XCTestCase {
         THStubs.storeSampleDeviceInstallation()
         THStubs.stubAPProcessedRecipesResponse()
         THStubs.stubAPProcessedRecipesReactions()
-        NearSDK.profileID = "profile"
         
         let expectation = expectationWithDescription("test download processed recipes")
         
@@ -401,7 +400,6 @@ class NPRecipesTests: XCTestCase {
         THStubs.storeSampleDeviceInstallation()
         THStubs.stubAPProcessedRecipesResponse()
         THStubs.stubAPProcessedRecipesReactions()
-        NearSDK.profileID = "profile"
         
         let resource = APIResource(
             type: "notifications",

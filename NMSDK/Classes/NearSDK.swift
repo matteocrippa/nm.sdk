@@ -585,28 +585,28 @@ public class NearSDK: NSObject, Extensible {
      
      - warning: **Experimental**
      
-     This method will use cached profile and installation identifiers and will fail if one or both of them are `nil`.
+     This method will use the cached installation identifiers and, if defined, the cached profile identifier.
+     `downloadProcessedRecipes(_:)` will fail if the installation identifier is `nil`.
      
      Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
      
      - parameter completionHandler: the handler which will be called when download process ends or when an error occurs
      */
     public class func downloadProcessedRecipes(completionHandler: DidDownloadProcessedRecipes?) {
-        guard let profile = profileID, installation = installationID else {
+        guard let installation = installationID else {
             completionHandler?(success: false, recipes: [], contents: [], polls: [])
             return
         }
         
-        let arguments = JSON(dictionary: [
-            "app-token": appToken,
-            "timeout-interval": timeoutInterval,
-            "options": [
-                "app_id": API.appID,
-                "installation_id": installation,
-                "congrego": ["profile_id": profile]]
-            ])
+        var arguments: [String: AnyObject] = [
+            "app-token": appToken, "timeout-interval": timeoutInterval, "options": ["app_id": API.appID, "installation_id": installation]
+        ]
         
-        plugins.runAsync(CorePlugin.Recipes.name, command: "download-processed-recipes", withArguments: arguments) { (response) in
+        if let profile = profileID {
+            arguments["options"] = ["app_id": API.appID, "installation_id": installation, "congrego": ["profile_id": profile]]
+        }
+        
+        plugins.runAsync(CorePlugin.Recipes.name, command: "download-processed-recipes", withArguments: JSON(dictionary: arguments)) { (response) in
             guard let
                 recipeIDs = response.content.stringArray("recipes"),
                 contentIDs = response.content.stringArray("reactions.contents"),
