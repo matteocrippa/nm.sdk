@@ -15,26 +15,22 @@ class THSamplePlugin: Plugin {
         return "com.near.sampleplugin"
     }
     override var commands: [String: RunHandler] {
-        return [
-            "nearSDKDidEvaluateRecipe": nearSDKDidEvaluateRecipe,
-            "beaconForestDidEnterRegion": beaconForestDidEnterRegion,
-            "beaconForestDidExitRegion": beaconForestDidExitRegion
-        ]
+        return ["evaluate-recipe": evaluateRecipe, "enter-region": enterRegion, "exit-region": exitRegion]
     }
     override var observedBroadcastKeys: [String] {
-        return ["nearSDKDidEvaluateRecipe", "beaconForestDidEnterRegion", "beaconForestDidExitRegion"]
+        return ["recipes", "beacon-forest"]
     }
     
-    private func nearSDKDidEvaluateRecipe(arguments: JSON, sender: String?) -> PluginResponse {
-        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "nearSDKDidEvaluateRecipe"))
-        return PluginResponse.ok(arguments, command: "nearSDKDidEvaluateRecipe")
+    private func evaluateRecipe(arguments: JSON, sender: String?) -> PluginResponse {
+        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "evaluate-recipe"))
+        return PluginResponse.ok(arguments, command: "evaluate-recipe")
     }
-    private func beaconForestDidEnterRegion(arguments: JSON, sender: String?) -> PluginResponse {
-        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "beaconForestDidEnterRegion"))
-        return PluginResponse.ok(arguments, command: "beaconForestDidEnterRegion")
+    private func enterRegion(arguments: JSON, sender: String?) -> PluginResponse {
+        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "enter-region"))
+        return PluginResponse.ok(arguments, command: "enter-region")
     }
-    private func beaconForestDidExitRegion(arguments: JSON, sender: String?) -> PluginResponse {
-        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "beaconForestDidExitRegion"))
-        return PluginResponse.ok(arguments, command: "beaconForestDidExitRegion")
+    private func exitRegion(arguments: JSON, sender: String?) -> PluginResponse {
+        hub?.dispatch(event: PluginEvent(from: name, content: arguments, pluginCommand: "exit-region"))
+        return PluginResponse.ok(arguments, command: "exit-region")
     }
 }

@@ -321,10 +321,10 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         Console.info(NPBeaconForest.self, text: "Left region \(region.identifier) - node name \(nodeName(region))")
     }
     private func broadcastRegionEvent(enter enter: Bool, region: CLRegion) {
-        let command = (enter ? "beaconForestDidEnterRegion" : "beaconForestDidExitRegion")
+        let command = (enter ? "enter-region" : "exit-region")
         let arguments = JSON(dictionary: ["region-id": region.identifier, "event": (enter ? "enter" : "exit"), "region-name": nodeName(region)])
         
-        hub?.broadcast(command, fromPluginNamed: name, toKey: command, withArguments: arguments)
+        hub?.broadcast(command, fromPluginNamed: name, toKey: "beacon-forest", withArguments: arguments)
     }
     
     private func isMonitoredRegion(id: String) -> Bool {
