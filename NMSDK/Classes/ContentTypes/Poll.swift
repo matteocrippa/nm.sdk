@@ -46,6 +46,13 @@ public class Poll: NSObject {
      */
     public private (set) var lastUpdate: NSDate?
     
+    /**
+     Indicates if the poll is empty, i.e. if `question`, `answer1` and `answer2` are all empty strings.
+     */
+    public var isEmpty: Bool {
+        return (question.isEmpty && answer1.isEmpty && answer2.isEmpty)
+    }
+    
     // MARK: Initializers
     /**
      Initializes a new `Poll`.

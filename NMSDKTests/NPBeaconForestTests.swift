@@ -184,6 +184,58 @@ class NPBeaconForestTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Test event forwarding
+    func testForwardEnterExitEvents() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test forward enter / exit events")
+        
+        let plugin = THSamplePlugin()
+        NearSDK.plugins.plug(plugin)
+        
+        func simulateEvent(enter enter: Bool, regionID: String) {
+            guard let beaconForest: NPBeaconForest = NearSDK.plugins.pluginNamed(CorePlugin.BeaconForest.name) else {
+                XCTFail("sdk plugin NPBeaconForest cannot be found")
+                return
+            }
+            
+            if enter {
+                beaconForest.locationManager(CLLocationManager(), didEnterRegion: THRegion(identifier: regionID))
+            }
+            else {
+                beaconForest.locationManager(CLLocationManager(), didExitRegion: THRegion(identifier: regionID))
+            }
+        }
+        
+        SDKDelegate.didReceiveDidDetectRegionEvent = { (contents) in
+            guard let regionID = contents.string("region-id"), event = contents.string("event") else {
+                XCTFail("invalid contents")
+                return
+            }
+            
+            guard let regionName = contents.string("region-name") where regionName != "?" else {
+                XCTFail("invalid region name")
+                return
+            }
+            
+            switch event {
+            case "enter":
+                simulateEvent(enter: false, regionID: regionID)
+            case "exit":
+                NearSDK.plugins.unplug(plugin.name)
+                expectation.fulfill()
+            default:
+                XCTFail("invalid event")
+            }
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            simulateEvent(enter: true, regionID: "C10_1")
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()
