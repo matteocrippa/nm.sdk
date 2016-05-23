@@ -120,7 +120,7 @@ class NPRecipes: Plugin {
             let reaction = JSON(dictionary: ["reaction": [command.contentType: response.content.dictionary], "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
             
             let broadcast = JSON(dictionary: ["pulse": ["plugin": pulsePlugin, "bundle": pulseBundle, "action": pulseAction], "evaluation": reaction.dictionary])
-            hub?.broadcast("nearSDKDidEvaluateRecipe", fromPluginNamed: name, toKey: "nearSDKDidEvaluateRecipe", withArguments: broadcast)
+            hub?.broadcast("evaluate-recipe", fromPluginNamed: name, toKey: "recipes", withArguments: broadcast)
             
             return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
                 PluginResponse.ok(command: "evaluate") :

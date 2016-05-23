@@ -44,11 +44,11 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         if let command = event.command where event.from == "com.near.sampleplugin" {
             switch command {
-            case "nearSDKDidEvaluateRecipe":
+            case "evaluate-recipe":
                 didReceiveDidEvaluateRecipeCommand?(arguments: event.content)
-            case "beaconForestDidEnterRegion":
+            case "enter-region":
                 didReceiveDidDetectRegionEvent?(arguments: event.content)
-            case "beaconForestDidExitRegion":
+            case "exit-region":
                 didReceiveDidDetectRegionEvent?(arguments: event.content)
             default:
                 break
