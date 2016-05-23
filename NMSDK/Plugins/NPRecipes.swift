@@ -17,7 +17,7 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.3"
+        return "0.3.1"
     }
     override var commands: [String: RunHandler] {
         return ["sync": sync, "index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
@@ -118,6 +118,10 @@ class NPRecipes: Plugin {
             Console.infoLine("      type: \(recipe.reaction(.Plugin))")
             
             let reaction = JSON(dictionary: ["reaction": [command.contentType: response.content.dictionary], "recipe": recipe.json.dictionary, "type": recipe.reaction(.Plugin)])
+            
+            let broadcast = JSON(dictionary: ["pulse": ["plugin": pulsePlugin, "bundle": pulseBundle, "action": pulseAction], "evaluation": reaction.dictionary])
+            hub?.broadcast("nearSDKDidEvaluateRecipe", fromPluginNamed: name, toKey: "nearSDKDidEvaluateRecipe", withArguments: broadcast)
+            
             return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
                 PluginResponse.ok(command: "evaluate") :
                 PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot send evaluation request to \(command.evaluator) for evaluation key \(evaluationKey)")

@@ -16,6 +16,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
     var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     var didEvaluateRecipe: ((recipe: Recipe) -> Void)?
+    var didReceiveDidEvaluateRecipeCommand: ((arguments: JSON) -> Void)?
     var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
     var sdkPluginDidSync: ((plugin: CorePlugin, error: CorePluginError?) -> Void)?
     
@@ -26,6 +27,8 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     func clearHandlers() {
         didReceiveEvent = nil
         didReceiveError = nil
+        didEvaluateRecipe = nil
+        didReceiveDidEvaluateRecipeCommand = nil
         sdkDidSync = nil
         sdkPluginDidSync = nil
     }
@@ -37,6 +40,10 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         sdkPluginDidSync?(plugin: plugin, error: error)
     }
     func nearSDKDidReceiveEvent(event: PluginEvent) {
+        if event.from == "com.near.sampleplugin" && event.command == "nearSDKDidEvaluateRecipe" {
+            didReceiveDidEvaluateRecipeCommand?(arguments: event.content)
+        }
+        
         didReceiveEvent?(event: event)
     }
     func nearSDKDidFail(error error: NearSDKError, message: String) {

@@ -27,6 +27,35 @@ class NPRecipesTests: XCTestCase {
     }
     
     // MARK: Successful evaluations
+    func testPropagateRecipeEvaluation() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test propagate recipe evaluation")
+        
+        let plugin = THSamplePlugin()
+        NearSDK.plugins.plug(plugin)
+        
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C10_1", "pulse-action": "enter_region"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+        }
+        SDKDelegate.didReceiveDidEvaluateRecipeCommand = { (contents) in
+            NearSDK.plugins.unplug(plugin.name)
+            
+            XCTAssertTrue(contents.containsJSON("evaluation.reaction"))
+            XCTAssertTrue(contents.containsJSON("evaluation.recipe"))
+            XCTAssertEqual(contents.string("pulse.action"), "enter_region")
+            XCTAssertEqual(contents.string("pulse.bundle"), "C10_1")
+            XCTAssertEqual(contents.string("pulse.plugin"), "beacon-forest")
+            
+            expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     func testEvaluateBeaconForestContentReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate content reaction with NPRecipes")
