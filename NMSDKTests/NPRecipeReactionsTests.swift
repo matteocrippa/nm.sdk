@@ -26,6 +26,34 @@ class NPRecipeReactionsTests: XCTestCase {
         super.tearDown()
     }
     
+    // MARK: Test emptyness
+    func testEmptyContent() {
+        let empty = Content(content: APRecipeContent(json: JSON(dictionary: ["id": "content"]))!)
+        XCTAssertTrue(empty.isEmpty)
+        
+        let content1 = Content(content: APRecipeContent(json: JSON(dictionary: ["id": "content", "text": "text"]))!)
+        XCTAssertFalse(content1.isEmpty)
+        
+        let content2 = Content(content: APRecipeContent(json: JSON(dictionary: ["id": "content", "images": ["image1"]]))!)
+        XCTAssertFalse(content2.isEmpty)
+        
+        let content3 = Content(content: APRecipeContent(json: JSON(dictionary: ["id": "content", "video": "http://sample.com/video.m4v"]))!)
+        XCTAssertFalse(content3.isEmpty)
+    }
+    func testEmptyPoll() {
+        let empty = Poll(poll: APRecipePoll(json: JSON(dictionary: ["id": "poll", "question": "", "answer-1": "", "answer-2": ""]))!)
+        XCTAssertTrue(empty.isEmpty)
+        
+        let poll1 = Poll(poll: APRecipePoll(json: JSON(dictionary: ["id": "poll", "question": "question", "answer-1": "", "answer-2": ""]))!)
+        XCTAssertFalse(poll1.isEmpty)
+        
+        let poll2 = Poll(poll: APRecipePoll(json: JSON(dictionary: ["id": "poll", "question": "", "answer-1": "answer", "answer-2": ""]))!)
+        XCTAssertFalse(poll2.isEmpty)
+        
+        let poll3 = Poll(poll: APRecipePoll(json: JSON(dictionary: ["id": "poll", "question": "", "answer-1": "", "answer-2": "answer"]))!)
+        XCTAssertFalse(poll3.isEmpty)
+    }
+    
     // MARK: Index command tests
     func testIndexContents() {
         THStubs.stubConfigurationAPIResponse()

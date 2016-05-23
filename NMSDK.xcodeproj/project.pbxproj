@@ -30,6 +30,7 @@
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
 		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B55E7A141CD23AF0008CCADC /* CorePluginError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E7A131CD23AF0008CCADC /* CorePluginError.swift */; };
+		B5747DB41CF2E73E002298F1 /* THSamplePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5747DB31CF2E73E002298F1 /* THSamplePlugin.swift */; };
 		B589B7DF1CE60769002CB061 /* NPBeaconForestRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
 		B5AB79F71CECA75000FC17BE /* NPSegmentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AB79F61CECA75000FC17BE /* NPSegmentationTests.swift */; };
@@ -95,6 +96,7 @@
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
 		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B55E7A131CD23AF0008CCADC /* CorePluginError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePluginError.swift; sourceTree = "<group>"; };
+		B5747DB31CF2E73E002298F1 /* THSamplePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THSamplePlugin.swift; sourceTree = "<group>"; };
 		B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestRegion.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
 		B5AB79F61CECA75000FC17BE /* NPSegmentationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPSegmentationTests.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 				B50100DC1CC3DC6B003231F9 /* THRegion.swift */,
 				B548FE921CBCEDAA006DCC02 /* THBeacon.swift */,
 				B5FA83BC1CB801FC0090E5CD /* THSDKDelegate.swift */,
+				B5747DB31CF2E73E002298F1 /* THSamplePlugin.swift */,
 			);
 			name = PluginHelpers;
 			sourceTree = "<group>";
@@ -543,6 +546,7 @@
 				B5AB79F71CECA75000FC17BE /* NPSegmentationTests.swift in Sources */,
 				B54707251CD3A9D500CD2DF0 /* NPRecipeReactionsTests.swift in Sources */,
 				B5FA83BD1CB801FC0090E5CD /* THSDKDelegate.swift in Sources */,
+				B5747DB41CF2E73E002298F1 /* THSamplePlugin.swift in Sources */,
 				B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */,
 				B50100DD1CC3DC6B003231F9 /* THRegion.swift in Sources */,
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
