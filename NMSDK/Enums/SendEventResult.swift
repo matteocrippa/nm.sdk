@@ -9,7 +9,7 @@
 import Foundation
 
 /**
- The result of a "send event" action executed by calling `NearSDK.sendEvent(_:response:)`.
+ The result of a "send event" action run by calling `NearSDK.sendEvent(_:response:)`.
  
  - seealso: `NearSDK.sendEvent(_:response:)`
  */

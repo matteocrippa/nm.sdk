@@ -34,7 +34,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return "0.6"
     }
     override var commands: [String: RunHandler] {
-        return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
+        return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes, "start-monitoring": startMonitoring]
     }
     
     // MARK: Sync
@@ -53,7 +53,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
                 Console.error(NPBeaconForest.self, text: "Cannot download nodes")
                 Console.info(NPBeaconForest.self, text: "Region monitoring will be started with the previously cached configuration, if available")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
-                self.startLocationUpdates()
+                self.persistCurrentRegionIdentifiers(self.navigator.defaultRegionIdentifiers)
+                self.startMonitoring(JSON(), sender: nil)
                 return
             }
             
@@ -81,7 +82,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             Console.infoLine("nodes saved: \(nodes.count)")
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
-            self.startLocationUpdates()
+            self.persistCurrentRegionIdentifiers(self.navigator.defaultRegionIdentifiers)
+            self.startMonitoring(JSON(), sender: nil)
         }
         
         return PluginResponse.ok(command: "sync")
@@ -233,28 +235,35 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     }
     
     // MARK: Location updates
-    func startLocationUpdates() {
-        let authorizationStatus = CLLocationManager.authorizationStatus()
-        if ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus)  {
-            Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
-            Console.errorLine("authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse")
+    func startMonitoring(arguments: JSON, sender: String?) -> PluginResponse {
+        let response = startLocationUpdates()
+        
+        if !response.started {
             hub?.dispatch(
-                event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(
-                    name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
-                    command: "start-monitoring"))
-            return
+                event: NearSDKError.RegionMonitoringDidFail.pluginEvent(
+                    name, message: "No regions found or authorization status not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
+                    command: "start-monitoring",
+                    details: ["configured-regions-count": response.configuredRegionsCount]))
         }
         
-        if currentRegionIdentifiers().count <= 0 {
+        return PluginResponse(status: (response.started ? PluginResponseStatus.OK : PluginResponseStatus.Error), command: "start-monitoring")
+    }
+    func startLocationUpdates() -> (started: Bool, configuredRegionsCount: Int, authorizationStatus: CLAuthorizationStatus) {
+        let regionsCount = currentRegionIdentifiers().count
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        
+        if regionsCount <= 0 ||
+            ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus) {
             Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
-            Console.errorLine("no regions found")
-            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "No regions found", command: "start-monitoring"))
-            return
+            Console.errorLine("no regions found or invalid authorization status")
+            
+            return (false, regionsCount, authorizationStatus)
         }
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.startUpdatingLocation()
+        return (true, regionsCount, authorizationStatus)
     }
     
     // MARK: Region ranging
@@ -300,7 +309,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         let regions = navigator.identifiersToRegions(identifiers)
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
-            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", command: "start-monitoring"))
+            hub?.dispatch(
+                event: NearSDKError.RegionMonitoringDidFail.pluginEvent(
+                    name, message: "Configured regions: \(regions.count)",
+                    command: "start-monitoring",
+                    details: ["configured-regions-count": regions.count]))
             return
         }
         
