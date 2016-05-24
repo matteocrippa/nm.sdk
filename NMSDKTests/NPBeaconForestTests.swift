@@ -236,6 +236,42 @@ class NPBeaconForestTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
+    // MARK: Monitoring failures
+    func testMonitoringFails_NoRegions() {
+        let expectation = expectationWithDescription("start monitoring fails - no regions")
+        
+        SDKDelegate.sdkMonitoringDidFail = { (regionsCount, status) in
+            XCTAssertEqual(regionsCount, 0)
+            expectation.fulfill()
+        }
+        
+        XCTAssertEqual(NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "start-monitoring").status, PluginResponseStatus.Error)
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testMonitoringFails_InvalidAuthorizationStatus() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("start monitoring fails - no regions")
+        
+        var shouldFulfillExpectation = false
+        SDKDelegate.sdkMonitoringDidFail = { (regionsCount, status) in
+            XCTAssertNotEqual(regionsCount, 0)
+            XCTAssertNotEqual(status, CLAuthorizationStatus.AuthorizedAlways)
+            XCTAssertNotEqual(status, CLAuthorizationStatus.AuthorizedWhenInUse)
+            
+            if shouldFulfillExpectation {
+                expectation.fulfill()
+            }
+        }
+        
+        SDKDelegate.sdkDidSync = { _ in
+            shouldFulfillExpectation = true
+            XCTAssertEqual(NearSDK.plugins.run(CorePlugin.BeaconForest.name, command: "start-monitoring").status, PluginResponseStatus.Error)
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(10, handler: nil)
+    }
+    
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()

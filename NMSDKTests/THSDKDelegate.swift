@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreLocation
 import NMJSON
 import NMNet
 import NMSDK
@@ -20,6 +21,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveDidDetectRegionEvent: ((arguments: JSON) -> Void)?
     var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
     var sdkPluginDidSync: ((plugin: CorePlugin, error: CorePluginError?) -> Void)?
+    var sdkMonitoringDidFail: ((regions: Int, status: CLAuthorizationStatus) -> Void)?
     
     override init() {
         super.init()
@@ -33,13 +35,20 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceiveDidDetectRegionEvent = nil
         sdkDidSync = nil
         sdkPluginDidSync = nil
+        sdkMonitoringDidFail = nil
     }
     
-    func nearSDKDidSync(errors: [CorePluginError]) {
+    func nearSDKDidSync() {
+        sdkDidSync?(errors: [])
+    }
+    func nearSDKSyncDidFailWithErrors(errors: [CorePluginError]) {
         sdkDidSync?(errors: errors)
     }
-    func nearSDKPluginDidSync(plugin: CorePlugin, error: CorePluginError?) {
+    func nearSDKPlugin(plugin: CorePlugin, didSyncWithError error: CorePluginError?) {
         sdkPluginDidSync?(plugin: plugin, error: error)
+    }
+    func nearSDKRegionMonitoringDidFail(configuredRegionsCount configuredRegionsCount: Int, authorizationStatus: CLAuthorizationStatus) {
+        sdkMonitoringDidFail?(regions: configuredRegionsCount, status: authorizationStatus)
     }
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         if let command = event.command where event.from == "com.near.sampleplugin" {

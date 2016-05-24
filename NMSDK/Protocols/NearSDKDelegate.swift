@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreLocation
 import NMJSON
 import NMPlug
 
@@ -17,15 +18,20 @@ import NMPlug
 public protocol NearSDKDelegate {
     // MARK: Common methods
     /**
-     This method is executed when all core plugins used by `NearSDK` which require to sync themselves with nearit.com.
+     This method is called after when all core plugins used by `NearSDK` have synced with nearit.com, but errors occured.
      
-     - parameter errors: an array of errors produced by plugins which failed to synchronize with nearit.com; if `errors.count` is less than or equal to 0, the synchronization task is supposed to be successful
+     - parameter errors: an array of errors produced by plugins which failed to synchronize with nearit.com
      - seealso: `CorePluginError`
      */
-    optional func nearSDKDidSync(errors: [CorePluginError])
+    optional func nearSDKSyncDidFailWithErrors(errors: [CorePluginError])
     
     /**
-     This method is executed when one of core plugins used by `NearSDK` synchronizes itself with nearit.com.
+     This method is called after when all core plugins used by `NearSDK` have synced with nearit.com successfully.
+     */
+    optional func nearSDKDidSync()
+    
+    /**
+     This method is called when one of core plugins used by `NearSDK` synchronizes itself with nearit.com.
      
      - parameter plugin: the core plugin which originated the event
      - parameter error: the optional error which describes why a core plugin did fail its synchronization task; if nil, the synchronization task is supposed to be successful
@@ -33,17 +39,31 @@ public protocol NearSDKDelegate {
        - `CorePlugin`
        - `CorePluginError`
      */
-    optional func nearSDKPluginDidSync(plugin: CorePlugin, error: CorePluginError?)
+    optional func nearSDKPlugin(plugin: CorePlugin, didSyncWithError error: CorePluginError?)
     
     /**
-     This method is executed whenever `NearSDK` receives an event.
+     This method is called when region monitoring fails.
+     
+     Region monitoring may fail because:
+     
+     - authorization status is not `CLAuthorizationStatus.AuthorizedAlways` or `CLAuthorizationStatus.AuthorizedWhenInUse`
+     - no regions can be found in `NearSDK`'s local cache
+     - both of the above conditions are true
+     
+     - parameter configuredRegionsCount: indicates how many regions have been found in `NearSDK`'s local cache
+     - parameter authorizationStatus: `CoreLocation`'s authorization status
+     */
+    optional func nearSDKRegionMonitoringDidFail(configuredRegionsCount configuredRegionsCount: Int, authorizationStatus: CLAuthorizationStatus)
+    
+    /**
+     This method is called whenever `NearSDK` receives an event.
      
      - parameter event: the event received by `NearSDK`
      */
     optional func nearSDKDidReceiveEvent(event: PluginEvent)
     
     /**
-     This method is executed whenever `NearSDK` detects an error.
+     This method is called whenever `NearSDK` detects an error.
      
      - parameter error: the `NearSDKError` received by `NearSDK`
      - parameter message: a `String` which better describes the error
@@ -53,7 +73,7 @@ public protocol NearSDKDelegate {
     
     // MARK: Evaluations
     /**
-     This method is executed whenever `NearSDK` evaluates a recipe.
+     This method is called whenever `NearSDK` evaluates a recipe.
      
      - parameter recipe: the recipe evaluated by `NearSDK`
      - seealso: `Recipe`
