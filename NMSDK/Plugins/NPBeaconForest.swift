@@ -17,6 +17,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     private static let rangedBeaconsCandidatesUpperLimit = 3
     private static let rangedBeaconsBackgroundUpperLimit = 3
     private static let rangedBeaconsActiveUpperLimit = 10
+    private static let locationUpdatesRefreshFrequency: NSTimeInterval = 20
+    private var lastLocationUpdate: NSDate?
     private var rangedBeacons = [String: (beacon: CLBeacon, count: Int)]()
     private var forceForestNavigation = false
     private var locationManager = CLLocationManager()
@@ -29,10 +31,10 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.5.1"
+        return "0.6"
     }
     override var commands: [String: RunHandler] {
-        return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
+        return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes, "start-monitoring": startMonitoring]
     }
     
     // MARK: Sync
@@ -49,7 +51,10 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
                 Console.error(NPBeaconForest.self, text: "Cannot download nodes")
+                Console.info(NPBeaconForest.self, text: "Region monitoring will be started with the previously cached configuration, if available")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
+                self.persistCurrentRegionIdentifiers(self.navigator.defaultRegionIdentifiers)
+                self.startMonitoring(JSON(), sender: nil)
                 return
             }
             
@@ -77,7 +82,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
             Console.infoLine("nodes saved: \(nodes.count)")
             
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: "sync"))
-            self.startLocationUpdates()
+            self.persistCurrentRegionIdentifiers(self.navigator.defaultRegionIdentifiers)
+            self.startMonitoring(JSON(), sender: nil)
         }
         
         return PluginResponse.ok(command: "sync")
@@ -138,8 +144,24 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        startMonitoring()
-        startRanging()
+        let now = NSDate()
+        func startBeaconScan() {
+            Console.info(NPBeaconForest.self, text: "Refreshing monitored regions...")
+            
+            startMonitoring()
+            startRanging()
+            lastLocationUpdate = now
+        }
+        
+        guard let lastUpdate = lastLocationUpdate else {
+            startBeaconScan()
+            return
+        }
+        
+        if abs(lastUpdate.timeIntervalSinceDate(now)) > NPBeaconForest.locationUpdatesRefreshFrequency {
+            startBeaconScan()
+            return
+        }
     }
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
         enter(region)
@@ -213,21 +235,35 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     }
     
     // MARK: Location updates
-    func startLocationUpdates() {
-        let authorizationStatus = CLLocationManager.authorizationStatus()
-        if ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus)  {
-            Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
-            Console.errorLine("authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse")
+    func startMonitoring(arguments: JSON, sender: String?) -> PluginResponse {
+        let response = startLocationUpdates()
+        
+        if !response.started {
             hub?.dispatch(
-                event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(
-                    name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
-                    command: "start-monitoring"))
-            return
+                event: NearSDKError.RegionMonitoringDidFail.pluginEvent(
+                    name, message: "No regions found or authorization status not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
+                    command: "start-monitoring",
+                    details: ["configured-regions-count": response.configuredRegionsCount]))
+        }
+        
+        return PluginResponse(status: (response.started ? PluginResponseStatus.OK : PluginResponseStatus.Error), command: "start-monitoring")
+    }
+    func startLocationUpdates() -> (started: Bool, configuredRegionsCount: Int, authorizationStatus: CLAuthorizationStatus) {
+        let regionsCount = currentRegionIdentifiers().count
+        let authorizationStatus = CLLocationManager.authorizationStatus()
+        
+        if regionsCount <= 0 ||
+            ![CLAuthorizationStatus.AuthorizedAlways, CLAuthorizationStatus.AuthorizedWhenInUse].contains(authorizationStatus) {
+            Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
+            Console.errorLine("no regions found or invalid authorization status")
+            
+            return (false, regionsCount, authorizationStatus)
         }
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.startUpdatingLocation()
+        return (true, regionsCount, authorizationStatus)
     }
     
     // MARK: Region ranging
@@ -273,7 +309,11 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         let regions = navigator.identifiersToRegions(identifiers)
         if regions.count <= 0 {
             Console.warning(NPBeaconForest.self, text: "Cannot monitor regions: no regions configured")
-            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "Configured regions: \(regions.count)", command: "start-monitoring"))
+            hub?.dispatch(
+                event: NearSDKError.RegionMonitoringDidFail.pluginEvent(
+                    name, message: "Configured regions: \(regions.count)",
+                    command: "start-monitoring",
+                    details: ["configured-regions-count": regions.count]))
             return
         }
         

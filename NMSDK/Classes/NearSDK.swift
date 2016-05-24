@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreLocation
 import UIKit
 import NMNet
 import NMJSON
@@ -215,11 +216,17 @@ public class NearSDK: NSObject, Extensible {
         }
         
         syncingCorePlugins.remove(plugin)
-        delegate?.nearSDKPluginDidSync?(plugin, error: error)
+        delegate?.nearSDKPlugin?(plugin, didSyncWithError: error)
         
         if !syncDidEnd && syncingCorePlugins.count <= 0 {
             syncDidEnd = true
-            delegate?.nearSDKDidSync?(syncincErrors)
+            
+            if syncincErrors.count <= 0 {
+                delegate?.nearSDKDidSync?()
+            }
+            else {
+                delegate?.nearSDKSyncDidFailWithErrors?(syncincErrors)
+            }
         }
     }
     
@@ -352,7 +359,7 @@ public class NearSDK: NSObject, Extensible {
      
      This method will download and cache images not found, previously cached images will not be downloaded again.
      
-     When executed, the asynchronous handler `didFetchImages(images:downloaded:notFound:)` will return a `[String: UIImage]` dictionary of all images which have been found (`images`), the array of identifiers of downloaded images (`downloaded`: those images are included in `images`) and an array indicating the identifiers of images which cannot be found locally or downloaded.
+     When called, the asynchronous handler `didFetchImages(images:downloaded:notFound:)` will return a `[String: UIImage]` dictionary of all images which have been found (`images`), the array of identifiers of downloaded images (`downloaded`: those images are included in `images`) and an array indicating the identifiers of images which cannot be found locally or downloaded.
      
      - parameter identifiers: the identifiers of requested images; those identifiers must be linked to content reactions
      - parameter didFetchImages: the closure which should be exectude when images have been fetched
@@ -453,7 +460,7 @@ public class NearSDK: NSObject, Extensible {
      If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
      
      - parameter APNSToken: the optional Apple Push Notification token which should be associated to the device installation
-     - parameter didRefresh: the closure which should be executed when the refresh of the installation identifier ends
+     - parameter didRefresh: the closure which should be called when the refresh of the installation identifier ends
      */
     public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: DidRefreshInstallationIdentifier?) {
         var dictionary = [String: AnyObject]()
@@ -488,7 +495,7 @@ public class NearSDK: NSObject, Extensible {
      The result of the action will be `SendEventResult.Success` if the class of the HTTP status code is `HTTPStatusCodeClass.Successful`.
      
      - parameter event: the event being sent
-     - parameter response: the handler which will be executed when `event`'s recipient will end processing `event`
+     - parameter response: the handler which will be called when `event`'s recipient will end processing `event`
      */
     public class func sendEvent(event: EventSerializable, response handler: DidSendEvent?) {
         plugins.runAsync(CorePlugin.Polls.name, command: "post", withArguments: event.body) { (response) in
@@ -505,7 +512,7 @@ public class NearSDK: NSObject, Extensible {
      
      - parameter answer: the answer
      - parameter poll: the identifier of the target poll
-     - parameter response: the handler which will be executed when the answer is sent to nearit.com or when an error occurs
+     - parameter response: the handler which will be called when the answer is sent to nearit.com or when an error occurs
      - seealso: `sendEvent(_:response:)`
      */
     public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: DidSendEvent?) {
@@ -571,6 +578,13 @@ public class NearSDK: NSObject, Extensible {
     private func manageError(event: PluginEvent) -> Bool {
         if let errorValue = event.content.int("error"), error = NearSDKError(rawValue: errorValue), message = event.content.string("message") {
             delegate?.nearSDKDidFail?(error: error, message: message)
+            
+            if error == NearSDKError.RegionMonitoringDidFail {
+                delegate?.nearSDKRegionMonitoringDidFail?(
+                    configuredRegionsCount: event.content.int("details.configured-regions-count", fallback: 0)!,
+                    authorizationStatus: CLLocationManager.authorizationStatus())
+            }
+            
             return true
         }
         

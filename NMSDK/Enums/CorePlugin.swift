@@ -35,7 +35,7 @@ public enum CorePlugin: Int, CustomStringConvertible {
     /**
      `Recipes` manages the evaluation of iBeacon™s into reactions configured on nearit.com.
      
-     The evaluation of a recipe is executed offline and, if successfull, requests a reaction to `Polls` or `Contents`.
+     The evaluation of a recipe occurs offline and, if successfull, requests a reaction to `Polls` or `Contents`.
      This plugin synchronizes itself with nearit.com when `NearSDK.start(appToken:)` is called.
      
      - seealso:
