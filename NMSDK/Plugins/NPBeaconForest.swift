@@ -17,6 +17,8 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     private static let rangedBeaconsCandidatesUpperLimit = 3
     private static let rangedBeaconsBackgroundUpperLimit = 3
     private static let rangedBeaconsActiveUpperLimit = 10
+    private static let locationUpdatesRefreshFrequency: NSTimeInterval = 20
+    private var lastLocationUpdate: NSDate?
     private var rangedBeacons = [String: (beacon: CLBeacon, count: Int)]()
     private var forceForestNavigation = false
     private var locationManager = CLLocationManager()
@@ -29,7 +31,7 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         return CorePlugin.BeaconForest.name
     }
     override var version: String {
-        return "0.5.1"
+        return "0.6"
     }
     override var commands: [String: RunHandler] {
         return ["sync": sync, "read-node": readNode, "read-nodes": readNodes, "read-next-nodes": readNextNodes]
@@ -49,7 +51,9 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         APBeaconForest.get { (nodes, status) in
             if status != .OK {
                 Console.error(NPBeaconForest.self, text: "Cannot download nodes")
+                Console.info(NPBeaconForest.self, text: "Region monitoring will be started with the previously cached configuration, if available")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadRegionMonitoringConfiguration.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
+                self.startLocationUpdates()
                 return
             }
             
@@ -138,8 +142,24 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
     
     // MARK: CoreLocation
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        startMonitoring()
-        startRanging()
+        let now = NSDate()
+        func startBeaconScan() {
+            Console.info(NPBeaconForest.self, text: "Refreshing monitored regions...")
+            
+            startMonitoring()
+            startRanging()
+            lastLocationUpdate = now
+        }
+        
+        guard let lastUpdate = lastLocationUpdate else {
+            startBeaconScan()
+            return
+        }
+        
+        if abs(lastUpdate.timeIntervalSinceDate(now)) > NPBeaconForest.locationUpdatesRefreshFrequency {
+            startBeaconScan()
+            return
+        }
     }
     func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
         enter(region)
@@ -222,6 +242,13 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
                 event: NearSDKError.RegionMonitoringIsNotAuthorized.pluginEvent(
                     name, message: "CLLocationManager's authorization status is not equal to .AuthorizedAlways or .AuthorizedWhenInUse",
                     command: "start-monitoring"))
+            return
+        }
+        
+        if currentRegionIdentifiers().count <= 0 {
+            Console.error(NPBeaconForest.self, text: "Cannot start monitoring regions")
+            Console.errorLine("no regions found")
+            hub?.dispatch(event: NearSDKError.NoRegionsToMonitor.pluginEvent(name, message: "No regions found", command: "start-monitoring"))
             return
         }
         
