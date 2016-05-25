@@ -152,7 +152,7 @@ Two of those plugins are used to detect events related to iBeacons™s and to pr
 - `NearSDK` will broadcast:
   - `enter-region` command on broadcast key `beacon-forest`
     - event's content will be `["region-id": <String>, "event": "enter", "region-name": <String>]`
-  - `exit-region` commands on broadcast key `beacon-forest`
+  - `exit-region` command on broadcast key `beacon-forest`
     - event's content will be `["region-id": <String>, "event": "exit", "region-name": <String>]`
   - `evaluate-recipe` command on broadcast key `recipes`
     - event's content will be `["pulse": <JSON>, "evaluation": ["reaction": <JSON>, "recipe": <JSON>, "type": <String>]]`
