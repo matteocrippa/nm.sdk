@@ -3,7 +3,9 @@ nearit.com iOS SDK
 
 **WARNING**
 
-This is a pre-release software and is not production-ready - code snippets contained in this README are Swift 2.2.
+This is a pre-release software and is not production-ready.
+
+Code snippets contained in this README are Swift 2.2.
 
 Methods marked as "experimental" may not work.
 
@@ -11,13 +13,13 @@ Methods marked as "experimental" may not work.
 
 `NearSDK` is available as a CocoaPod for iOS 8 and later and can be easily integrated into existing iOS apps by adding `pod 'NMSDK'` command to your `Podfile`.
 
-The following code snippet may be used as a template of a `Podfile`
+The following code snippet may be used as a template of a `Podfile`.
 
 **Code snippet** - *sample `Podfile`*
 
     use_frameworks!
 
-    target '<your app target name>' do
+    target '<the name of the target of your app>' do
       pod 'NMSDK'
     end
 
@@ -113,8 +115,6 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
     - `answer1`
     - `answer2`
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
-
-All reactions evaluated by `NearSDK` may include a reference to the evaluating `Recipe`, i.e. the transformation of an input event into an output reaction.
 
 *Push notifications and NearSDK*
 
