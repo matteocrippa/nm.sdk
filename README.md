@@ -143,7 +143,7 @@ Because this method accepts an optional `APNSToken`, it should be called either 
       NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
     }
 
-**Notes about NearSDK Core Plugins*
+**Notes about NearSDK Core Plugins**
 `NearSDK` uses some "core" plugins which fulfills requirements of the SDK itself: such plugins are built with [NMPlug](https://github.com/nearit/nm.plug) module.
 
 Two of those plugins are used to detect events related to iBeacons™s and to produce contents, more specifically:
