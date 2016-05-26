@@ -62,6 +62,10 @@ public class NearSDK: NSObject, Extensible {
         
         pluginHub = PluginHub(extendedObject: self)
         
+        if let aToken = NSBundle.mainBundle().objectForInfoDictionaryKey("NearSDKToken") as? String {
+            API.authorizationToken = aToken
+        }
+        
         let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice(), NPSegmentation()]
         for plugin in plugins {
             pluginHub.plug(plugin)
@@ -175,8 +179,8 @@ public class NearSDK: NSObject, Extensible {
             return startCorePlugins()
         }
         
-        // Token is nil: use value NearSDKToken configured in app's Info.plist
-        guard let aToken = NSBundle.mainBundle().objectForInfoDictionaryKey("NearSDKToken") as? String else {
+        // Token is undefined: use value NearSDKToken configured in app's Info.plist
+        if appToken.isEmpty {
             delegate?.nearSDKDidFail?(
                 error: NearSDKError.TokenNotFoundInAppConfiguration,
                 message: "A valid token must be configured in app's Info.plist for key \"NearSDKToken\": it must be linked to an app registered on nearit.com")
@@ -187,7 +191,7 @@ public class NearSDK: NSObject, Extensible {
             return false
         }
         
-        NearSDK.appToken = aToken
+        // At this stage, it is assumed that a valid app token has been found in app's Info.plist file
         return startCorePlugins()
     }
     private class func startCorePlugins() -> Bool {
@@ -739,7 +743,7 @@ public class NearSDK: NSObject, Extensible {
      
      - warning: **Experimental**
      
-     This method requires `installationID` to be not `nil` and will return the cached profile identifier, if found.
+     This method will return the cached profile identifier, if found.
      
      - parameter completionHandler: the handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
      - seealso: `installationID`
@@ -751,14 +755,7 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        guard let id = installationID else {
-            Console.error(NearSDK.self, text: "No installation identifier can be found")
-            Console.errorLine("an installation identifier must be obtained before calling this method")
-            completionHandler?(id: nil)
-            return
-        }
-        
-        APSegmentation.requestProfileID(appID: API.appID, installationID: id) { (id, status) in
+        APSegmentation.requestProfileID(appID: API.appID) { (id, status) in
             NearSDK.profileID = id
             completionHandler?(id: id)
         }
