@@ -3,7 +3,9 @@ nearit.com iOS SDK
 
 **WARNING**
 
-This is a pre-release software and is not production-ready - code snippets contained in this README are Swift 2.2.
+This is a pre-release software and is not production-ready.
+
+Code snippets contained in this README are Swift 2.2.
 
 Methods marked as "experimental" may not work.
 
@@ -11,13 +13,13 @@ Methods marked as "experimental" may not work.
 
 `NearSDK` is available as a CocoaPod for iOS 8 and later and can be easily integrated into existing iOS apps by adding `pod 'NMSDK'` command to your `Podfile`.
 
-The following code snippet may be used as a template of a `Podfile`
+The following code snippet may be used as a template of a `Podfile`.
 
 **Code snippet** - *sample `Podfile`*
 
     use_frameworks!
 
-    target '<your app target name>' do
+    target '<the name of the target of your app>' do
       pod 'NMSDK'
     end
 
@@ -114,8 +116,6 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
     - `answer2`
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
 
-All reactions evaluated by `NearSDK` may include a reference to the evaluating `Recipe`, i.e. the transformation of an input event into an output reaction.
-
 *Push notifications and NearSDK*
 
 `NearSDK` can manage push notifications sent from nearit.com backend.
@@ -143,7 +143,8 @@ Because this method accepts an optional `APNSToken`, it should be called either 
       NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
     }
 
-* Notes about NearSDK Core Plugins*
+**Notes about NearSDK Core Plugins**
+
 `NearSDK` uses some "core" plugins which fulfills requirements of the SDK itself: such plugins are built with [NMPlug](https://github.com/nearit/nm.plug) module.
 
 Two of those plugins are used to detect events related to iBeacons™s and to produce contents, more specifically:
@@ -151,7 +152,7 @@ Two of those plugins are used to detect events related to iBeacons™s and to pr
 - `NearSDK` will broadcast:
   - `enter-region` command on broadcast key `beacon-forest`
     - event's content will be `["region-id": <String>, "event": "enter", "region-name": <String>]`
-  - `exit-region` commands on broadcast key `beacon-forest`
+  - `exit-region` command on broadcast key `beacon-forest`
     - event's content will be `["region-id": <String>, "event": "exit", "region-name": <String>]`
   - `evaluate-recipe` command on broadcast key `recipes`
     - event's content will be `["pulse": <JSON>, "evaluation": ["reaction": <JSON>, "recipe": <JSON>, "type": <String>]]`

@@ -59,11 +59,11 @@ class NPSegmentationTests: XCTestCase {
     func testUpdateInstallationID() {
         THStubs.storeSampleDeviceInstallation()
         NearSDK.profileID = "00000000-0000-0000-0000-000000000000"
-        stub(isHost("api.nearit.com") && isPath("/plugins/congrego/profiles/00000000-0000-0000-0000-000000000000/installations")) { (request) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/installations/installation-id/plugin_resources")) { (request) -> OHHTTPStubsResponse in
             let response = [
                 "data": [
-                    "id": "00000000-0000-0000-0000-000000000000", "type": "profiles", "attributes": ["app_id": "00000000-0000-0000-0000-000000000000"],
-                    "relationships": ["data_points": ["data": []], "installations": ["data": []]]]
+                    "id": "00000000-0000-0000-0000-000000000000", "type": "profiles",
+                    "attributes": ["installation_id": "00000000-0000-0000-0000-000000000000", "plugin_name": "congrego", "resource_id": "00000000-0000-0000-0000-000000000000"]]
             ]
             
             return OHHTTPStubsResponse(JSONObject: response, statusCode: 201, headers: nil)
