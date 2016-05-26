@@ -269,7 +269,7 @@ class NPBeaconForestTests: XCTestCase {
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectationsWithTimeout(1, handler: nil)
     }
     
     // MARK: Helper functions

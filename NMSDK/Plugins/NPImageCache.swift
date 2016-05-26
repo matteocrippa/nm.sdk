@@ -19,7 +19,7 @@ class NPImageCache: Plugin {
         return "0.3"
     }
     override var commands: [String: RunHandler] {
-        return ["store": store, "clear": clear, "read": read]
+        return ["store": store, "clear": clear, "read": read, "remove-images": removeImages]
     }
     
     // MARK: Images' management
@@ -64,5 +64,17 @@ class NPImageCache: Plugin {
         }
         
         return PluginResponse.ok(JSON(dictionary: ["images": images]), command: "read")
+    }
+    private func removeImages(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let identifiers = arguments.stringArray("identifiers") else {
+            Console.commandError(NPImageCache.self, command: "remove-images", cause: "\"identifiers\" must be an array of String identifiers", requiredParameters: ["identifiers"])
+            return PluginResponse.cannotRun("remove-images", requiredParameters: ["identifiers"], cause: "\"identifiers\" must be an array of String identifiers")
+        }
+        
+        for id in identifiers {
+            hub?.cache.removeResource(id, fromCollection: "Images", forPlugin: self)
+        }
+        
+        return PluginResponse.ok(command: "remove-images")
     }
 }

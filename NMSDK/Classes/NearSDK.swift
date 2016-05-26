@@ -352,6 +352,46 @@ public class NearSDK: NSObject, Extensible {
             completionHandler?(success: (response.status == PluginResponseStatus.OK), didDownloadRecipe: success)
         }
     }
+    /**
+     Downloads a content for the given identifier.
+     
+     Calling this method will overwrite any previously cached data, including images linked to the content being downloaded.
+     If an error occurs, previously cached data will not be modified or deleted.
+     
+     - parameter id: the identifier of the content which should be downloaded
+     - parameter completionHandler: the closure which should be called when the content has been downloaded or if errors occur
+     - seealso: `Content`
+     */
+    public class func downloadContent(id: String, completionHandler: DidDownloadContent?) {
+        plugins.runAsync(CorePlugin.Contents.name, command: "download-reaction", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval])) { (response) in
+            guard let json = response.content.json("content"), resource = APRecipeContent(json: json) where response.status == .OK else {
+                completionHandler?(content: nil, result: HTTPSimpleStatusCode(rawValue: (response.content.int("result") ?? -1)))
+                return
+            }
+            
+            completionHandler?(content: Content(content: resource), result: HTTPSimpleStatusCode.OK)
+        }
+    }
+    /**
+     Downloads a poll for the given identifier.
+     
+     Calling this method will overwrite any previously cached data.
+     If an error occurs, previously cached data will not be modified or deleted.
+     
+     - parameter id: the identifier of the poll which should be downloaded
+     - parameter completionHandler: the closure which should be called when the poll has been downloaded or if errors occur
+     - seealso: `Poll`
+     */
+    public class func downloadPoll(id: String, completionHandler: DidDownloadPoll?) {
+        plugins.runAsync(CorePlugin.Polls.name, command: "download-reaction", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval])) { (response) in
+            guard let json = response.content.json("poll"), resource = APRecipePoll(json: json) where response.status == .OK else {
+                completionHandler?(poll: nil, result: HTTPSimpleStatusCode(rawValue: (response.content.int("result") ?? -1)))
+                return
+            }
+            
+            completionHandler?(poll: Poll(poll: resource), result: HTTPSimpleStatusCode.OK)
+        }
+    }
     
     // MARK: Contents' images
     /**
@@ -362,7 +402,7 @@ public class NearSDK: NSObject, Extensible {
      When called, the asynchronous handler `didFetchImages(images:downloaded:notFound:)` will return a `[String: UIImage]` dictionary of all images which have been found (`images`), the array of identifiers of downloaded images (`downloaded`: those images are included in `images`) and an array indicating the identifiers of images which cannot be found locally or downloaded.
      
      - parameter identifiers: the identifiers of requested images; those identifiers must be linked to content reactions
-     - parameter didFetchImages: the closure which should be exectude when images have been fetched
+     - parameter didFetchImages: the closure which should be called when images have been fetched
      - seealso: `Content`
     */
     public class func imagesWithIdentifiers(identifiers: [String], didFetchImages: DidFetchImages? = nil) {
@@ -630,8 +670,8 @@ public class NearSDK: NSObject, Extensible {
             }
             
             var success = true
-            var contents = [(id: String, downloaded: Bool)]()
-            var polls = [(id: String, downloaded: Bool)]()
+            var contents = [(id: String, status: HTTPSimpleStatusCode)]()
+            var polls = [(id: String, status: HTTPSimpleStatusCode)]()
             
             let downloadGroup = dispatch_group_create()
             func download(reactionIDs: [String], pluginName: String) {
@@ -639,14 +679,14 @@ public class NearSDK: NSObject, Extensible {
                     dispatch_group_enter(downloadGroup)
                     
                     let downloadArguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval, "id": id])
-                    plugins.runAsync(pluginName, command: "download-reaction-if-missing", withArguments: downloadArguments) { (downloadReactionResponse) in
+                    plugins.runAsync(pluginName, command: "download-reaction", withArguments: downloadArguments) { (downloadReactionResponse) in
                         success = (downloadReactionResponse.status != .OK ? false : success)
-                        if let reactionID = downloadReactionResponse.content.string("id"), downloaded = downloadReactionResponse.content.bool("downloaded") {
+                        if let reactionID = downloadReactionResponse.content.string("id"), downloadResult = downloadReactionResponse.content.int("result") {
                             switch pluginName {
                             case CorePlugin.Contents.name:
-                                contents.append((reactionID, downloaded))
+                                contents.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
                             case CorePlugin.Polls.name:
-                                polls.append((reactionID, downloaded))
+                                polls.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
                             default:
                                 break
                             }

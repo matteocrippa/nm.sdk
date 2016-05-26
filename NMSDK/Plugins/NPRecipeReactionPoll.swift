@@ -23,7 +23,7 @@ class NPRecipeReactionPoll: Plugin {
         return ["sync": sync, "index": index, "read": read, "store-online-resource": storeOnlineResource]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
-        return ["post": post, "download-reaction-if-missing": downloadIfMissing]
+        return ["post": post, "download-reaction": download]
     }
     
     // MARK: Async
@@ -109,17 +109,10 @@ class NPRecipeReactionPoll: Plugin {
     }
     
     // MARK: Store
-    private func downloadIfMissing(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
+    private func download(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
         guard let pluginHub = hub, id = arguments.string("id"), appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
-            completionHandler?(response: PluginResponse.cannotRun("download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"]))
-            return
-        }
-        
-        if let _: APRecipePoll = pluginHub.cache.resource(id, inCollection: "Reactions", forPlugin: self) {
-            Console.info(NPRecipeReactionPoll.self, text: "Cache did contain poll \(id)")
-            Console.infoLine("skipping download")
-            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "downloaded": false]), command: "download-reaction-if-missing"))
+            Console.commandError(NPRecipeReactionPoll.self, command: "download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
+            completionHandler?(response: PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"]))
             return
         }
         
@@ -127,14 +120,25 @@ class NPRecipeReactionPoll: Plugin {
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         APRecipeReactions.getPoll(id) { (poll, status) in
             guard let p = poll where status.codeClass == .Successful else {
-                completionHandler?(response: PluginResponse.cannotRun("download-reaction-if-missing", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"], cause: "HTTPStatusCode \(status.rawValue)"))
+                var error = PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"], cause: "HTTPStatusCode \(status.rawValue)")
+                self.setDownloadResult(status, toResponse: &error)
+                
+                Console.error(NPRecipeReactionPoll.self, text: "Cannot download poll \(id)")
+                Console.errorLine("HTTPStatusCode: \(status.description)")
+                completionHandler?(response: error)
                 return
             }
             
             Console.info(NPRecipeReactionPoll.self, text: "Poll reaction \(p.id) has been downloaded and cached")
             pluginHub.cache.store(p, inCollection: "Reactions", forPlugin: self)
-            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "downloaded": true]), command: "download-reaction-if-missing"))
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "poll": poll!.json.dictionary, "result": HTTPSimpleStatusCode.OK.rawValue]), command: "download-reaction"))
         }
+    }
+    private func setDownloadResult(status: HTTPStatusCode, inout toResponse response: PluginResponse) {
+        var dictionary = response.content.dictionary
+        dictionary["download-status"] = HTTPSimpleStatusCode(statusCode: status).rawValue
+        
+        response = PluginResponse(status: response.status, content: JSON(dictionary: dictionary), command: response.command)
     }
     private func storeOnlineResource(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resource = arguments.object("resource") as? APIResource, content = APRecipePoll.makeWithResource(resource) else {
