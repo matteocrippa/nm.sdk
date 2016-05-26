@@ -193,6 +193,7 @@ class NearSDKTests: XCTestCase {
     // MARK: Helper functions
     private func reset() {
         SDKDelegate.clearHandlers()
+        NearSDK.appToken = ""
         NearSDK.clearImageCache()
         NearSDK.forwardCoreEvents = false
         NearSDK.delegate = SDKDelegate
