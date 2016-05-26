@@ -386,8 +386,8 @@ class NPRecipesTests: XCTestCase {
             XCTAssertEqual(recipes.count, 2)
             XCTAssertEqual(contents.count, 1)
             XCTAssertEqual(polls.count, 1)
-            XCTAssertTrue(contents[0].downloaded)
-            XCTAssertTrue(polls[0].downloaded)
+            XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)
+            XCTAssertEqual(polls[0].status, HTTPSimpleStatusCode.OK)
             
             NearSDK.evaluateRecipe("RC") { (success, didDownloadRecipe) in
                 XCTAssertTrue(success)
@@ -414,8 +414,8 @@ class NPRecipesTests: XCTestCase {
             XCTAssertEqual(recipes.count, 2)
             XCTAssertEqual(contents.count, 1)
             XCTAssertEqual(polls.count, 1)
-            XCTAssertFalse(contents[0].downloaded)
-            XCTAssertTrue(polls[0].downloaded)
+            XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)
+            XCTAssertEqual(polls[0].status, HTTPSimpleStatusCode.OK)
             
             expectation.fulfill()
         }
