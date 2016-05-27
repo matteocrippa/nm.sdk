@@ -43,7 +43,7 @@
 		B5CBB1351CBF7B39000DBA34 /* NPBeaconForest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */; };
 		B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */; };
 		B5CBB14C1CBFF84E000DBA34 /* NPContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */; };
-		B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */; };
+		B5CBB1501CBFF874000DBA34 /* NPPolls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */; };
 		B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BC81CCA286B00E4D911 /* NPDevice.swift */; };
 		B5E12BF51CCA799B00E4D911 /* NPDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */; };
 		B5E1BE8A1CE24F91001EC562 /* PushNotificationAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1BE891CE24F91001EC562 /* PushNotificationAction.swift */; };
@@ -110,7 +110,7 @@
 		B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForest.swift; sourceTree = "<group>"; };
 		B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipes.swift; sourceTree = "<group>"; };
 		B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPContents.swift; sourceTree = "<group>"; };
-		B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionPoll.swift; sourceTree = "<group>"; };
+		B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPPolls.swift; sourceTree = "<group>"; };
 		B5E12BC81CCA286B00E4D911 /* NPDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDevice.swift; sourceTree = "<group>"; };
 		B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDeviceTests.swift; sourceTree = "<group>"; };
 		B5E1BE891CE24F91001EC562 /* PushNotificationAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationAction.swift; sourceTree = "<group>"; };
@@ -298,7 +298,7 @@
 				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */,
-				B5CBB14F1CBFF874000DBA34 /* NPRecipeReactionPoll.swift */,
+				B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */,
 				B5E12BC81CCA286B00E4D911 /* NPDevice.swift */,
 				B5AB79F81CECA91400FC17BE /* NPSegmentation.swift */,
 				B55E7A131CD23AF0008CCADC /* CorePluginError.swift */,
@@ -509,7 +509,7 @@
 				B53D6D081CD0F17500500244 /* SendEventResult.swift in Sources */,
 				B503AD061CC1210D0081A581 /* Poll.swift in Sources */,
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
-				B5CBB1501CBFF874000DBA34 /* NPRecipeReactionPoll.swift in Sources */,
+				B5CBB1501CBFF874000DBA34 /* NPPolls.swift in Sources */,
 				B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */,
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,

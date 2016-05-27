@@ -1,5 +1,5 @@
 //
-//  NPRecipeReactionPoll.swift
+//  NPPolls.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 14/04/16.
@@ -11,7 +11,7 @@ import NMPlug
 import NMJSON
 import NMNet
 
-class NPRecipeReactionPoll: Plugin {
+class NPPolls: Plugin {
     // MARK: Plugin override
     override var name: String {
         return CorePlugin.Polls.name
@@ -29,7 +29,7 @@ class NPRecipeReactionPoll: Plugin {
     // MARK: Async
     private func post(arguments: JSON, sender: String?, handler: ((response: PluginResponse) -> Void)?) {
         guard let pollID = arguments.string("notification-id"), answerValue = arguments.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "post", requiredParameters: ["notification-id", "answer"])
+            Console.commandError(NPPolls.self, command: "post", requiredParameters: ["notification-id", "answer"])
             handler?(response: PluginResponse.cannotRun("post", requiredParameters: ["notification-id", "answer"], cause: "\"notification-id\", i.e. the poll identifier, is required, as well as the answer (which can be either 1 or 2)"))
             return
         }
@@ -45,22 +45,22 @@ class NPRecipeReactionPoll: Plugin {
     // MARK: Sync
     private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+            Console.commandError(NPPolls.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
         }
         
         API.authorizationToken = appToken
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
-        Console.info(NPRecipeReactionPoll.self, text: "Downloading poll reactions...", symbol: .Download)
+        Console.info(NPPolls.self, text: "Downloading poll reactions...", symbol: .Download)
         APRecipeReactions.getPolls { (polls, status) in
             if status != .OK {
-                Console.error(NPRecipeReactionPoll.self, text: "Cannot download poll reactions")
+                Console.error(NPPolls.self, text: "Cannot download poll reactions")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadPollReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
                 return
             }
             
-            Console.info(NPRecipeReactionPoll.self, text: "Saving poll reactions...")
+            Console.info(NPPolls.self, text: "Saving poll reactions...")
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for poll in polls {
                 Console.infoLine(poll.id, symbol: .Add)
@@ -89,12 +89,12 @@ class NPRecipeReactionPoll: Plugin {
     }
     private func read(arguments: JSON, sender: String?) -> PluginResponse {
         guard let id = arguments.string("content-id") else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "read", requiredParameters: ["content-id"])
+            Console.commandError(NPPolls.self, command: "read", requiredParameters: ["content-id"])
             return PluginResponse.cannotRun("read", requiredParameters: ["content-id"])
         }
         
         guard let reaction = poll(id) else {
-            Console.commandWarning(NPRecipeReactionPoll.self, command: "read", cause: "Content \"\(id) \" not found")
+            Console.commandWarning(NPPolls.self, command: "read", cause: "Content \"\(id) \" not found")
             return PluginResponse.warning("Content \"\(id)\" not found", command: "read")
         }
         
@@ -111,7 +111,7 @@ class NPRecipeReactionPoll: Plugin {
     // MARK: Store
     private func download(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
         guard let pluginHub = hub, id = arguments.string("id"), appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
+            Console.commandError(NPPolls.self, command: "download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
             completionHandler?(response: PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"]))
             return
         }
@@ -123,13 +123,13 @@ class NPRecipeReactionPoll: Plugin {
                 var error = PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"], cause: "HTTPStatusCode \(status.rawValue)")
                 self.setDownloadResult(status, toResponse: &error)
                 
-                Console.error(NPRecipeReactionPoll.self, text: "Cannot download poll \(id)")
+                Console.error(NPPolls.self, text: "Cannot download poll \(id)")
                 Console.errorLine("HTTPStatusCode: \(status.description)")
                 completionHandler?(response: error)
                 return
             }
             
-            Console.info(NPRecipeReactionPoll.self, text: "Poll reaction \(p.id) has been downloaded and cached")
+            Console.info(NPPolls.self, text: "Poll reaction \(p.id) has been downloaded and cached")
             pluginHub.cache.store(p, inCollection: "Reactions", forPlugin: self)
             completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["id": id, "poll": poll!.json.dictionary, "result": HTTPSimpleStatusCode.OK.rawValue]), command: "download-reaction"))
         }
@@ -142,16 +142,16 @@ class NPRecipeReactionPoll: Plugin {
     }
     private func storeOnlineResource(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resource = arguments.object("resource") as? APIResource, content = APRecipePoll.makeWithResource(resource) else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "store-online-resource", requiredParameters: ["resource"])
+            Console.commandError(NPPolls.self, command: "store-online-resource", requiredParameters: ["resource"])
             return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"])
         }
         
         guard let pluginHub = hub else {
-            Console.commandError(NPRecipeReactionPoll.self, command: "store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
+            Console.commandError(NPPolls.self, command: "store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
             return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
         }
         
-        Console.info(NPRecipeReactionPoll.self, text: "Poll reaction \(resource.id) has been stored")
+        Console.info(NPPolls.self, text: "Poll reaction \(resource.id) has been stored")
         pluginHub.cache.store(content, inCollection: "Reactions", forPlugin: self)
         return PluginResponse.ok(command: "store-online-resource")
     }
