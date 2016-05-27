@@ -66,7 +66,7 @@ public class NearSDK: NSObject, Extensible {
             API.authorizationToken = aToken
         }
         
-        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPRecipeReactionContent(), NPRecipeReactionPoll(), NPImageCache(), NPDevice(), NPSegmentation()]
+        let plugins: [Pluggable] = [NPBeaconForest(), NPRecipes(), NPContents(), NPRecipeReactionPoll(), NPImageCache(), NPDevice(), NPSegmentation()]
         for plugin in plugins {
             pluginHub.plug(plugin)
             corePluginNames.append(plugin.name)

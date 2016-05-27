@@ -1,5 +1,5 @@
 //
-//  NPRecipeReactionContent.swift
+//  NPContents.swift
 //  NMSDK
 //
 //  Created by Francesco Colleoni on 14/04/16.
@@ -11,7 +11,7 @@ import NMPlug
 import NMJSON
 import NMNet
 
-class NPRecipeReactionContent: Plugin {
+class NPContents: Plugin {
     // MARK: Plugin override
     override var name: String {
         return CorePlugin.Contents.name
@@ -29,22 +29,22 @@ class NPRecipeReactionContent: Plugin {
     // MARK: Sync
     private func sync(arguments: JSON, sender: String?) -> PluginResponse {
         guard let appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipeReactionContent.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
+            Console.commandError(NPContents.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
             return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
         }
         
         API.authorizationToken = appToken
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
-        Console.info(NPRecipeReactionContent.self, text: "Downloading content reactions...", symbol: .Download)
+        Console.info(NPContents.self, text: "Downloading content reactions...", symbol: .Download)
         APRecipeReactions.getContents { (contents, status) in
             if status != .OK {
-                Console.error(NPRecipeReactionContent.self, text: "Cannot download content reactions")
+                Console.error(NPContents.self, text: "Cannot download content reactions")
                 self.hub?.dispatch(event: NearSDKError.CannotDownloadContentReactions.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
                 return
             }
             
-            Console.info(NPRecipeReactionContent.self, text: "Saving content reactions...")
+            Console.info(NPContents.self, text: "Saving content reactions...")
             self.hub?.cache.removeAllResourcesWithPlugin(self)
             for content in contents {
                 Console.infoLine(content.id, symbol: .Add)
@@ -74,12 +74,12 @@ class NPRecipeReactionContent: Plugin {
     }
     private func read(arguments: JSON, sender: String?) -> PluginResponse {
         guard let id = arguments.string("content-id") else {
-            Console.commandError(NPRecipeReactionContent.self, command: "read", requiredParameters: ["content-id"])
+            Console.commandError(NPContents.self, command: "read", requiredParameters: ["content-id"])
             return PluginResponse.cannotRun("read", requiredParameters: ["content-id"])
         }
         
         guard let reaction = content(id) else {
-            Console.commandWarning(NPRecipeReactionContent.self, command: "read", cause: "Content \"\(id) \" not found")
+            Console.commandWarning(NPContents.self, command: "read", cause: "Content \"\(id) \" not found")
             return PluginResponse.warning("Content \"\(id)\" not found", command: "read")
         }
         
@@ -96,7 +96,7 @@ class NPRecipeReactionContent: Plugin {
     // MARK: Store
     private func download(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
         guard let pluginHub = hub, id = arguments.string("id"), appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipeReactionContent.self, command: "download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
+            Console.commandError(NPContents.self, command: "download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"])
             completionHandler?(response: PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"]))
             return
         }
@@ -108,13 +108,13 @@ class NPRecipeReactionContent: Plugin {
                 var error = PluginResponse.cannotRun("download-reaction", requiredParameters: ["id", "app-token"], optionalParameters: ["timeout-interval"], cause: "HTTPStatusCode \(status.rawValue)")
                 self.setDownloadResult(status, toResponse: &error)
                 
-                Console.error(NPRecipeReactionContent.self, text: "Cannot download content \(id)")
+                Console.error(NPContents.self, text: "Cannot download content \(id)")
                 Console.errorLine("HTTPStatusCode: \(status.description)")
                 completionHandler?(response: error)
                 return
             }
             
-            Console.info(NPRecipeReactionContent.self, text: "Content reaction \(c.id) has been downloaded and cached")
+            Console.info(NPContents.self, text: "Content reaction \(c.id) has been downloaded and cached")
             pluginHub.cache.store(c, inCollection: "Reactions", forPlugin: self)
             
             Console.infoLine("Removing images (\(c.imageIdentifiers.count))...")
@@ -136,16 +136,16 @@ class NPRecipeReactionContent: Plugin {
     }
     private func storeOnlineResource(arguments: JSON, sender: String?) -> PluginResponse {
         guard let resource = arguments.object("resource") as? APIResource, content = APRecipeContent.makeWithResource(resource) else {
-            Console.commandError(NPRecipeReactionContent.self, command: "store-online-resource", requiredParameters: ["resource"])
+            Console.commandError(NPContents.self, command: "store-online-resource", requiredParameters: ["resource"])
             return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"])
         }
         
         guard let pluginHub = hub else {
-            Console.commandError(NPRecipeReactionContent.self, command: "store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
+            Console.commandError(NPContents.self, command: "store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
             return PluginResponse.cannotRun("store-online-resource", requiredParameters: ["resource"], cause: "No plugin hub can be found")
         }
         
-        Console.info(NPRecipeReactionContent.self, text: "Content reaction \(resource.id) has been stored")
+        Console.info(NPContents.self, text: "Content reaction \(resource.id) has been stored")
         pluginHub.cache.store(content, inCollection: "Reactions", forPlugin: self)
         return PluginResponse.ok(command: "store-online-resource")
     }
