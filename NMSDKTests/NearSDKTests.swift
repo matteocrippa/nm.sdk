@@ -83,7 +83,7 @@ class NearSDKTests: XCTestCase {
         }
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
-            XCTAssertEqual(syncedPlugins.count, 4)
+            XCTAssertEqual(syncedPlugins.count, 3)
             expectation.fulfill()
         }
         

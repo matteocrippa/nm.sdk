@@ -90,7 +90,9 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     
-    /// Plugin hub exposed by the SDK.
+    /**
+     Plugin hub exposed by the SDK.
+     */
     public class var plugins: PluginHub {
         return sharedSDK.pluginHub
     }
@@ -199,7 +201,7 @@ public class NearSDK: NSObject, Extensible {
         
         syncDidEnd = false
         syncincErrors = []
-        syncingCorePlugins = [CorePlugin.Recipes, CorePlugin.BeaconForest, CorePlugin.Polls, CorePlugin.Contents]
+        syncingCorePlugins = [CorePlugin.BeaconForest, CorePlugin.Contents, CorePlugin.Polls]
         
         let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval])
         for plugin in syncingCorePlugins {
@@ -222,15 +224,26 @@ public class NearSDK: NSObject, Extensible {
         syncingCorePlugins.remove(plugin)
         delegate?.nearSDKPlugin?(plugin, didSyncWithError: error)
         
-        if !syncDidEnd && syncingCorePlugins.count <= 0 {
-            syncDidEnd = true
-            
-            if syncincErrors.count <= 0 {
+        if syncDidEnd || syncingCorePlugins.count > 0 {
+            return
+        }
+        
+        syncDidEnd = true
+        if syncincErrors.count > 0 {
+            delegate?.nearSDKSyncDidFailWithErrors?(syncincErrors)
+        }
+        
+        NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
+            if success {
                 delegate?.nearSDKDidSync?()
+                return
             }
-            else {
-                delegate?.nearSDKSyncDidFailWithErrors?(syncincErrors)
+            
+            if let error = CorePluginError(event: NearSDKError.CannotDownloadRecipes.pluginEvent(CorePlugin.Recipes.name, message: "Cannot download processed recipes or related reactions", command: nil)) {
+                syncincErrors.append(error)
             }
+            
+            delegate?.nearSDKSyncDidFailWithErrors?(syncincErrors)
         }
     }
     
@@ -647,21 +660,17 @@ public class NearSDK: NSObject, Extensible {
      `downloadProcessedRecipes(_:)` will fail if the installation identifier is `nil`.
      
      Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
+     All previously cached recipes will be removed if the download of new data is successful.
      
      - parameter completionHandler: the handler which will be called when download process ends or when an error occurs
      */
     public class func downloadProcessedRecipes(completionHandler: DidDownloadProcessedRecipes?) {
-        guard let installation = installationID else {
-            completionHandler?(success: false, recipes: [], contents: [], polls: [])
-            return
-        }
-        
         var arguments: [String: AnyObject] = [
-            "app-token": appToken, "timeout-interval": timeoutInterval, "options": ["app_id": API.appID, "installation_id": installation]
+            "app-token": appToken, "timeout-interval": timeoutInterval, "options": ["app_id": API.appID]
         ]
         
         if let profile = profileID {
-            arguments["options"] = ["app_id": API.appID, "installation_id": installation, "congrego": ["profile_id": profile]]
+            arguments["options"] = ["app_id": API.appID, "congrego": ["evaluate_segment": ["profile_id": profile]]]
         }
         
         plugins.runAsync(CorePlugin.Recipes.name, command: "download-processed-recipes", withArguments: JSON(dictionary: arguments)) { (response) in

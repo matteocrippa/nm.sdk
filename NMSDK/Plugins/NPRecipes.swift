@@ -17,46 +17,13 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.3.1"
+        return "0.5"
     }
     override var commands: [String: RunHandler] {
-        return ["sync": sync, "index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
+        return ["index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
         return ["download": download, "download-processed-recipes": downloadProcessedRecipes]
-    }
-    
-    // MARK: Sync
-    private func sync(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let appToken = arguments.string("app-token") else {
-            Console.commandError(NPRecipes.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
-            return PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval"])
-        }
-        
-        API.authorizationToken = appToken
-        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
-        
-        Console.info(NPRecipes.self, text: "Downloading recipes...", symbol: .Download)
-        APRecipes.get { (recipes, recipeMaps, status) in
-            if status != .OK {
-                Console.error(NPRecipes.self, text: "Cannot download recipes")
-                self.hub?.dispatch(event: NearSDKError.CannotDownloadRecipes.pluginEvent(self.name, message: "HTTPStatusCode \(status.rawValue)", command: "sync"))
-                return
-            }
-            
-            self.hub?.cache.removeAllResourcesWithPlugin(self)
-            self.storeRecipes(recipes, recipeMaps: recipeMaps, command: "sync", dispatchEvent: true)
-        }
-        
-        return PluginResponse.ok(command: "sync")
-    }
-    private func clear(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let pluginHub = hub else {
-            return PluginResponse.cannotRun("clear")
-        }
-        
-        pluginHub.cache.removeAllResourcesWithPlugin(self)
-        return PluginResponse.ok(command: "clear")
     }
     
     // MARK: Index
@@ -78,6 +45,14 @@ class NPRecipes: Plugin {
         }
         
         return PluginResponse.ok(JSON(dictionary: ["triggers": maps]), command: "index")
+    }
+    private func clear(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let pluginHub = hub else {
+            return PluginResponse.cannotRun("clear")
+        }
+        
+        pluginHub.cache.removeAllResourcesWithPlugin(self)
+        return PluginResponse.ok(command: "clear")
     }
     
     // MARK: Evaluate
@@ -211,6 +186,8 @@ class NPRecipes: Plugin {
                 return
             }
             
+            Console.info(NPRecipes.self, text: "Removing previously cached recipes...")
+            self.clear(JSON(), sender: self.name)
             self.storeRecipes(recipes, recipeMaps: recipeMaps, command: "download-processed-recipes", dispatchEvent: false)
             
             func append(id: String, inout toDictionary dictionary: [String: [String]], forKey key: String) {
