@@ -104,7 +104,7 @@ class NPRecipeReactionsTests: XCTestCase {
             let response = NearSDK.plugins.run(CorePlugin.Contents.name, command: "index")
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             XCTAssertNotNil(response.content.stringArray("reactions"))
-            XCTAssertEqual(response.content.stringArray("reactions")?.count, 3)
+            XCTAssertEqual(response.content.stringArray("reactions")?.count, 4)
             
             expectation.fulfill()
         }
@@ -122,7 +122,7 @@ class NPRecipeReactionsTests: XCTestCase {
             let response = NearSDK.plugins.run(CorePlugin.Polls.name, command: "index")
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             XCTAssertNotNil(response.content.stringArray("reactions"))
-            XCTAssertEqual(response.content.stringArray("reactions")?.count, 2)
+            XCTAssertEqual(response.content.stringArray("reactions")?.count, 3)
             
             expectation.fulfill()
         }
