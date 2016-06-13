@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (3.4.0)
+  - Alamofire (3.4.1)
   - CocoaLumberjack (2.3.0):
     - CocoaLumberjack/Default (= 2.3.0)
     - CocoaLumberjack/Extensions (= 2.3.0)
@@ -19,20 +19,20 @@ PODS:
     - NMCache
   - NMPlug (0.8.3):
     - NMCache
-  - OHHTTPStubs (5.0.0):
-    - OHHTTPStubs/Default (= 5.0.0)
-  - OHHTTPStubs/Core (5.0.0)
-  - OHHTTPStubs/Default (5.0.0):
+  - OHHTTPStubs (5.1.0):
+    - OHHTTPStubs/Default (= 5.1.0)
+  - OHHTTPStubs/Core (5.1.0)
+  - OHHTTPStubs/Default (5.1.0):
     - OHHTTPStubs/Core
     - OHHTTPStubs/JSON
     - OHHTTPStubs/NSURLSession
     - OHHTTPStubs/OHPathHelpers
-  - OHHTTPStubs/JSON (5.0.0):
+  - OHHTTPStubs/JSON (5.1.0):
     - OHHTTPStubs/Core
-  - OHHTTPStubs/NSURLSession (5.0.0):
+  - OHHTTPStubs/NSURLSession (5.1.0):
     - OHHTTPStubs/Core
-  - OHHTTPStubs/OHPathHelpers (5.0.0)
-  - OHHTTPStubs/Swift (5.0.0):
+  - OHHTTPStubs/OHPathHelpers (5.1.0)
+  - OHHTTPStubs/Swift (5.1.0):
     - OHHTTPStubs/Core
   - YapDatabase (2.8.3):
     - YapDatabase/Standard (= 2.8.3)
@@ -85,14 +85,14 @@ DEPENDENCIES:
   - OHHTTPStubs/Swift
 
 SPEC CHECKSUMS:
-  Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
+  Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
   CocoaLumberjack: 97fab7ee5f507fe54445cca7ea80f926729cfd15
   JWTDecode: d172edcb1607cc15aed85d58eceedcbb675a4534
   NMCache: 8a176e9cb8d941f7b94616cdc661737b6424d36a
   NMJSON: a96a318c7284078361423339fda4fe1e0c3a2200
   NMNet: 67132d8c8ead9fc6f7cd0821875a5a44599750f4
   NMPlug: e4353d470ecc2dcf5f52f5035dbbc6db761183ba
-  OHHTTPStubs: a5d2e9eea07869d42ec03338325f398bc520e159
+  OHHTTPStubs: 592f74439d2d72615115cf99a954237a3fbe26e5
   YapDatabase: 15b6867a07ff30eac3af28794cd2262b4d0ca4ca
 
 COCOAPODS: 0.39.0

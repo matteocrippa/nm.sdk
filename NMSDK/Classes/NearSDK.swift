@@ -339,6 +339,71 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     /**
+     Downloads processed recipes from nearit.com backend.
+     
+     This method will use the cached installation identifiers and, if defined, the cached profile identifier.
+     `downloadProcessedRecipes(_:)` will fail if the installation identifier is `nil`.
+     
+     Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
+     All previously cached recipes will be removed if the download of new data is successful.
+     
+     - parameter completionHandler: the handler which will be called when download process ends or when an error occurs
+     */
+    public class func downloadProcessedRecipes(completionHandler: DidDownloadProcessedRecipes?) {
+        var arguments: [String: AnyObject] = [
+            "app-token": appToken, "timeout-interval": timeoutInterval, "options": ["app_id": API.appID]
+        ]
+        
+        if let profile = profileID {
+            arguments["options"] = ["app_id": API.appID, "congrego": ["evaluate_segment": ["profile_id": profile]]]
+        }
+        
+        plugins.runAsync(CorePlugin.Recipes.name, command: "download-processed-recipes", withArguments: JSON(dictionary: arguments)) { (response) in
+            guard let
+                recipeIDs = response.content.stringArray("recipes"),
+                contentIDs = response.content.stringArray("reactions.contents"),
+                pollIDs = response.content.stringArray("reactions.polls") where response.status == .OK else {
+                    completionHandler?(success: false, recipes: [], contents: [], polls: [])
+                    return
+            }
+            
+            var success = true
+            var contents = [(id: String, status: HTTPSimpleStatusCode)]()
+            var polls = [(id: String, status: HTTPSimpleStatusCode)]()
+            
+            let downloadGroup = dispatch_group_create()
+            func download(reactionIDs: [String], pluginName: String) {
+                for id in reactionIDs {
+                    dispatch_group_enter(downloadGroup)
+                    
+                    let downloadArguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval, "id": id])
+                    plugins.runAsync(pluginName, command: "download-reaction", withArguments: downloadArguments) { (downloadReactionResponse) in
+                        success = (downloadReactionResponse.status != .OK ? false : success)
+                        if let reactionID = downloadReactionResponse.content.string("id"), downloadResult = downloadReactionResponse.content.int("result") {
+                            switch pluginName {
+                            case CorePlugin.Contents.name:
+                                contents.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
+                            case CorePlugin.Polls.name:
+                                polls.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
+                            default:
+                                break
+                            }
+                        }
+                        
+                        dispatch_group_leave(downloadGroup)
+                    }
+                }
+            }
+            
+            download(contentIDs, pluginName: CorePlugin.Contents.name)
+            download(pollIDs, pluginName: CorePlugin.Polls.name)
+            
+            dispatch_group_notify(downloadGroup, dispatch_get_main_queue()) {
+                completionHandler?(success: success, recipes: recipeIDs, contents: contents, polls: polls)
+            }
+        }
+    }
+    /**
      Evaluates a recipe.
      
      This method evaluates a recipe immediately if it has been downloaded previously, otherwise it will download it before attempting to evaluate it again.
@@ -407,6 +472,94 @@ public class NearSDK: NSObject, Extensible {
             }
             
             completionHandler?(poll: Poll(poll: resource), result: HTTPSimpleStatusCode.OK)
+        }
+    }
+    
+    // MARK: Segmentation
+    /**
+     Gets or sets the current profile identifier.
+     
+     If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `requestNewProfileID(_:)`.
+     
+     - seealso: `requestNewProfileID(_:)`
+     */
+    public static var profileID: String? {
+        get {
+            let response = plugins.run(CorePlugin.Segmentation.name, command: "read")
+            guard let id = response.content.string("profile-id") where response.status == .OK else {
+                return nil
+            }
+            
+            return id
+        }
+        set(newValue) {
+            guard let id = newValue else {
+                plugins.run(CorePlugin.Segmentation.name, command: "clear")
+                return
+            }
+            
+            plugins.run(CorePlugin.Segmentation.name, command: "save", withArguments: JSON(dictionary: ["id": id]))
+        }
+    }
+    /**
+     Requests a new profile identifier.
+     
+     This method will return the cached profile identifier, if found.
+     
+     - parameter completionHandler: the handler which will be called asynchronously when the profile identifier has been obtained.
+     - seealso: `installationID`
+     */
+    public class func requestNewProfileID(completionHandler: DidRefreshIdentifier?) {
+        APSegmentation.requestProfileID(appID: API.appID) { (id, status) in
+            NearSDK.profileID = id
+            completionHandler?(id: id)
+        }
+    }
+    /**
+     Links the `profileID` to `installationID` on nearit.com if both values are not `nil`.
+     
+     This method requires two values to be cached, i.e. a profile identifier and an installation identifier.
+     
+     If such values could not be found locally, they must be requested (profile identifier) or refreshed (installation identifier).
+     
+     - parameter completionHandler: the handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
+     - seealso:
+     - `profileID`
+     - `requestNewProfileID(_:)`
+     - `installationID`
+     - `refreshInstallationID(APNSToken:didRefresh:)`
+     */
+    public class func linkProfileToInstallation(completionHandler: DidCompleteOperation?) {
+        guard let profile = profileID, installation = installationID else {
+            Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
+            Console.errorLine("both installation and profile identifiers must be obtained before calling this method")
+            completionHandler?(success: false)
+            return
+        }
+        
+        APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
+            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
+    /**
+     Adds data points to the current profile identifier on nearit.com.
+     
+     This method fails if `profileID` is `nil`.
+     
+     - parameter points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
+     - parameter completionHandler: the handler which will be called asynchronously when data points have been added to the current profile identifier.
+     - seealso: `profileID`
+     */
+    public class func addProfileDataPoints(points: [String: String], completionHandler: DidCompleteOperation?) {
+        guard let profile = profileID else {
+            Console.error(NearSDK.self, text: "No profile identifier can be found")
+            Console.errorLine("a profile identifier must be obtained or set before calling this method")
+            completionHandler?(success: false)
+            return
+        }
+        
+        APSegmentation.addDataPoints(points, toProfileID: profile) { (status) in
+            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
         }
     }
     
@@ -646,178 +799,5 @@ public class NearSDK: NSObject, Extensible {
         }
         
         return false
-    }
-    
-    // MARK: -
-    // MARK: Experimental
-    // MARK: Recipes
-    /**
-     Downloads processed recipes from nearit.com backend.
-     
-     - warning: **Experimental**
-     
-     This method will use the cached installation identifiers and, if defined, the cached profile identifier.
-     `downloadProcessedRecipes(_:)` will fail if the installation identifier is `nil`.
-     
-     Downloaded recipes may be linked to non-cached reactions, so downloading a processed recipe may download additional content from nearit.com backend.
-     All previously cached recipes will be removed if the download of new data is successful.
-     
-     - parameter completionHandler: the handler which will be called when download process ends or when an error occurs
-     */
-    public class func downloadProcessedRecipes(completionHandler: DidDownloadProcessedRecipes?) {
-        var arguments: [String: AnyObject] = [
-            "app-token": appToken, "timeout-interval": timeoutInterval, "options": ["app_id": API.appID]
-        ]
-        
-        if let profile = profileID {
-            arguments["options"] = ["app_id": API.appID, "congrego": ["evaluate_segment": ["profile_id": profile]]]
-        }
-        
-        plugins.runAsync(CorePlugin.Recipes.name, command: "download-processed-recipes", withArguments: JSON(dictionary: arguments)) { (response) in
-            guard let
-                recipeIDs = response.content.stringArray("recipes"),
-                contentIDs = response.content.stringArray("reactions.contents"),
-                pollIDs = response.content.stringArray("reactions.polls") where response.status == .OK else {
-                    completionHandler?(success: false, recipes: [], contents: [], polls: [])
-                return
-            }
-            
-            var success = true
-            var contents = [(id: String, status: HTTPSimpleStatusCode)]()
-            var polls = [(id: String, status: HTTPSimpleStatusCode)]()
-            
-            let downloadGroup = dispatch_group_create()
-            func download(reactionIDs: [String], pluginName: String) {
-                for id in reactionIDs {
-                    dispatch_group_enter(downloadGroup)
-                    
-                    let downloadArguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval, "id": id])
-                    plugins.runAsync(pluginName, command: "download-reaction", withArguments: downloadArguments) { (downloadReactionResponse) in
-                        success = (downloadReactionResponse.status != .OK ? false : success)
-                        if let reactionID = downloadReactionResponse.content.string("id"), downloadResult = downloadReactionResponse.content.int("result") {
-                            switch pluginName {
-                            case CorePlugin.Contents.name:
-                                contents.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
-                            case CorePlugin.Polls.name:
-                                polls.append((reactionID, HTTPSimpleStatusCode(rawValue: downloadResult)))
-                            default:
-                                break
-                            }
-                        }
-                        
-                        dispatch_group_leave(downloadGroup)
-                    }
-                }
-            }
-            
-            download(contentIDs, pluginName: CorePlugin.Contents.name)
-            download(pollIDs, pluginName: CorePlugin.Polls.name)
-            
-            dispatch_group_notify(downloadGroup, dispatch_get_main_queue()) {
-                completionHandler?(success: success, recipes: recipeIDs, contents: contents, polls: polls)
-            }
-        }
-    }
-    
-    // MARK: Segmentation
-    /**
-     Gets or sets the current profile identifier.
-     
-     - warning: **Experimental**
-     
-     If the value of this property is set explicitly, it must be a valid profile identifier obtained by calling nearit.com APIs or `requestNewProfileID(_:)`.
-     
-     - seealso: `requestNewProfileID(_:)`
-     */
-    public static var profileID: String? {
-        get {
-            let response = plugins.run(CorePlugin.Segmentation.name, command: "read")
-            guard let id = response.content.string("profile-id") where response.status == .OK else {
-                return nil
-            }
-            
-            return id
-        }
-        set(newValue) {
-            guard let id = newValue else {
-                plugins.run(CorePlugin.Segmentation.name, command: "clear")
-                return
-            }
-            
-            plugins.run(CorePlugin.Segmentation.name, command: "save", withArguments: JSON(dictionary: ["id": id]))
-        }
-    }
-    /**
-     Requests a new profile identifier.
-     
-     - warning: **Experimental**
-     
-     This method will return the cached profile identifier, if found.
-     
-     - parameter completionHandler: the handler which will be called asynchronously when the profile identifier has been obtained or has been red from the local cache.
-     - seealso: `installationID`
-     */
-    public class func requestNewProfileID(completionHandler: DidRefreshIdentifier?) {
-        if let id = profileID {
-            Console.info(NearSDK.self, text: "A cached profile identifier has been found and will be returned instead of requesting a new one")
-            completionHandler?(id: id)
-            return
-        }
-        
-        APSegmentation.requestProfileID(appID: API.appID) { (id, status) in
-            NearSDK.profileID = id
-            completionHandler?(id: id)
-        }
-    }
-    /**
-     Links the `profileID` to `installationID` on nearit.com if both values are not `nil`.
-     
-     - warning: **Experimental**
-     
-     This method requires two values to be cached, i.e. a profile identifier and an installation identifier.
-     
-     If such values could not be found locally, they must be requested (profile identifier) or refreshed (installation identifier).
-     
-     - parameter completionHandler: the handler which will be called asynchronously when the current profile identifier has been successfully linked to the current installation identifier.
-     - seealso:
-       - `profileID`
-       - `requestNewProfileID(_:)`
-       - `installationID`
-       - `refreshInstallationID(APNSToken:didRefresh:)`
-     */
-    public class func linkProfileToInstallation(completionHandler: DidCompleteOperation?) {
-        guard let profile = profileID, installation = installationID else {
-            Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
-            Console.errorLine("both installation and profile identifiers must be obtained before calling this method")
-            completionHandler?(success: false)
-            return
-        }
-        
-        APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
-            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
-        }
-    }
-    /**
-     Adds data points to the current profile identifier on nearit.com.
-     
-     - warning: **Experimental**
-     
-     This method fails if `profileID` is `nil`.
-     
-     - parameter points: a key-value dictionary (`[String: String]` dictionary) which defines "data points" that should be added to the current profile identifier on nearit.com.
-     - parameter completionHandler: the handler which will be called asynchronously when data points have been added to the current profile identifier.
-     - seealso: `profileID`
-     */
-    public class func addProfileDataPoints(points: [String: String], completionHandler: DidCompleteOperation?) {
-        guard let profile = profileID else {
-            Console.error(NearSDK.self, text: "No profile identifier can be found")
-            Console.errorLine("a profile identifier must be obtained or set before calling this method")
-            completionHandler?(success: false)
-            return
-        }
-        
-        APSegmentation.addDataPoints(points, toProfileID: profile) { (status) in
-            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
-        }
     }
 }
