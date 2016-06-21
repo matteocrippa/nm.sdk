@@ -20,7 +20,7 @@ class NPCouponBlaster: Plugin {
         return "0.1"
     }
     override var commands: [String: RunHandler] {
-        return ["clear": clear, "read": read]
+        return ["clear": clear, "read": read, "index": index]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
         return ["download": download]
@@ -39,6 +39,13 @@ class NPCouponBlaster: Plugin {
         }
         
         return PluginResponse.ok(reaction.json, command: "read")
+    }
+    private func index(arguments: JSON, sender: String?) -> PluginResponse {
+        guard let resources: [APCoupon] = hub?.cache.resourcesIn(collection: "Reactions", forPlugin: self) else {
+            return PluginResponse.warning("No coupons found", command: "index")
+        }
+        
+        return PluginResponse.ok(JSON(dictionary: ["coupons": resources]), command: "index")
     }
     private func coupon(id: String) -> APCoupon? {
         guard let resource: APCoupon = hub?.cache.resource(id, inCollection: "Reactions", forPlugin: self) else {
