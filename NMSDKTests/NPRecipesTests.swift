@@ -153,7 +153,7 @@ class NPRecipesTests: XCTestCase {
                 return
             }
             
-            XCTAssertEqual(triggers.count, 5)
+            XCTAssertEqual(triggers.count, 6)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             expectation.fulfill()
         }
@@ -383,7 +383,7 @@ class NPRecipesTests: XCTestCase {
         }
         NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
             XCTAssertTrue(success)
-            XCTAssertEqual(recipes.count, 6)
+            XCTAssertEqual(recipes.count, 7)
             XCTAssertEqual(contents.count, 2)
             XCTAssertEqual(polls.count, 2)
             XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)
@@ -411,7 +411,7 @@ class NPRecipesTests: XCTestCase {
         
         NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
             XCTAssertTrue(success)
-            XCTAssertEqual(recipes.count, 6)
+            XCTAssertEqual(recipes.count, 7)
             XCTAssertEqual(contents.count, 2)
             XCTAssertEqual(polls.count, 2)
             XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)

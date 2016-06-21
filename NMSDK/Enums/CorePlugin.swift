@@ -21,9 +21,16 @@ public enum CorePlugin: Int, CustomStringConvertible {
     case BeaconForest
     
     /**
+     `CouponBlaster` manages coupons linked to nearit.com coupon reactions.
+     
+     This plugin can sync itself with nearit.com servers and can be used to list all cached coupons or to show a specific coupon.
+     */
+    case CouponBlaster
+    
+    /**
      `ImageCache` manages images linked to nearit.com content reactions.
      
-     This plugin can return, cache and download images for a given array of image identifiers, which must be defined in a "source" content reaction.
+     This plugin can return cached and download images for a given array of image identifiers, which must be defined in a "source" content reaction.
      
      - seealso:
        - `NearSDK.imagesWithIdentifiers(_:didFetchImages:)`
@@ -97,6 +104,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
         switch self {
         case .BeaconForest:
             return "com.nearit.sdk.plugin.np-beacon-forest"
+        case .CouponBlaster:
+            return "com.nearit.sdk.plugin.np-coupon-blaster"
         case .ImageCache:
             return "com.nearit.sdk.plugin.np-image-cache"
         case .Recipes:
@@ -118,6 +127,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
         switch self {
         case .BeaconForest:
             return "Beacon forest"
+        case .CouponBlaster:
+            return "Coupon blaster"
         case .ImageCache:
             return "Image Cache"
         case .Recipes:
@@ -139,21 +150,24 @@ public enum CorePlugin: Int, CustomStringConvertible {
      
      Accepted names:
      
-     - `com.nearit.sdk.plugin.np-beacon-forest` (*BeaconForest*)
-     - `com.nearit.sdk.plugin.np-image-cache`   (*ImageCache*)
-     - `com.nearit.sdk.plugin.np-recipes`       (*Recipes*)
-     - `com.nearit.sdk.plugin.np-polls`         (*Polls*)
-     - `com.nearit.sdk.plugin.np-contents`      (*Contents*)
-     - `com.nearit.sdk.plugin.np-device`        (*Device*)
-     - `com.nearit.sdk.plugin.np-segmentation`  (*Segmentation*)
+     - `com.nearit.sdk.plugin.np-beacon-forest`  (*BeaconForest*)
+     - `com.nearit.sdk.plugin.np-coupon-blaster` (*CouponBlaster*)
+     - `com.nearit.sdk.plugin.np-image-cache`    (*ImageCache*)
+     - `com.nearit.sdk.plugin.np-recipes`        (*Recipes*)
+     - `com.nearit.sdk.plugin.np-polls`          (*Polls*)
+     - `com.nearit.sdk.plugin.np-contents`       (*Contents*)
+     - `com.nearit.sdk.plugin.np-device`         (*Device*)
+     - `com.nearit.sdk.plugin.np-segmentation`   (*Segmentation*)
      
-     - parameter name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "image-cache", "recipes", "polls", "contents", "device" or "segmentation"
+     - parameter name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "coupon-blaster", "image-cache", "recipes", "polls", "contents", "device" or "segmentation"
      - returns: `nil` if `name` is not a valid core plugin name
      */
     public init?(name: String) {
         switch name {
         case "com.nearit.sdk.plugin.np-beacon-forest":
             self = .BeaconForest
+        case "com.nearit.sdk.plugin.np-coupon-blaster":
+            self = .CouponBlaster
         case "com.nearit.sdk.plugin.np-image-cache":
             self = .ImageCache
         case "com.nearit.sdk.plugin.np-recipes":

@@ -17,7 +17,7 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.5"
+        return "0.6"
     }
     override var commands: [String: RunHandler] {
         return ["index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
@@ -223,6 +223,8 @@ class NPRecipes: Plugin {
             return (CorePlugin.Polls.name, "poll")
         case "content-notification":
             return (CorePlugin.Contents.name, "content")
+        case "coupon-blaster":
+            return (CorePlugin.CouponBlaster.name, "coupon")
         default:
             return nil
         }
