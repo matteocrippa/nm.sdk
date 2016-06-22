@@ -479,55 +479,6 @@ public class NearSDK: NSObject, Extensible {
             completionHandler?(poll: Poll(poll: resource), result: HTTPSimpleStatusCode.OK)
         }
     }
-    /**
-     Downloads coupons.
-     
-     This method downloads coupons from nearit.com servers and should be called after downloading processed recipes.
-     
-     - precondition: a valid profile identifier must be set (or requested) before calling this method.
-     - seealso: `downloadProcessedRecipes(_:)`
-     */
-    public class func downloadCoupons(completionHandler: DidCompleteOperation?) {
-        guard let profile = profileID else {
-            completionHandler?(success: false)
-            return
-        }
-        
-        let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval, "profile-id": profile])
-        plugins.runAsync(CorePlugin.CouponBlaster.name, command: "download", withArguments: arguments) { (response) in
-            completionHandler?(success: response.status == .OK)
-        }
-    }
-    /**
-     The list of downloaded coupons.
-     */
-    public class var coupons: [Coupon] {
-        let response = plugins.run(CorePlugin.CouponBlaster.name, command: "index")
-        guard let resources = response.content.objectArray("coupons") where response.status == .OK else {
-            return []
-        }
-        
-        var coupons = [Coupon]()
-        for  resource in resources where resource is APCoupon {
-            coupons.append(Coupon(coupon: resource as! APCoupon))
-        }
-        
-        return coupons
-    }
-    /**
-     Returns a coupon for a given serial number.
-     
-     - parameter serialNumber: the coupon's serial number.
-     - returns: a `Coupon` instance or `nil` if no coupon exitst for the given serial number.
-     */
-    public class func coupon(withSerialNumber sn: String) -> Coupon? {
-        let downloadedCoupons = coupons
-        for coupon in downloadedCoupons where coupon.serialNumber == sn {
-            return coupon
-        }
-        
-        return nil
-    }
     
     // MARK: Segmentation
     /**
@@ -858,5 +809,63 @@ public class NearSDK: NSObject, Extensible {
         }
         
         return false
+    }
+    
+    // MARK: Experimental
+    // MARK: Coupons
+    /**
+     Downloads coupons.
+     
+     - warning: **Experimental**
+     
+     This method downloads coupons from nearit.com servers and should be called after downloading processed recipes.
+     
+     - precondition: a valid profile identifier must be set (or requested) before calling this method.
+     - seealso: `downloadProcessedRecipes(_:)`
+     */
+    public class func downloadCoupons(completionHandler: DidCompleteOperation?) {
+        guard let profile = profileID else {
+            completionHandler?(success: false)
+            return
+        }
+        
+        let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval, "profile-id": profile])
+        plugins.runAsync(CorePlugin.CouponBlaster.name, command: "download", withArguments: arguments) { (response) in
+            completionHandler?(success: response.status == .OK)
+        }
+    }
+    /**
+     The list of downloaded coupons.
+     
+     - warning: **Experimental**
+     */
+    public class var coupons: [Coupon] {
+        let response = plugins.run(CorePlugin.CouponBlaster.name, command: "index")
+        guard let resources = response.content.objectArray("coupons") where response.status == .OK else {
+            return []
+        }
+        
+        var coupons = [Coupon]()
+        for  resource in resources where resource is APCoupon {
+            coupons.append(Coupon(coupon: resource as! APCoupon))
+        }
+        
+        return coupons
+    }
+    /**
+     Returns a coupon for a given serial number.
+     
+     - warning: **Experimental**
+     
+     - parameter serialNumber: the coupon's serial number.
+     - returns: a `Coupon` instance or `nil` if no coupon exitst for the given serial number.
+     */
+    public class func coupon(withSerialNumber sn: String) -> Coupon? {
+        let downloadedCoupons = coupons
+        for coupon in downloadedCoupons where coupon.serialNumber == sn {
+            return coupon
+        }
+        
+        return nil
     }
 }
