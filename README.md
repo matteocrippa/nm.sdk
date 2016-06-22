@@ -1,13 +1,11 @@
 # NMSDK
 nearit.com iOS SDK
 
-**WARNING**
+**Note**
 
-This is a pre-release software and is not production-ready.
+This is a pre-release software - features are subject to change.
 
 Code snippets contained in this README are Swift 2.2.
-
-Methods marked as "experimental" may not work.
 
 **Installation**
 

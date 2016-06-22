@@ -26,6 +26,7 @@ class THStubs {
         stubAPProcessedRecipesResponse()
         
         stubAPRecipeReactions()
+        stubAPCouponBlasterResponse()
         stubAPProcessedRecipesReactions()
     }
     
@@ -219,6 +220,43 @@ class THStubs {
             }
         }
     }
+    class func stubAPCouponBlasterResponse() {
+        stub(isHost("api.nearit.com") && pathStartsWith("/plugins/coupon-blaster/claims")) { (request) -> OHHTTPStubsResponse in
+            let included: [String: AnyObject] = [
+                "id": "COUPON-TEMPLATE-1",
+                "type": "coupons",
+                "attributes": [
+                    "app_id": "00000000-0000-0000-0000-000000000000",
+                    "name": "Coupon Name",
+                    "description": "Description (\"100% Off!\")",
+                    "value": "64% discount",
+                    "expires_at": "2016-01-01T00:00:00.000Z",
+                    "icon_id": "00000000-0000-0000-0000-000000000000"
+                ]
+            ]
+            let response: [String: AnyObject] = [
+                "data": [
+                    [
+                        "id": "COUPON-1", "type": "claims",
+                        "attributes": [
+                            "profile_id": "00000000-0000-0000-0000-000000000000",
+                            "serial_number": "000000000000",
+                            "claimed_at": "2016-01-01T00:00:00.000Z",
+                            "redeemed_at": NSNull()
+                        ],
+                        "relationships": [
+                            "coupon": [
+                                "data": ["id": "COUPON-TEMPLATE-1", "type": "coupons"]
+                            ]
+                        ]
+                    ]
+                ],
+                "included": [included]
+            ]
+            
+            return OHHTTPStubsResponse(JSONObject: response, statusCode: 200, headers: nil)
+        }
+    }
     
     class func stubAPProcessedRecipesResponse() {
         let recipe1 = recipe("R1", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT-1",      contentType: "content-notification", trigger: "enter_region")
@@ -228,9 +266,10 @@ class THStubs {
         
         let recipe5 = recipe("RC", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT",      contentType: "content-notification", trigger: "enter_region")
         let recipe6 = recipe("RP", nodeIdentifier: "C10_2",   contentIdentifier: "POLL",         contentType: "poll-notification",    trigger: "enter_region")
+        let recipe7 = recipe("CP1", nodeIdentifier: "R1_1",   contentIdentifier: "COUPON-1",      contentType: "coupon-blaster", trigger: "enter_region")
         
         stub(isHost("api.nearit.com") && isPath("/recipes/process")) { (request) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5, recipe6]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5, recipe6, recipe7]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeReactions() {

@@ -30,6 +30,9 @@
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
 		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B55E7A141CD23AF0008CCADC /* CorePluginError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E7A131CD23AF0008CCADC /* CorePluginError.swift */; };
+		B5678EE71D1819F000C2F531 /* NPCouponBlasterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EE61D1819F000C2F531 /* NPCouponBlasterTests.swift */; };
+		B5678EE91D181C2900C2F531 /* Coupon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EE81D181C2900C2F531 /* Coupon.swift */; };
+		B5678EEB1D18403A00C2F531 /* NPCouponBlaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EEA1D18403A00C2F531 /* NPCouponBlaster.swift */; };
 		B5747DB41CF2E73E002298F1 /* THSamplePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5747DB31CF2E73E002298F1 /* THSamplePlugin.swift */; };
 		B589B7DF1CE60769002CB061 /* NPBeaconForestRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */; };
 		B58C48391CB816EC008714DC /* NearSDKDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C48381CB816EC008714DC /* NearSDKDelegate.swift */; };
@@ -96,6 +99,9 @@
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
 		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B55E7A131CD23AF0008CCADC /* CorePluginError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePluginError.swift; sourceTree = "<group>"; };
+		B5678EE61D1819F000C2F531 /* NPCouponBlasterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPCouponBlasterTests.swift; sourceTree = "<group>"; };
+		B5678EE81D181C2900C2F531 /* Coupon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coupon.swift; sourceTree = "<group>"; };
+		B5678EEA1D18403A00C2F531 /* NPCouponBlaster.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPCouponBlaster.swift; sourceTree = "<group>"; };
 		B5747DB31CF2E73E002298F1 /* THSamplePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = THSamplePlugin.swift; sourceTree = "<group>"; };
 		B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPBeaconForestRegion.swift; sourceTree = "<group>"; };
 		B58C48381CB816EC008714DC /* NearSDKDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NearSDKDelegate.swift; sourceTree = "<group>"; };
@@ -160,6 +166,7 @@
 				B503AD031CC120730081A581 /* Content.swift */,
 				B516ED3F1CC91A250029F58B /* ContentImage.swift */,
 				B503AD051CC1210D0081A581 /* Poll.swift */,
+				B5678EE81D181C2900C2F531 /* Coupon.swift */,
 			);
 			path = ContentTypes;
 			sourceTree = "<group>";
@@ -284,6 +291,7 @@
 				B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */,
 				B54707241CD3A9D500CD2DF0 /* NPRecipeReactionsTests.swift */,
 				B5AB79F61CECA75000FC17BE /* NPSegmentationTests.swift */,
+				B5678EE61D1819F000C2F531 /* NPCouponBlasterTests.swift */,
 			);
 			name = Plugins;
 			sourceTree = "<group>";
@@ -301,6 +309,7 @@
 				B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */,
 				B5E12BC81CCA286B00E4D911 /* NPDevice.swift */,
 				B5AB79F81CECA91400FC17BE /* NPSegmentation.swift */,
+				B5678EEA1D18403A00C2F531 /* NPCouponBlaster.swift */,
 				B55E7A131CD23AF0008CCADC /* CorePluginError.swift */,
 			);
 			path = Plugins;
@@ -521,6 +530,8 @@
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,
 				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B5AB79FD1CECB18E00FC17BE /* NPSegmentationIdentifier.swift in Sources */,
+				B5678EEB1D18403A00C2F531 /* NPCouponBlaster.swift in Sources */,
+				B5678EE91D181C2900C2F531 /* Coupon.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,
 				B53D6D0A1CD10EF100500244 /* Recipe.swift in Sources */,
@@ -549,6 +560,7 @@
 				B5747DB41CF2E73E002298F1 /* THSamplePlugin.swift in Sources */,
 				B50BCB751CBBD2DE005F7E86 /* THStubs.swift in Sources */,
 				B50100DD1CC3DC6B003231F9 /* THRegion.swift in Sources */,
+				B5678EE71D1819F000C2F531 /* NPCouponBlasterTests.swift in Sources */,
 				B5FA83B31CB7DF690090E5CD /* NearSDKTests.swift in Sources */,
 				B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */,
 				B548FE931CBCEDAA006DCC02 /* THBeacon.swift in Sources */,
