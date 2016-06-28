@@ -173,7 +173,7 @@ class NearSDKTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testTouchPushNotificationReceivedDownloadRecipe() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         THStubs.stubTouchPushNotification("push-id")
         THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
         let expectation = expectationWithDescription("test touch push notification, download recipe")

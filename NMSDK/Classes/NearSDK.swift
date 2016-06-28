@@ -868,4 +868,53 @@ public class NearSDK: NSObject, Extensible {
         
         return nil
     }
+    /**
+     Evaluates a pulse.
+     
+     - warning: **Experimental**
+     
+     This method evaluates a pulse online and returns the evaluated recipe and reactions, if any.
+     
+     - parameter plugin: the identifier of the plugin which evaluates the pulse
+     - parameter action: the identifier of the action which evaluates the pulse
+     - parameter bundle: the identifier of the bundle which evaluates the pulse
+     */
+    public class func evaluateOnlinePulse(plugin plugin: String, action: String, bundle: String, completionHandler: ((recipe: Recipe?, success: Bool) -> Void)?) {
+        let arguments = JSON(dictionary: [
+            "app-token": API.authorizationToken, "timeout-interval": API.timeoutInterval,
+            "plugin": plugin, "action": action, "bundle": bundle]
+        )
+        
+        plugins.runAsync(CorePlugin.Recipes.name, command: "evaluate-online-pulse", withArguments: arguments) { (response) in
+            manageOnlineEvaluation(response, completionHandler: completionHandler)
+        }
+    }
+    /**
+     Evaluates a recipe online for a given identifier.
+     
+     - warning: **Experimental**
+     
+     This method evaluates a pulse online and returns the evaluated recipe and reactions, if any.
+     
+     - parameter id: the identifier of the recipe which should be evaluated online
+     */
+    public class func evaluateOnlineRecipe(id id: String, completionHandler: ((recipe: Recipe?, success: Bool) -> Void)?) {
+        let arguments = JSON(dictionary: ["app-token": API.authorizationToken, "timeout-interval": API.timeoutInterval, "recipe-id": id])
+        plugins.runAsync(CorePlugin.Recipes.name, command: "evaluate-online-id", withArguments: arguments) { (response) in
+            manageOnlineEvaluation(response, completionHandler: completionHandler)
+        }
+    }
+    private class func manageOnlineEvaluation(response: PluginResponse, completionHandler: ((recipe: Recipe?, success: Bool) -> Void)?) {
+        guard let
+            recipe = response.content.object("recipe") as? APRecipe,
+            reactions = response.content.object("reactions") as? APReactions where response.status == .OK else {
+                completionHandler?(recipe: nil, success: false)
+                return
+        }
+        
+        completionHandler?(
+            recipe: Recipe(recipe: recipe, contentReaction: reactions.content, pollReaction: reactions.poll, couponReaction: reactions.coupon),
+            success: true
+        )
+    }
 }

@@ -304,17 +304,17 @@ class THStubs {
         }
     }
     
-    class func stubOnlineContentEvaluation() {
+    class func stubContentEvaluation() {
         let onlineRecipe = recipe("CONTENT-RECIPE", nodeIdentifier: "X", contentIdentifier: "CONTENT-ONLINE-EVALUATION", contentType: "content-notification", trigger: "online")
-        let content = ["id": "CONTENT-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["content": "<content's text>", "images": [], "video_link": NSNull()]]
+        let content = ["id": "CONTENT-ONLINE-EVALUATION", "type": "contents", "attributes": ["content": "<content's text>", "images": [], "video_link": NSNull()]]
         
         stub(isHost("api.nearit.com") && isPath("/recipes/CONTENT-RECIPE")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": onlineRecipe, "included": [content]], statusCode: 200, headers: nil)
         }
     }
-    class func stubOnlinePollEvaluation() {
+    class func stubPollEvaluation() {
         let onlineRecipe = recipe("POLL-RECIPE", nodeIdentifier: "X", contentIdentifier: "POLL-ONLINE-EVALUATION", contentType: "poll-notification", trigger: "online")
-        let poll = ["id": "POLL-ONLINE-EVALUATION", "type": "reaction_bundles", "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
+        let poll = ["id": "POLL-ONLINE-EVALUATION", "type": "polls", "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2"]]
         
         stub(isHost("api.nearit.com") && isPath("/recipes/POLL-RECIPE")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": onlineRecipe, "included": [poll]], statusCode: 200, headers: nil)
@@ -333,6 +333,105 @@ class THStubs {
             return OHHTTPStubsResponse(JSONObject: responseResource, statusCode: 201, headers: nil)
         }
     }
+    
+    private class func onlineEvaluationResult(recipeID: String, reactionType: String, reactionObjects: [[String: AnyObject]]) -> [String: AnyObject] {
+        let recipe: [String: AnyObject] = [
+            "id": recipeID,
+            "type": "recipes",
+            "attributes": [
+                "name": "recipe",
+                "notification": ["title": "Notification title", "body": "Notification body"],
+                "pulse_plugin_id": "IN-PLUGIN",
+                "pulse_bundle_id": "IN-BUNDLE",
+                "operation_plugin_id": "OP-PLUGIN",
+                "operation_bundle_id": "OP-BUNDLE",
+                "reaction_plugin_id": "OUT-PLUGIN",
+                "reaction_bundle_id": "REACTION-ID",
+                "created_at": "2000-01-01T00:00:00.000Z",
+                "updated_at": "2000-01-01T00:00:00.000Z",
+                "labels": ["online": true]
+            ],
+            "relationships": [
+                "pulse_action": ["data": ["id": "IN-ACTION", "type": "pulse_actions"]],
+                "pulse_bundle": ["data": ["id": "IN-BUNDLE", "type": "pulse_bundles"]],
+                "operation_action": ["data": ["id": "OP-ACTION", "type": "pulse_actions"]],
+                "operation_bundle": ["data": ["id": "OP-BUNDLE", "type": "pulse_bundles"]],
+                "reaction_action": ["data": ["id": "OUT-ACTION", "type": "pulse_actions"]],
+                "reaction_bundle": ["data": ["id": "REACTION-ID", "type": "pulse_bundles"]]
+            ]
+        ]
+        
+        var result: [String: AnyObject] = [
+            "data": recipe
+        ]
+        
+        var included: [[String: AnyObject]] = [recipe]
+        for object in reactionObjects {
+            included.append(object)
+        }
+        
+        result["included"] = included
+        return result
+    }
+    class func stubOnlineEvaluationContent(recipeID: String, byID: Bool) {
+        let path = (byID ? "/recipes/\(recipeID)/evaluate" : "/recipes/evaluate")
+        let content = [
+            "id": "REACTION-ID", "type": "contents",
+            "attributes": ["content": "The <b>text</b> of the <i>content</i>", "video_link": "https://sample.nearit.com/image.jpg", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"],
+            "relationships": ["images": ["data": [["id": "IMAGE-1", "type": "images"], ["id": "IMAGE-2", "type": "images"]]]]]
+        
+        let reaction = onlineEvaluationResult(recipeID, reactionType: "contents", reactionObjects: [content])
+        stub(isHost("api.nearit.com") && isPath(path)) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: reaction, statusCode: 200, headers: nil)
+        }
+    }
+    class func stubOnlineEvaluationPoll(recipeID: String, byID: Bool) {
+        let path = (byID ? "/recipes/\(recipeID)/evaluate" : "/recipes/evaluate")
+        let poll = [
+            "id": "REACTION-ID", "type": "polls",
+            "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+        ]
+        
+        let reaction = onlineEvaluationResult(recipeID, reactionType: "polls", reactionObjects: [poll])
+        stub(isHost("api.nearit.com") && isPath(path)) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: reaction, statusCode: 200, headers: nil)
+        }
+    }
+    class func stubOnlineEvaluationCoupon(recipeID: String, byID: Bool) {
+        let path = (byID ? "/recipes/\(recipeID)/evaluate" : "/recipes/evaluate")
+        let coupon: [String: AnyObject] = [
+            "id": "REACTION-ID",
+            "type": "coupons",
+            "attributes": [
+                "app_id": "00000000-0000-0000-0000-000000000000",
+                "name": "Coupon Name",
+                "description": "Description (\"100% Off!\")",
+                "value": "64% discount",
+                "expires_at": "2016-01-01T00:00:00.000Z",
+                "icon_id": "00000000-0000-0000-0000-000000000000"
+            ]
+        ]
+        let claim: [String: AnyObject] = [
+            "id": "00000000-0000-0000-0000-000000000000", "type": "claims",
+            "attributes": [
+                "profile_id": "00000000-0000-0000-0000-000000000000",
+                "serial_number": "000000000000",
+                "claimed_at": "2016-01-00T00:00:00.000Z",
+                "redeemed_at": NSNull()
+            ],
+            "relationships": [
+                "coupon": [
+                    "data": ["id": "REACTION-ID", "type": "coupons"]
+                ]
+            ]
+        ]
+        
+        let reaction = onlineEvaluationResult(recipeID, reactionType: "coupons", reactionObjects: [coupon, claim])
+        stub(isHost("api.nearit.com") && isPath(path)) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: reaction, statusCode: 200, headers: nil)
+        }
+    }
+    
     class func stubBeacon(major major: Int, minor: Int) -> CLBeacon {
         return THBeacon(major: major, minor: minor, proximityUUID: NSUUID(UUIDString: "00000000-0000-0000-0000-000000000000")!, proximity: CLProximity.Near)
     }
