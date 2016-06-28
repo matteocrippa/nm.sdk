@@ -203,7 +203,7 @@ class NPRecipesTests: XCTestCase {
     
     // MARK: Download recipes
     func testDownloadRecipeContentReaction() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test download recipe - content reaction")
         
         NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
@@ -214,7 +214,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testDownloadRecipePollReaction() {
-        THStubs.stubOnlinePollEvaluation()
+        THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test download recipe - poll reaction")
         
         NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
@@ -227,7 +227,7 @@ class NPRecipesTests: XCTestCase {
     
     // MARK: Evaluate recipes by identifier
     func testEvaluateRecipeByIDContentReaction() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe - content reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -242,7 +242,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateRecipeByIDPollReaction() {
-        THStubs.stubOnlinePollEvaluation()
+        THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe - poll reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -257,7 +257,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateRecipeByIDContentReactionViaSDK() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - content reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -276,7 +276,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testEvaluateRecipeByIDPollReactionViaSDK() {
-        THStubs.stubOnlinePollEvaluation()
+        THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - poll reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -295,7 +295,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testDownloadAndEvaluateRecipeByIDContentReactionViaSDK() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test download and evaluate recipe via SDK - content reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -310,7 +310,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testDownloadAndEvaluateRecipeByIDPollReactionViaSDK() {
-        THStubs.stubOnlinePollEvaluation()
+        THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test download and evaluate recipe via SDK - poll reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -325,7 +325,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testForceDownloadAndEvaluateRecipeByIDContentReactionViaSDK() {
-        THStubs.stubOnlineContentEvaluation()
+        THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - content reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -342,7 +342,7 @@ class NPRecipesTests: XCTestCase {
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     func testForceDownloadAndEvaluateRecipeByIDPollReactionViaSDK() {
-        THStubs.stubOnlinePollEvaluation()
+        THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - poll reaction")
         
         SDKDelegate.didEvaluateRecipe = { (recipe) in
@@ -354,6 +354,100 @@ class NPRecipesTests: XCTestCase {
                 XCTAssertTrue(success)
                 XCTAssertTrue(didDownloadRecipe)
             }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Online evaluation - pulses
+    func testOnlineEvaluationWithPulse_Content() {
+        THStubs.stubOnlineEvaluationContent("RECIPE-ID", byID: false)
+        let expectation = expectationWithDescription("test evaluate online recipe with pulse - content reaction")
+        
+        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNotNil(recipe?.content)
+            XCTAssertNil(recipe?.poll)
+            XCTAssertNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testOnlineEvaluationWithPulse_Coupon() {
+        THStubs.stubOnlineEvaluationCoupon("RECIPE-ID", byID: false)
+        let expectation = expectationWithDescription("test evaluate online recipe with pulse - coupon reaction")
+        
+        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNil(recipe?.content)
+            XCTAssertNil(recipe?.poll)
+            XCTAssertNotNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testOnlineEvaluationWithPulse_Poll() {
+        THStubs.stubOnlineEvaluationPoll("RECIPE-ID", byID: false)
+        let expectation = expectationWithDescription("test evaluate online recipe with pulse - poll reaction")
+        
+        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNil(recipe?.content)
+            XCTAssertNotNil(recipe?.poll)
+            XCTAssertNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Online evaluation - identifiers
+    func testOnlineEvaluationWithID_Content() {
+        THStubs.stubOnlineEvaluationContent("RECIPE-ID", byID: true)
+        let expectation = expectationWithDescription("test evaluate online recipe with id - content reaction")
+        
+        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNotNil(recipe?.content)
+            XCTAssertNil(recipe?.poll)
+            XCTAssertNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testOnlineEvaluationWithID_Coupon() {
+        THStubs.stubOnlineEvaluationCoupon("RECIPE-ID", byID: true)
+        let expectation = expectationWithDescription("test evaluate online recipe with id - coupon reaction")
+        
+        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNil(recipe?.content)
+            XCTAssertNil(recipe?.poll)
+            XCTAssertNotNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testOnlineEvaluationWithID_Poll() {
+        THStubs.stubOnlineEvaluationPoll("RECIPE-ID", byID: true)
+        let expectation = expectationWithDescription("test evaluate online recipe with id - poll reaction")
+        
+        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+            XCTAssertNotNil(recipe)
+            XCTAssertNil(recipe?.content)
+            XCTAssertNotNil(recipe?.poll)
+            XCTAssertNil(recipe?.coupon)
+            XCTAssertTrue(success)
+            expectation.fulfill()
         }
         
         waitForExpectationsWithTimeout(1, handler: nil)

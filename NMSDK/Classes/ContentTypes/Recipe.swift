@@ -25,6 +25,11 @@ public class Recipe: NSObject {
     public private (set) var id = ""
     
     /**
+     Indicates if the recipe should be evaluated online.
+     */
+    public private (set) var online = false
+    
+    /**
      The name of the recipe.
     */
     public private (set) var name = ""
@@ -131,6 +136,7 @@ public class Recipe: NSObject {
         
         id = recipe.id
         name = recipe.name
+        online = recipe.online
         notificationText = recipe.notificationText
         notificationTitle = recipe.notificationTitle
         
