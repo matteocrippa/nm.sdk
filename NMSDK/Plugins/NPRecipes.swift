@@ -17,13 +17,17 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.6"
+        return "0.7"
     }
     override var commands: [String: RunHandler] {
         return ["index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
     }
     override var asyncCommands: [String: RunAsyncHandler] {
-        return ["download": download, "download-processed-recipes": downloadProcessedRecipes]
+        return [
+            "download": download,
+            "download-processed-recipes": downloadProcessedRecipes,
+            "evaluate-online-pulse": evaluateOnlinePulse,
+            "evaluate-online-id": evaluateOnlineID]
     }
     
     // MARK: Index
@@ -107,6 +111,73 @@ class NPRecipes: Plugin {
         self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" cannot be evaluated", command: "evaluate"))
         return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
     }
+    private func evaluateOnlinePulse(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipes.self, command: "evaluate-online-pulse", requiredParameters: ["app-token", "bundle", "action", "plugin"], optionalParameters: ["timeout-interval"])
+            completionHandler?(response: PluginResponse.cannotRun("evaluate-online-pulse", requiredParameters: ["app-token", "bundle", "action", "plugin"], optionalParameters: ["timeout-interval"]))
+            return
+        }
+        
+        API.authorizationToken = appToken
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
+        
+        guard let bundle = arguments.string("bundle"), action = arguments.string("action"), plugin = arguments.string("plugin") else {
+            Console.commandError(NPRecipes.self, command: "evaluate-online-pulse", requiredParameters: ["app-token", "bundle", "action", "plugin"])
+            completionHandler?(response: PluginResponse.cannotRun("evaluate-online-pulse", requiredParameters: ["app-token", "bundle", "action", "plugin"]))
+            return
+        }
+        
+        let identifiers = cachedIdentifiers()
+        let pulse = APPulse(pluginID: plugin, action: action, bundleID: bundle)
+        APRecipes.evaluate(pulse: pulse, profileID: identifiers.profile, installationID: identifiers.installation) { (recipe, reactions, status) in
+            guard let _ = recipe, _ = reactions where status == .OK else {
+                Console.error(NPRecipes.self, text: "Cannot evaluate pulse")
+                Console.errorLine("   recipe: \(recipe?.name ?? "-")")
+                Console.errorLine("reactions:", symbol: .AlternateSpace)
+                Console.errorLine("  content: \(reactions?.content?.id ?? "-")")
+                Console.errorLine("     poll: \(reactions?.poll?.id ?? "-")")
+                Console.errorLine("   coupon: \(reactions?.coupon?.id ?? "-")")
+                
+                completionHandler?(response: PluginResponse.error("No recipe or reaction", command: "evaluate-online-pulse"))
+                return
+            }
+            
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["recipe": recipe!, "reactions": reactions!]), command: "evaluate-online-pulse"))
+        }
+    }
+    private func evaluateOnlineID(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) {
+        guard let appToken = arguments.string("app-token") else {
+            Console.commandError(NPRecipes.self, command: "evaluate-online-id", requiredParameters: ["app-token", "recipe-id"], optionalParameters: ["timeout-interval"])
+            completionHandler?(response: PluginResponse.cannotRun("evaluate-online-id", requiredParameters: ["app-token", "recipe-id"], optionalParameters: ["timeout-interval"]))
+            return
+        }
+        
+        API.authorizationToken = appToken
+        API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
+        
+        guard let id = arguments.string("recipe-id") else {
+            Console.commandError(NPRecipes.self, command: "Cannot download recipe", requiredParameters: ["app-token", "recipe-id"])
+            completionHandler?(response: PluginResponse.cannotRun("evaluate-online-id", requiredParameters: ["app-token", "recipe-id"]))
+            return
+        }
+        
+        let identifiers = cachedIdentifiers()
+        APRecipes.evaluate(recipe: id, profileID: identifiers.profile, installationID: identifiers.installation) { (recipe, reactions, status) in
+            guard let _ = recipe, _ = reactions where status == .OK else {
+                Console.error(NPRecipes.self, text: "Cannot evaluate pulse")
+                Console.errorLine("   recipe: \(recipe?.name ?? "-")")
+                Console.errorLine("reactions:", symbol: .AlternateSpace)
+                Console.errorLine("  content: \(reactions?.content?.id ?? "-")")
+                Console.errorLine("     poll: \(reactions?.poll?.id ?? "-")")
+                Console.errorLine("   coupon: \(reactions?.coupon?.id ?? "-")")
+                
+                completionHandler?(response: PluginResponse.error("No recipe or reaction", command: "evaluate-online-id"))
+                return
+            }
+            
+            completionHandler?(response: PluginResponse.ok(JSON(dictionary: ["recipe": recipe!, "reactions": reactions!]), command: "evaluate-online-id"))
+        }
+    }
     private func evaluateByID(arguments: JSON, sender: String?) -> PluginResponse {
         guard let id = arguments.string("id") else {
             Console.commandError(NPRecipes.self, command: "evaluate-recipe-by-id", requiredParameters: ["id"])
@@ -162,11 +233,43 @@ class NPRecipes: Plugin {
             }
             
             // Store contents
+            // Coupons are not stored
+            if evaluatedReaction.coupon != nil {
+                completionHandler?(response: PluginResponse.cannotRun("download",
+                    requiredParameters: ["id"],
+                    cause: "Recipe \(id) has been downloaded, but recipe's reaction could not be stored offline"))
+                return
+            }
+            
             pluginHub.cache.store(evaluatedRecipe, inCollection: "Recipes", forPlugin: self)
-            completionHandler?(response: pluginHub.send("store-online-resource", fromPluginNamed: self.name, toPluginNamed: evaluator.name, withArguments: JSON(dictionary: ["resource": evaluatedReaction])).status == .OK ?
-                PluginResponse.ok(JSON(dictionary: ["id": id]), command: "download") :
-                PluginResponse.cannotRun("download", requiredParameters: ["id"], cause: "Recipe \(id) has been downloaded, but recipe's reaction could not be stored offline")
-            )
+            var reaction: JSON?
+            if let content = evaluatedReaction.content, resource = content.resource {
+                reaction = JSON(dictionary: ["resource": resource])
+            }
+            
+            if let poll = evaluatedReaction.poll, resource = poll.resource {
+                reaction = JSON(dictionary: ["resource": resource])
+            }
+            
+            if let r = reaction {
+                let response = pluginHub.send("store-online-resource", fromPluginNamed: self.name, toPluginNamed: evaluator.name, withArguments: r)
+                
+                completionHandler?(response:
+                    response.status == .OK ?
+                        PluginResponse.ok(JSON(dictionary: ["id": id]), command: "download") :
+                        PluginResponse.cannotRun("download",
+                            requiredParameters: ["id"],
+                            cause: "Recipe \(id) has been downloaded, but recipe's reaction could not be stored offline")
+                )
+                
+                return
+            }
+            
+            completionHandler?(
+                response: PluginResponse.cannotRun("download",
+                    requiredParameters: ["id"],
+                    cause: "Recipe \(id) has been downloaded, but recipe's reaction could not be stored offline")
+                )
         }
     }
     private func downloadProcessedRecipes(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) -> Void {
@@ -286,5 +389,26 @@ class NPRecipes: Plugin {
         if dispatchEvent {
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: command))
         }
+    }
+    
+    private func cachedIdentifiers() -> (profile: String?, installation: String?) {
+        guard let pluginHub = hub else {
+            return (profile: nil, installation: nil)
+        }
+        
+        var profile: String?
+        var installation: String?
+        
+        let pidResponse = pluginHub.send("read", fromPluginNamed: name, toPluginNamed: CorePlugin.Segmentation.name, withArguments: JSON())
+        if let id = pidResponse.content.string("profile-id") where pidResponse.status == .OK {
+            profile = id
+        }
+        
+        let nidResponse = pluginHub.send("read", fromPluginNamed: name, toPluginNamed: CorePlugin.Device.name, withArguments: JSON())
+        if let id = pidResponse.content.string("installation-id") where nidResponse.status == .OK {
+            installation = id
+        }
+        
+        return (profile: profile, installation: installation)
     }
 }
