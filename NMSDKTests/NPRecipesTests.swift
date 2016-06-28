@@ -364,7 +364,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationContent("RECIPE-ID", byID: false)
         let expectation = expectationWithDescription("test evaluate online recipe with pulse - content reaction")
         
-        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+        NearSDK.evaluateOnlinePulse(plugin: "IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNotNil(recipe?.content)
             XCTAssertNil(recipe?.poll)
@@ -379,7 +379,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationCoupon("RECIPE-ID", byID: false)
         let expectation = expectationWithDescription("test evaluate online recipe with pulse - coupon reaction")
         
-        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+        NearSDK.evaluateOnlinePulse(plugin: "IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNil(recipe?.content)
             XCTAssertNil(recipe?.poll)
@@ -394,7 +394,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationPoll("RECIPE-ID", byID: false)
         let expectation = expectationWithDescription("test evaluate online recipe with pulse - poll reaction")
         
-        NearSDK.evaluateOnlinePulse("IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
+        NearSDK.evaluateOnlinePulse(plugin: "IN-PLUGIN", action: "IN-ACTION", bundle: "IN-BUNDLE") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNil(recipe?.content)
             XCTAssertNotNil(recipe?.poll)
@@ -411,7 +411,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationContent("RECIPE-ID", byID: true)
         let expectation = expectationWithDescription("test evaluate online recipe with id - content reaction")
         
-        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+        NearSDK.evaluateOnlineRecipe(id: "RECIPE-ID") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNotNil(recipe?.content)
             XCTAssertNil(recipe?.poll)
@@ -426,7 +426,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationCoupon("RECIPE-ID", byID: true)
         let expectation = expectationWithDescription("test evaluate online recipe with id - coupon reaction")
         
-        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+        NearSDK.evaluateOnlineRecipe(id: "RECIPE-ID") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNil(recipe?.content)
             XCTAssertNil(recipe?.poll)
@@ -441,7 +441,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubOnlineEvaluationPoll("RECIPE-ID", byID: true)
         let expectation = expectationWithDescription("test evaluate online recipe with id - poll reaction")
         
-        NearSDK.evaluateOnlineRecipe("RECIPE-ID") { (recipe, success) in
+        NearSDK.evaluateOnlineRecipe(id: "RECIPE-ID") { (recipe, success) in
             XCTAssertNotNil(recipe)
             XCTAssertNil(recipe?.content)
             XCTAssertNotNil(recipe?.poll)
