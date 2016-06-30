@@ -47,6 +47,8 @@
 		B5CBB1371CBFA5EE000DBA34 /* NPRecipes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */; };
 		B5CBB14C1CBFF84E000DBA34 /* NPContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */; };
 		B5CBB1501CBFF874000DBA34 /* NPPolls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */; };
+		B5CC554B1D25149800193021 /* NPCustomJSONContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CC554A1D25149800193021 /* NPCustomJSONContents.swift */; };
+		B5CC554D1D25177300193021 /* CustomJSONObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CC554C1D25177300193021 /* CustomJSONObject.swift */; };
 		B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BC81CCA286B00E4D911 /* NPDevice.swift */; };
 		B5E12BF51CCA799B00E4D911 /* NPDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */; };
 		B5E1BE8A1CE24F91001EC562 /* PushNotificationAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E1BE891CE24F91001EC562 /* PushNotificationAction.swift */; };
@@ -117,6 +119,8 @@
 		B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipes.swift; sourceTree = "<group>"; };
 		B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPContents.swift; sourceTree = "<group>"; };
 		B5CBB14F1CBFF874000DBA34 /* NPPolls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPPolls.swift; sourceTree = "<group>"; };
+		B5CC554A1D25149800193021 /* NPCustomJSONContents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPCustomJSONContents.swift; sourceTree = "<group>"; };
+		B5CC554C1D25177300193021 /* CustomJSONObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomJSONObject.swift; sourceTree = "<group>"; };
 		B5E12BC81CCA286B00E4D911 /* NPDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDevice.swift; sourceTree = "<group>"; };
 		B5E12BF41CCA799B00E4D911 /* NPDeviceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPDeviceTests.swift; sourceTree = "<group>"; };
 		B5E1BE891CE24F91001EC562 /* PushNotificationAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushNotificationAction.swift; sourceTree = "<group>"; };
@@ -167,6 +171,7 @@
 				B516ED3F1CC91A250029F58B /* ContentImage.swift */,
 				B503AD051CC1210D0081A581 /* Poll.swift */,
 				B5678EE81D181C2900C2F531 /* Coupon.swift */,
+				B5CC554C1D25177300193021 /* CustomJSONObject.swift */,
 			);
 			path = ContentTypes;
 			sourceTree = "<group>";
@@ -303,6 +308,7 @@
 				B5CBB1341CBF7B39000DBA34 /* NPBeaconForest.swift */,
 				B503AD0A1CC154690081A581 /* NPBeaconForestNavigator.swift */,
 				B589B7DE1CE60769002CB061 /* NPBeaconForestRegion.swift */,
+				B5CC554A1D25149800193021 /* NPCustomJSONContents.swift */,
 				B510AAA91CC4E5DF00E022A8 /* NPImageCache.swift */,
 				B5CBB1361CBFA5EE000DBA34 /* NPRecipes.swift */,
 				B5CBB14B1CBFF84E000DBA34 /* NPContents.swift */,
@@ -531,6 +537,8 @@
 				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B5AB79FD1CECB18E00FC17BE /* NPSegmentationIdentifier.swift in Sources */,
 				B5678EEB1D18403A00C2F531 /* NPCouponBlaster.swift in Sources */,
+				B5CC554B1D25149800193021 /* NPCustomJSONContents.swift in Sources */,
+				B5CC554D1D25177300193021 /* CustomJSONObject.swift in Sources */,
 				B5678EE91D181C2900C2F531 /* Coupon.swift in Sources */,
 				B503AD041CC120730081A581 /* Content.swift in Sources */,
 				B5028A341CC643E100DA6381 /* Console.swift in Sources */,

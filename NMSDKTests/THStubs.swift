@@ -267,9 +267,10 @@ class THStubs {
         let recipe5 = recipe("RC", nodeIdentifier: "C10_1",   contentIdentifier: "CONTENT",      contentType: "content-notification", trigger: "enter_region")
         let recipe6 = recipe("RP", nodeIdentifier: "C10_2",   contentIdentifier: "POLL",         contentType: "poll-notification",    trigger: "enter_region")
         let recipe7 = recipe("CP1", nodeIdentifier: "R1_1",   contentIdentifier: "COUPON-1",      contentType: "coupon-blaster", trigger: "enter_region")
+        let recipe8 = recipe("JS1", nodeIdentifier: "R1_2",   contentIdentifier: "OBJECT-1",      contentType: "json-sender", trigger: "enter_region")
         
         stub(isHost("api.nearit.com") && isPath("/recipes/process")) { (request) -> OHHTTPStubsResponse in
-            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5, recipe6, recipe7]], statusCode: 200, headers: nil)
+            return OHHTTPStubsResponse(JSONObject: ["data": [recipe1, recipe2, recipe3, recipe4, recipe5, recipe6, recipe7, recipe8]], statusCode: 200, headers: nil)
         }
     }
     private class func stubAPRecipeReactions() {
@@ -296,11 +297,23 @@ class THStubs {
             "attributes": ["question": "question", "choice_1": "answer 1", "choice_2": "answer 2", "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
         ]
         
+        let object1 = [
+            "id": "OBJECT-1", "type": "json_contents",
+            "attributes": ["content": ["json": ["key": "value 1"]], "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+        ]
+        let object2 = [
+            "id": "OBJECT-2", "type": "json_contents",
+            "attributes": ["content": ["json": ["key": "value 2"]], "created_at": "2000-01-01T00:00:00.000Z", "updated_at": "2000-01-01T00:00:00.000Z"]
+        ]
+        
         stub(isHost("api.nearit.com") && isPath("/plugins/content-notification/contents")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [content1, content2, content3]], statusCode: 200, headers: nil)
         }
         stub(isHost("api.nearit.com") && isPath("/plugins/poll-notification/polls")) { (request) -> OHHTTPStubsResponse in
             return OHHTTPStubsResponse(JSONObject: ["data": [poll1, poll2]], statusCode: 200, headers: nil)
+        }
+        stub(isHost("api.nearit.com") && isPath("/plugins/json-sender/json_contents")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(JSONObject: ["data": [object1, object2]], statusCode: 200, headers: nil)
         }
     }
     
