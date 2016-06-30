@@ -194,12 +194,12 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1), response: { (response, status, result) in
+            NearSDK.sendEvent(PollAnswer(poll: "poll_id", answer: .Answer1, profileID: "profile-id", recipeID: "recipe-id")) { (response, status, result) in
                 XCTAssertEqual(response.status, PluginResponseStatus.OK)
                 XCTAssertEqual(status.codeClass, HTTPStatusCodeClass.Successful)
                 XCTAssertEqual(result, SendEventResult.Success)
                 expectation.fulfill()
-            })
+            }
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
@@ -213,9 +213,12 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
             
-            NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id") { (response, status, result) in
+            NearSDK.profileID = "profile-id"
+            NearSDK.sendPollAnswer(.Answer1, forPoll: "poll_id", recipeID: "recipe-id") { (response, status, result) in
                 XCTAssertEqual(result, SendEventResult.Success)
                 XCTAssertTrue(response.content.containsInt("HTTPStatusCode"))
+                
+                NearSDK.profileID = nil
                 expectation.fulfill()
             }
         }
