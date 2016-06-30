@@ -72,6 +72,15 @@ public enum CorePlugin: Int, CustomStringConvertible {
     case Contents
     
     /**
+     `CustomJSONObject` returns a content reaction in response to a successful evaluation of a recipe.
+     
+     This plugin synchronizes itself with nearit.com when `NearSDK.start(appToken:)` is called.
+     
+     - seealso: `CustomJSONObject`
+     */
+    case CustomJSONObjects
+    
+    /**
      `Device` synchronizes app's installation identifier with nearit.com.
      
      `Device` will request a new installation identifier if it cannot be found locally.
@@ -114,6 +123,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "com.nearit.sdk.plugin.np-polls"
         case .Contents:
             return "com.nearit.sdk.plugin.np-contents"
+        case .CustomJSONObjects:
+            return "com.nearit.sdk.plugin.np-custom-json-objects"
         case .Device:
             return "com.nearit.sdk.plugin.np-device"
         case .Segmentation:
@@ -126,9 +137,9 @@ public enum CorePlugin: Int, CustomStringConvertible {
     public var description: String {
         switch self {
         case .BeaconForest:
-            return "Beacon forest"
+            return "Beacon Forest"
         case .CouponBlaster:
-            return "Coupon blaster"
+            return "Coupon Blaster"
         case .ImageCache:
             return "Image Cache"
         case .Recipes:
@@ -137,6 +148,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             return "Polls"
         case .Contents:
             return "Contents"
+        case .CustomJSONObjects:
+            return "Custom JSON Objects"
         case .Device:
             return "Device"
         case .Segmentation:
@@ -150,16 +163,17 @@ public enum CorePlugin: Int, CustomStringConvertible {
      
      Accepted names:
      
-     - `com.nearit.sdk.plugin.np-beacon-forest`  (*BeaconForest*)
-     - `com.nearit.sdk.plugin.np-coupon-blaster` (*CouponBlaster*)
-     - `com.nearit.sdk.plugin.np-image-cache`    (*ImageCache*)
-     - `com.nearit.sdk.plugin.np-recipes`        (*Recipes*)
-     - `com.nearit.sdk.plugin.np-polls`          (*Polls*)
-     - `com.nearit.sdk.plugin.np-contents`       (*Contents*)
-     - `com.nearit.sdk.plugin.np-device`         (*Device*)
-     - `com.nearit.sdk.plugin.np-segmentation`   (*Segmentation*)
+     - `com.nearit.sdk.plugin.np-beacon-forest`        (*BeaconForest*)
+     - `com.nearit.sdk.plugin.np-coupon-blaster`       (*CouponBlaster*)
+     - `com.nearit.sdk.plugin.np-image-cache`          (*ImageCache*)
+     - `com.nearit.sdk.plugin.np-recipes`              (*Recipes*)
+     - `com.nearit.sdk.plugin.np-polls`                (*Polls*)
+     - `com.nearit.sdk.plugin.np-contents`             (*Contents*)
+     - `com.nearit.sdk.plugin.np-custom-json-objects`  (*CustomJSONObjects*)
+     - `com.nearit.sdk.plugin.np-device`               (*Device*)
+     - `com.nearit.sdk.plugin.np-segmentation`         (*Segmentation*)
      
-     - parameter name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "coupon-blaster", "image-cache", "recipes", "polls", "contents", "device" or "segmentation"
+     - parameter name: must be a concatenation of "com.nearit.sdk.plugin.np-" and with "beacon-forest", "coupon-blaster", "image-cache", "recipes", "polls", "contents", "custom-json-objects", "device" or "segmentation"
      - returns: `nil` if `name` is not a valid core plugin name
      */
     public init?(name: String) {
@@ -176,6 +190,8 @@ public enum CorePlugin: Int, CustomStringConvertible {
             self = .Polls
         case "com.nearit.sdk.plugin.np-contents":
             self = .Contents
+        case "com.nearit.sdk.plugin.np-custom-json-objects":
+            self = .CustomJSONObjects
         case "com.nearit.sdk.plugin.np-device":
             self = .Device
         case "com.nearit.sdk.plugin.np-segmentation":

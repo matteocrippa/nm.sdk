@@ -303,7 +303,7 @@ class NPRecipes: Plugin {
                 }
             }
             
-            var reactions = ["contents": [String](), "polls": [String]()]
+            var reactions = ["contents": [String](), "polls": [String](), "jsons": [String]()]
             var recipeIDs = Set<String>()
             for recipe in recipes {
                 recipeIDs.insert(recipe.id)
@@ -328,6 +328,8 @@ class NPRecipes: Plugin {
             return (CorePlugin.Contents.name, "content")
         case "coupon-blaster":
             return (CorePlugin.CouponBlaster.name, "coupon")
+        case "json-sender":
+            return (CorePlugin.CustomJSONObjects.name, "json")
         default:
             return nil
         }
