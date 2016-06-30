@@ -664,7 +664,7 @@ public class NearSDK: NSObject, Extensible {
      - parameter completionHandler: the handler which should be called when the tracking is posted (or not posted) on nearit.com
      - seealso: `profileID`
      */
-    public class func track(event: APTrackType, recipeID: String, completionHandler: DidCompleteOperation?) {
+    public class func track(event event: APTrackType, recipeID: String, completionHandler: DidCompleteOperation?) {
         guard let pid = profileID else {
             completionHandler?(success: false)
             return

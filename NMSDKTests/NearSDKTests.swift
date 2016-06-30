@@ -196,11 +196,11 @@ class NearSDKTests: XCTestCase {
         THStubs.stubPostTrack()
         
         let expectation = expectationWithDescription("post tracking")
-        NearSDK.track(APTrackType.Notified, recipeID: "recipe") { (success) in
+        NearSDK.track(event: APTrackType.Notified, recipeID: "recipe") { (success) in
             XCTAssertFalse(success)
             
             NearSDK.profileID = "profile"
-            NearSDK.track(APTrackType.Notified, recipeID: "recipe") { (success) in
+            NearSDK.track(event: APTrackType.Notified, recipeID: "recipe") { (success) in
                 XCTAssertTrue(success)
                 expectation.fulfill()
             }
