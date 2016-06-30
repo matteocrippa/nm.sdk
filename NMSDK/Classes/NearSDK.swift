@@ -653,6 +653,28 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
+    // MARK: Trackings
+    /**
+     Posts a tracking on nearit.com servers.
+     
+     `NearSDK.profileID` must not be `nil`, otherwise the method will fail.
+     
+     - parameter event: the event type
+     - parameter recipeID: the identifier of the recipe which should be associated to the tracking
+     - parameter completionHandler: the handler which should be called when the tracking is posted (or not posted) on nearit.com
+     - seealso: `profileID`
+     */
+    public class func track(event event: APTrackType, recipeID: String, completionHandler: DidCompleteOperation?) {
+        guard let pid = profileID else {
+            completionHandler?(success: false)
+            return
+        }
+        
+        APTrackings.postEvent(event, recipeID: recipeID, profileID: pid, installationID: NearSDK.installationID) { (status) in
+            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
+    
     // MARK: Installation
     /**
      Gets the current installation identifier.
@@ -725,13 +747,25 @@ public class NearSDK: NSObject, Extensible {
      
      This is a facility method which sends a `PollAnswer` instance by calling `sendEvent(_:response:)`.
      
+     This method will not work if `NearSDK.profileID` is `nil`.
+     
      - parameter answer: the answer
      - parameter poll: the identifier of the target poll
+     - parameter recipeID: the identifier of the recipe linked to the poll
      - parameter response: the handler which will be called when the answer is sent to nearit.com or when an error occurs
      - seealso: `sendEvent(_:response:)`
+     - seealso: `profileID`
      */
-    public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, response handler: DidSendEvent?) {
-        sendEvent(PollAnswer(poll: poll, answer: answer), response: handler)
+    public class func sendPollAnswer(answer: APRecipePollAnswer, forPoll poll: String, recipeID: String, response handler: DidSendEvent?) {
+        guard let pid = profileID else {
+            handler?(
+                response: PluginResponse.error("A profile identifier is required", command: "post"),
+                status: HTTPStatusCode._Undefined,
+                result: SendEventResult.Failure)
+            return
+        }
+        
+        sendEvent(PollAnswer(poll: poll, answer: answer, profileID: pid, recipeID: recipeID), response: handler)
     }
     
     /**

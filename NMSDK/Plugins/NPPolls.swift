@@ -28,13 +28,18 @@ class NPPolls: Plugin {
     
     // MARK: Async
     private func post(arguments: JSON, sender: String?, handler: ((response: PluginResponse) -> Void)?) {
-        guard let pollID = arguments.string("notification-id"), answerValue = arguments.int("answer"), answer = APRecipePollAnswer(rawValue: answerValue) else {
-            Console.commandError(NPPolls.self, command: "post", requiredParameters: ["notification-id", "answer"])
-            handler?(response: PluginResponse.cannotRun("post", requiredParameters: ["notification-id", "answer"], cause: "\"notification-id\", i.e. the poll identifier, is required, as well as the answer (which can be either 1 or 2)"))
+        guard let
+            pollID = arguments.string("notification-id"),
+            answerValue = arguments.int("answer"),
+            answer = APRecipePollAnswer(rawValue: answerValue),
+            recipeID = arguments.string("recipe-id"),
+            profileID = arguments.string("profile-id") else {
+            Console.commandError(NPPolls.self, command: "post", requiredParameters: ["notification-id", "answer", "recipe-id", "profile-id"])
+            handler?(response: PluginResponse.cannotRun("post", requiredParameters: ["notification-id", "answer", "recipe-id", "profile-id"], cause: "\"notification-id\", i.e. the poll identifier, is required, as well as the answer (which can be either 1 or 2)"))
             return
         }
         
-        APRecipeReactions.postPollAnswer(answer, withPollID: pollID) { (data, status) in
+        APRecipeReactions.postPollAnswer(answer, withPollID: pollID, recipeID: recipeID, profileID: profileID) { (data, status) in
             handler?(response: (
                 status == .Created ?
                     PluginResponse.ok(JSON(dictionary: ["HTTPStatusCode": status.rawValue]), command: "post") :
