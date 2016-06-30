@@ -21,6 +21,11 @@ class THStubs {
         OHHTTPStubs.removeAllStubs()
     }
     
+    class func stubPostTrack() {
+        stub(isHost("api.nearit.com") && pathStartsWith("/trackings")) { (request) -> OHHTTPStubsResponse in
+            return OHHTTPStubsResponse(data: NSData(), statusCode: 201, headers: nil)
+        }
+    }
     class func stubConfigurationAPIResponse() {
         stubAPBeaconForestResponse()
         stubAPProcessedRecipesResponse()

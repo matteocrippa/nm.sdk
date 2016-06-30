@@ -653,6 +653,28 @@ public class NearSDK: NSObject, Extensible {
         return didClearImageCache
     }
     
+    // MARK: Trackings
+    /**
+     Posts a tracking on nearit.com servers.
+     
+     `NearSDK.profileID` must not be `nil`, otherwise the method will fail.
+     
+     - parameter event: the event type
+     - parameter recipeID: the identifier of the recipe which should be associated to the tracking
+     - parameter completionHandler: the handler which should be called when the tracking is posted (or not posted) on nearit.com
+     - seealso: `profileID`
+     */
+    public class func track(event: APTrackType, recipeID: String, completionHandler: DidCompleteOperation?) {
+        guard let pid = profileID else {
+            completionHandler?(success: false)
+            return
+        }
+        
+        APTrackings.postEvent(event, recipeID: recipeID, profileID: pid, installationID: NearSDK.installationID) { (status) in
+            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        }
+    }
+    
     // MARK: Installation
     /**
      Gets the current installation identifier.

@@ -8,6 +8,7 @@
 
 import XCTest
 import Foundation
+import NMNet
 import NMJSON
 @testable import NMSDK
 
@@ -183,6 +184,24 @@ class NearSDKTests: XCTestCase {
                 XCTAssertTrue(success)
                 XCTAssertTrue(notificationTouched)
                 XCTAssertTrue(recipeDownloaded)
+                expectation.fulfill()
+            }
+        }
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    
+    // MARK: Trackings
+    func testPostTracking() {
+        THStubs.stubPostTrack()
+        
+        let expectation = expectationWithDescription("post tracking")
+        NearSDK.track(APTrackType.Notified, recipeID: "recipe") { (success) in
+            XCTAssertFalse(success)
+            
+            NearSDK.profileID = "profile"
+            NearSDK.track(APTrackType.Notified, recipeID: "recipe") { (success) in
+                XCTAssertTrue(success)
                 expectation.fulfill()
             }
         }
