@@ -62,6 +62,17 @@ public enum NearSDKError: Int, CustomStringConvertible {
     case CannotDownloadContentReactions = 5000
     
     /**
+     Thrown when `NearSDK` is started, but `CustomJSONObject` reactions cannot be downloaded from nearit.com.
+     
+     While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate `CustomJSONObject` reactions.
+     
+     `NearSDK` will be able to evaluate contents when an iBeacon™ is detected.
+     
+     - seealso: `CustomJSONObject`
+     */
+    case CannotDownloadCustomJSONObjectReactions = 5001
+    
+    /**
      Thrown when `NearSDK` is started, but `Poll` reactions cannot be downloaded.
      
      While `NearSDK` may be able to detect iBeacon™s, it will not be able to evaluate `Poll` reactions.
@@ -108,6 +119,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
             return "Cannot receive installation identifier"
         case .CannotUpdateInstallationID:
             return "Cannot update installation identifier"
+        case .CannotDownloadCustomJSONObjectReactions:
+            return "Cannot download custom JSON object reactions"
         }
     }
     
@@ -115,8 +128,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
     /**
      Converts `rawValue` in `Self` if it does correspont to a valid `Self` value.
      
-     - parameter rawValue: must be either `1`, `1000`, `2000`, `3000`, `3001`, `5000`, `6000`, `7000` or `7001`
-     - returns: `nil` if `rawValue` is not `1`, `1000`, `2000`, `3000`, `3001`, `5000`, `6000`, `7000` or `7001`
+     - parameter rawValue: must be either `1`, `1000`, `2000`, `3000`, `3001`, `5000`, `5001`, `6000`, `7000` or `7001`
+     - returns: `nil` if `rawValue` is not `1`, `1000`, `2000`, `3000`, `3001`, `5000`, `5001`, `6000`, `7000` or `7001`
      */
     public init?(rawValue: Int) {
         switch rawValue {
@@ -134,6 +147,8 @@ public enum NearSDKError: Int, CustomStringConvertible {
             self = .CannotEvaluateRecipeOnline
         case 5000:
             self = .CannotDownloadContentReactions
+        case 5001:
+            self = .CannotDownloadCustomJSONObjectReactions
         case 6000:
             self = .CannotDownloadPollReactions
         case 7000:

@@ -47,9 +47,9 @@ class NPDevice: Plugin {
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
-            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token"), response: { (installation, status) in
+            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token")) { (installation, status) in
                 self.manageSyncResponse(true, installation: installation, status: status, completionHandler: completionHandler)
-            })
+            }
             
             return
         }

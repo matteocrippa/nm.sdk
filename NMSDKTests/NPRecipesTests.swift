@@ -56,6 +56,27 @@ class NPRecipesTests: XCTestCase {
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testEvaluateBeaconForestJSONObjectReaction() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test evaluate json object reaction with NPRecipes")
+        
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "R1_2", "pulse-action": "enter_region"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.OK)
+        }
+        SDKDelegate.didEvaluateRecipe = { (recipe) in
+            XCTAssertNil(recipe.content)
+            XCTAssertNil(recipe.poll)
+            XCTAssertNotNil(recipe.customJSONObject)
+            expectation.fulfill()
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     func testEvaluateBeaconForestContentReaction() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test evaluate content reaction with NPRecipes")
@@ -70,6 +91,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.content)
             XCTAssertNil(recipe.poll)
+            XCTAssertNil(recipe.customJSONObject)
             expectation.fulfill()
         }
         
@@ -90,6 +112,7 @@ class NPRecipesTests: XCTestCase {
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.poll)
             XCTAssertNil(recipe.content)
+            XCTAssertNil(recipe.customJSONObject)
             expectation.fulfill()
         }
         
@@ -153,7 +176,7 @@ class NPRecipesTests: XCTestCase {
                 return
             }
             
-            XCTAssertEqual(triggers.count, 6)
+            XCTAssertEqual(triggers.count, 7)
             XCTAssertEqual(response.status, PluginResponseStatus.OK)
             expectation.fulfill()
         }
@@ -477,7 +500,7 @@ class NPRecipesTests: XCTestCase {
         }
         NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
             XCTAssertTrue(success)
-            XCTAssertEqual(recipes.count, 7)
+            XCTAssertEqual(recipes.count, 8)
             XCTAssertEqual(contents.count, 2)
             XCTAssertEqual(polls.count, 2)
             XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)
@@ -505,7 +528,7 @@ class NPRecipesTests: XCTestCase {
         
         NearSDK.downloadProcessedRecipes() { (success, recipes, contents, polls) in
             XCTAssertTrue(success)
-            XCTAssertEqual(recipes.count, 7)
+            XCTAssertEqual(recipes.count, 8)
             XCTAssertEqual(contents.count, 2)
             XCTAssertEqual(polls.count, 2)
             XCTAssertEqual(contents[0].status, HTTPSimpleStatusCode.OK)

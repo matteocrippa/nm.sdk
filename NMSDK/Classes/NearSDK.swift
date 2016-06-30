@@ -68,7 +68,7 @@ public class NearSDK: NSObject, Extensible {
         
         let plugins: [Pluggable] = [
             NPBeaconForest(), NPCouponBlaster(),
-            NPRecipes(), NPContents(), NPPolls(),
+            NPRecipes(), NPContents(), NPPolls(), NPCustomJSONContents(),
             NPImageCache(), NPDevice(), NPSegmentation()
         ]
         
@@ -206,7 +206,7 @@ public class NearSDK: NSObject, Extensible {
         
         syncDidEnd = false
         syncincErrors = []
-        syncingCorePlugins = [CorePlugin.BeaconForest, CorePlugin.Contents, CorePlugin.Polls]
+        syncingCorePlugins = [CorePlugin.BeaconForest, CorePlugin.Contents, CorePlugin.Polls, CorePlugin.CustomJSONObjects]
         
         let arguments = JSON(dictionary: ["app-token": appToken, "timeout-interval": timeoutInterval])
         for plugin in syncingCorePlugins {
@@ -292,20 +292,20 @@ public class NearSDK: NSObject, Extensible {
         
         switch action {
         case .Received:
-            PushNotificationsAPI.touchReceived(pushID, installationID: installationID, response: { (data, status) in
+            PushNotificationsAPI.touchReceived(pushID, installationID: installationID) { (data, status) in
                 downloadPushNotificationRecipe(
                     touchStatus: status,
                     recipeID: userInfo["recipe_id"] as? String,
                     downloadRecipe: downloadRecipe,
                     completionHandler: completionHandler)
-            })
+            }
         case .Opened:
-            PushNotificationsAPI.touchOpened(pushID, installationID: installationID, response: { (data, status) in
+            PushNotificationsAPI.touchOpened(pushID, installationID: installationID) { (data, status) in
                 downloadPushNotificationRecipe(touchStatus: status,
                     recipeID: userInfo["recipe_id"] as? String,
                     downloadRecipe: downloadRecipe,
                     completionHandler: completionHandler)
-            })
+            }
         }
     }
     private class func downloadPushNotificationRecipe(touchStatus status: HTTPStatusCode, recipeID: String?, downloadRecipe flag: Bool, completionHandler: DidTouchNotification?) {
@@ -324,9 +324,9 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        downloadRecipe(id, completionHandler: { (success) in
+        downloadRecipe(id) { (success) in
             completionHandler?(success: success, notificationTouched: true, recipeDownloaded: success)
-        })
+        }
     }
     
     // MARK: Recipes
@@ -754,7 +754,7 @@ public class NearSDK: NSObject, Extensible {
         }
     }
     private func manageReaction(reactionJSON: JSON, recipe: APRecipe, type: String) {
-        if ["content-notification", "poll-notification", "coupon-blaster"].contains(type) {
+        if ["content-notification", "poll-notification", "coupon-blaster", "json-sender"].contains(type) {
             var content: APRecipeContent?    
             if let json = reactionJSON.json("content") {
                 content = APRecipeContent(json: json)
@@ -770,7 +770,12 @@ public class NearSDK: NSObject, Extensible {
                 coupon = APCoupon(json: json)
             }
             
-            delegate?.nearSDKDidEvaluateRecipe?(Recipe(recipe: recipe, contentReaction: content, pollReaction: poll, couponReaction: coupon))
+            var jsonObject: APJSONObject?
+            if let json = reactionJSON.json("json") {
+                jsonObject = APJSONObject(json: json)
+            }
+            
+            delegate?.nearSDKDidEvaluateRecipe?(Recipe(recipe: recipe, contentReaction: content, pollReaction: poll, couponReaction: coupon, jsonReaction: jsonObject))
         }
     }
     private func manageCoreEventForwarding(event: PluginEvent) {

@@ -83,7 +83,7 @@ class NearSDKTests: XCTestCase {
         }
         SDKDelegate.sdkDidSync = { (errors) in
             XCTAssertEqual(errors.count, 0)
-            XCTAssertEqual(syncedPlugins.count, 3)
+            XCTAssertEqual(syncedPlugins.count, 4)
             expectation.fulfill()
         }
         
@@ -175,7 +175,7 @@ class NearSDKTests: XCTestCase {
     func testTouchPushNotificationReceivedDownloadRecipe() {
         THStubs.stubContentEvaluation()
         THStubs.stubTouchPushNotification("push-id")
-        THStubs.stubRequestDeviceInstallation(expectedHTTPStatusCode: .Created)
+        THStubs.stubRequestDeviceInstallation("installation-id", expectedHTTPStatusCode: .OK)
         let expectation = expectationWithDescription("test touch push notification, download recipe")
         
         NearSDK.refreshInstallationID(APNSToken: "00000000-0000-0000-0000-000000000000") { (status, installation) in
