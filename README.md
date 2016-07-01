@@ -141,6 +141,24 @@ Because this method accepts an optional `APNSToken`, it should be called either 
       NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
     }
 
+*Segmentation*
+
+`NearSDK` exposes functionalities which can be used to profile users, without the need of a user account: this means that apps using `NearSDK` can create user profiles and define them with properties.
+
+Defining or altering users' properties will change what recipes can be downloaded and evaluated by the `NearSDK`, i.e. `NearSDK` will be able to receive and evaluate only recipes which are satisfied by the user linked to the current profile identifier and described by its properties.
+
+When "data points" of a user profile changes, updated recipes must be downloaded explicilty by calling `downloadProcessedRecipes(_:)` class method of `NearSDK`.
+
+First, a profile identifier must be obtained from the server by calling `requestNewProfileID(_:)` class method of `NearSDK`.
+
+The above method should be called if and only if the class property `profileID` of `NearSDK` is `nil`. 
+
+If both class properties `installationID` and `profileID` are not `nil`, their values can be linked by calling `linkProfileToInstallation(_:)` class method of `NearSDK`, i.e. it is possible to identify the unique installations of an app using `NearSDK`.
+
+Calling `NearSDK` class method `linkProfileToInstallation(_:completionHandler:)` will update the data which defines the current profile identifier: the value of a "data point" can be set to `nil` or `empty` by specifying the empty string `""` as a value for the desired data point's key name.
+
+Calling `linkProfileToInstallation(_:completionHandler:)` will fail if the value of `profileID` is `nil`.
+
 **Notes about NearSDK Core Plugins**
 
 `NearSDK` uses some "core" plugins which fulfills requirements of the SDK itself: such plugins are built with [NMPlug](https://github.com/nearit/nm.plug) module.
