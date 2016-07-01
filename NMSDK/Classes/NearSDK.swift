@@ -542,8 +542,16 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        APSegmentation.addInstallationID(installation, toProfileID: profile) { (status) in
-            completionHandler?(success: (status.codeClass == HTTPStatusCodeClass.Successful))
+        APDevice.updateInstallationID(installation, NearSDKVersion: currentVersion, APNSToken: APNSToken, profileID: profile) { (installation, status) in
+            if status.codeClass == .Successful {
+                Console.info(NearSDK.self, text: "Profile \(profile) has been successfully linked to installation \(installation)")
+            }
+            else {
+                Console.error(NearSDK.self, text: "Cannot link profile \(profile) to installation \(installation)")
+                Console.errorLine("HTTPStatusCode: \(status.description)")
+            }
+            
+            completionHandler?(success: (status.codeClass == .Successful))
         }
     }
     /**
@@ -692,6 +700,21 @@ public class NearSDK: NSObject, Extensible {
         return id
     }
     /**
+     Gets the current APNS token.
+     
+     This value can be refreshed by calling `refreshInstallationID(APNSToken:didRefresh:)`.
+     
+     - seealso: `refreshInstallationID(APNSToken:didRefresh:)`
+     */
+    public static var APNSToken: String? {
+        let response = plugins.run(CorePlugin.Device.name, command: "read")
+        guard let token = response.content.string("apns-token") where response.status == .OK else {
+            return nil
+        }
+        
+        return token
+    }
+    /**
      Refreshes an existing installation identifier or requests a new one.
      
      If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
@@ -706,6 +729,9 @@ public class NearSDK: NSObject, Extensible {
         
         if let token = APNSToken {
             dictionary["apns-token"] = token
+        }
+        if let profile = profileID {
+            dictionary["profile-id"] = profile
         }
         
         plugins.runAsync(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: dictionary)) { (response) in
