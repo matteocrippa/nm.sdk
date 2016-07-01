@@ -535,19 +535,19 @@ public class NearSDK: NSObject, Extensible {
      - `refreshInstallationID(APNSToken:didRefresh:)`
      */
     public class func linkProfileToInstallation(completionHandler: DidCompleteOperation?) {
-        guard let profile = profileID, installation = installationID else {
+        guard let pid = profileID, iid = installationID else {
             Console.error(NearSDK.self, text: "No installation or profile identifier can be found")
             Console.errorLine("both installation and profile identifiers must be obtained before calling this method")
             completionHandler?(success: false)
             return
         }
         
-        APDevice.updateInstallationID(installation, NearSDKVersion: currentVersion, APNSToken: APNSToken, profileID: profile) { (installation, status) in
-            if status.codeClass == .Successful {
-                Console.info(NearSDK.self, text: "Profile \(profile) has been successfully linked to installation \(installation)")
+        APDevice.updateInstallationID(iid, NearSDKVersion: currentVersion, APNSToken: APNSToken, profileID: pid) { (installation, status) in
+            if let object = installation where status.codeClass == .Successful {
+                Console.info(NearSDK.self, text: "Profile \(pid) has been successfully linked to installation \(object.id)")
             }
             else {
-                Console.error(NearSDK.self, text: "Cannot link profile \(profile) to installation \(installation)")
+                Console.error(NearSDK.self, text: "Cannot link profile \(pid) to installation \(iid)")
                 Console.errorLine("HTTPStatusCode: \(status.description)")
             }
             
