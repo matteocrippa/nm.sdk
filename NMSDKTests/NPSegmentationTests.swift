@@ -59,7 +59,7 @@ class NPSegmentationTests: XCTestCase {
     func testUpdateInstallationID() {
         THStubs.storeSampleDeviceInstallation()
         NearSDK.profileID = "00000000-0000-0000-0000-000000000000"
-        stub(isHost("api.nearit.com") && isPath("/installations/installation-id/plugin_resources")) { (request) -> OHHTTPStubsResponse in
+        stub(isHost("api.nearit.com") && isPath("/installations/installation-id")) { (request) -> OHHTTPStubsResponse in
             let response = [
                 "data": [
                     "id": "00000000-0000-0000-0000-000000000000", "type": "profiles",
