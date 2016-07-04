@@ -79,4 +79,11 @@ public protocol NearSDKDelegate {
      - seealso: `Recipe`
      */
     optional func nearSDKDidEvaluateRecipe(recipe: Recipe)
+    
+    /**
+     This method is called whenever `NearSDK` fails to evaluate a pulse, a recipe for a given identifier or both.
+     
+     - parameter evaluation: the evaluation which failed to produce a reaction
+     */
+    optional func nearSDKDidFailToEvaluate(evaluation: Evaluation)
 }

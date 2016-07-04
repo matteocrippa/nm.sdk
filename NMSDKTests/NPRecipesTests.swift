@@ -141,6 +141,28 @@ class NPRecipesTests: XCTestCase {
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    func testCannotEvaluatePulse_NotFound() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test recipe not found")
+        
+        SDKDelegate.didFailToEvaluate = { (evaluation) in
+            XCTAssertEqual(evaluation.pulse?.plugin, "beacon-forest")
+            XCTAssertEqual(evaluation.pulse?.action, "EVENT-X")
+            XCTAssertEqual(evaluation.pulse?.bundle, "C0_0")
+            
+            expectation.fulfill()
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C0_0", "pulse-action": "EVENT-X"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.Warning)
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
     func testUnprocessableRecipe() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test unprocessable recipe - unknown content type")
@@ -159,6 +181,70 @@ class NPRecipesTests: XCTestCase {
         }
         
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testCannotEvaluatePulse_CannotEvaluateRecipe() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test unprocessable recipe - unknown content type")
+        
+        SDKDelegate.didFailToEvaluate = { (evaluation) in
+            XCTAssertEqual(evaluation.pulse?.plugin, "beacon-forest")
+            XCTAssertEqual(evaluation.pulse?.action, "EVENT-1")
+            XCTAssertEqual(evaluation.pulse?.bundle, "C1000_1")
+            
+            expectation.fulfill()
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            XCTAssertEqual(errors.count, 0)
+            
+            let args = JSON(dictionary: ["pulse-plugin": "beacon-forest", "pulse-bundle": "C1000_1", "pulse-action": "EVENT-1"])
+            let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate", withArguments: args)
+            XCTAssertEqual(response.status, PluginResponseStatus.Warning)
+        }
+        
+        XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testCannotEvaluateRecipe_NotFound() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test recipe not found")
+        
+        SDKDelegate.didFailToEvaluate = { (evaluation) in
+            XCTAssertEqual(evaluation.recipe?.id, "UNKNOWN-RECIPE")
+            
+            // The `online` flag of recipes not cached offline will be set to `true`.
+            XCTAssertEqual(evaluation.recipe?.online, true)
+            XCTAssertNil(evaluation.pulse)
+            
+            expectation.fulfill()
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            NearSDK.evaluateRecipe("UNKNOWN-RECIPE")
+        }
+        NearSDK.start(appToken: THStubs.SDKToken)
+        
+        waitForExpectationsWithTimeout(1, handler: nil)
+    }
+    func testCannotEvaluateRecipe_Unprocessable() {
+        THStubs.stubConfigurationAPIResponse()
+        let expectation = expectationWithDescription("test unprocessable recipe")
+        
+        SDKDelegate.didFailToEvaluate = { (evaluation) in
+            XCTAssertEqual(evaluation.recipe?.id, "R51")
+            
+            // The `online` flag will be set to the value of the flag `online` of the cached recipe (which is stored in the offline cache).
+            XCTAssertEqual(evaluation.recipe?.online, false)
+            
+            // If a recipe is found offline, but cannot be evaluated, the evaluation object will include the recipe's pulse.
+            XCTAssertNotNil(evaluation.pulse)
+            
+            expectation.fulfill()
+        }
+        SDKDelegate.sdkDidSync = { (errors) in
+            NearSDK.evaluateRecipe("R51")
+        }
+        NearSDK.start(appToken: THStubs.SDKToken)
+        
         waitForExpectationsWithTimeout(1, handler: nil)
     }
     
