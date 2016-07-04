@@ -17,7 +17,7 @@ class NPRecipes: Plugin {
         return CorePlugin.Recipes.name
     }
     override var version: String {
-        return "0.7"
+        return "0.8"
     }
     override var commands: [String: RunHandler] {
         return ["index": index, "evaluate": evaluate, "evaluate-recipe-by-id": evaluateByID, "clear": clear]
@@ -69,9 +69,17 @@ class NPRecipes: Plugin {
         let evaluationKey = APRecipe.evaluationKey(pulsePlugin: pulsePlugin, pulseBundle: pulseBundle, pulseAction: pulseAction)
         Console.info(NPRecipes.self, text: "Will evaluate recipe \(evaluationKey)")
         
+        var failedEvaluation: [String: AnyObject] = [
+            "pulse": [
+                "plugin": pulsePlugin,
+                "action": pulseAction,
+                "bundle": pulseBundle
+            ]
+        ]
+        
         guard let pluginHub = hub, recipeMap: APRecipeMap = hub?.cache.resource(evaluationKey, inCollection: "RecipesMaps", forPlugin: self) else {
             Console.commandWarning(NPRecipes.self, command: "evaluate", cause: "Cannot evaluate recipe \(evaluationKey)")
-            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" not found", command: "evaluate"))
+            self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" not found", command: "evaluate", details: failedEvaluation))
             return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
         }
         
@@ -89,6 +97,12 @@ class NPRecipes: Plugin {
             
             if response.status != .OK {
                 Console.error(NPRecipes.self, text: "Cannot evaluate reaction")
+                failedEvaluation["recipe"] = [
+                    "id": id,
+                    "online": recipe.online
+                ]
+                
+                pluginHub.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(name, message: "Cannot evaluate recipe \(id) for evaluation key \(evaluationKey)", command: "evaluate", details: failedEvaluation))
                 return PluginResponse.cannotForward(command.command, toPluginNamed: command.evaluator, targetPluginResponse: response)
             }
             
@@ -103,12 +117,12 @@ class NPRecipes: Plugin {
             
             return pluginHub.dispatch(event: PluginEvent(from: name, content: reaction, pluginCommand: "evaluate")) ?
                 PluginResponse.ok(command: "evaluate") :
-                PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot send evaluation request to \(command.evaluator) for evaluation key \(evaluationKey)")
+                PluginResponse.cannotRun("evaluate", requiredParameters: ["pulse-plugin", "pulse-bundle", "pulse-action"], cause: "Cannot dispatch evaluation result of evaluation key \(evaluationKey)")
         }
         
         Console.warning(NPRecipes.self, text: "Cannot evaluate recipe \(evaluationKey)")
         Console.warningLine("content type may be invalid or no content can be found for the given recipe")
-        self.hub?.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" cannot be evaluated", command: "evaluate"))
+        pluginHub.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(evaluationKey)\" cannot be evaluated", command: "evaluate", details: failedEvaluation))
         return PluginResponse.warning("Cannot evaluate recipe \(evaluationKey)", command: "evaluate")
     }
     private func evaluateOnlinePulse(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) {
@@ -179,17 +193,44 @@ class NPRecipes: Plugin {
         }
     }
     private func evaluateByID(arguments: JSON, sender: String?) -> PluginResponse {
-        guard let id = arguments.string("id") else {
+        guard let id = arguments.string("id"), pluginHub = hub else {
             Console.commandError(NPRecipes.self, command: "evaluate-recipe-by-id", requiredParameters: ["id"])
             return PluginResponse.cannotRun("evaluate-recipe-by-id", requiredParameters: ["id"])
         }
         
+        guard let recipe: APRecipe = pluginHub.cache.resource(id, inCollection: "Recipes", forPlugin: self) else {
+            Console.commandError(NPRecipes.self, command: "evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot find recipe \(id)")
+            pluginHub.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(name, message: "Recipe \"\(id)\" cannot be evaluated", command: "evaluate-recipe-by-id", details: ["recipe": ["id": id, "online": true]]))
+            
+            return PluginResponse.cannotRun("evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
+        }
+        
+        let failedEvaluation = [
+            "pulse": [
+                "plugin": recipe.pulse(.Plugin),
+                "action": recipe.pulse(.Action),
+                "bundle": recipe.pulse(.Bundle)
+            ],
+            "recipe": [
+                "id": recipe.id,
+                "online": recipe.online
+            ]
+        ]
+        
+        guard let command = evaluatorCommand(recipe) else {
+            Console.commandError(NPRecipes.self, command: "evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
+            
+            pluginHub.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(name, message: "Recipe \"\(id)\" cannot be evaluated", command: "evaluate-recipe-by-id", details: failedEvaluation))
+            
+            return PluginResponse.cannotRun("evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
+        }
+        
         guard let
-            pluginHub = hub,
-            recipe: APRecipe = pluginHub.cache.resource(id, inCollection: "Recipes", forPlugin: self),
-            command = evaluatorCommand(recipe),
             response = hub?.send(command.command, fromPluginNamed: name, toPluginNamed: command.evaluator, withArguments: command.args) where response.status == .OK else {
                 Console.commandError(NPRecipes.self, command: "evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
+                
+                pluginHub.dispatch(event: NearSDKError.CannotEvaluateRecipe.pluginEvent(self.name, message: "Recipe \"\(recipe.id)\" cannot be evaluated", command: "evaluate-recipe-by-id", details: failedEvaluation))
+                
                 return PluginResponse.cannotRun("evaluate-recipe-by-id", requiredParameters: ["id"], cause: "Cannot evaluate recipe \(id) or its reaction")
         }
         
@@ -392,7 +433,6 @@ class NPRecipes: Plugin {
             self.hub?.dispatch(event: PluginEvent(from: self.name, content: JSON(dictionary: [: ]), pluginCommand: command))
         }
     }
-    
     private func cachedIdentifiers() -> (profile: String?, installation: String?) {
         guard let pluginHub = hub else {
             return (profile: nil, installation: nil)

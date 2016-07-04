@@ -22,6 +22,7 @@
 		B52AF6E51CB7BE4700769ECE /* NMSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = B52AF6E41CB7BE4700769ECE /* NMSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		B52AF6EC1CB7BE4700769ECE /* NMSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B52AF6E11CB7BE4700769ECE /* NMSDK.framework */; };
 		B52F0DA11CC0D14800EE91AC /* NPRecipesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */; };
+		B53C0FE91D2A50F700896062 /* EvaluationRecipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53C0FE81D2A50F700896062 /* EvaluationRecipe.swift */; };
 		B53D6D081CD0F17500500244 /* SendEventResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53D6D071CD0F17500500244 /* SendEventResult.swift */; };
 		B53D6D0A1CD10EF100500244 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53D6D091CD10EF100500244 /* Recipe.swift */; };
 		B54707251CD3A9D500CD2DF0 /* NPRecipeReactionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54707241CD3A9D500CD2DF0 /* NPRecipeReactionsTests.swift */; };
@@ -30,6 +31,8 @@
 		B54EB5A31CC7B80800A80B04 /* CorePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */; };
 		B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */; };
 		B55E7A141CD23AF0008CCADC /* CorePluginError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E7A131CD23AF0008CCADC /* CorePluginError.swift */; };
+		B56456461D2A4E9600F3F616 /* Evaluation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56456451D2A4E9600F3F616 /* Evaluation.swift */; };
+		B56456491D2A507200F3F616 /* EvaluationPulse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56456481D2A507200F3F616 /* EvaluationPulse.swift */; };
 		B5678EE71D1819F000C2F531 /* NPCouponBlasterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EE61D1819F000C2F531 /* NPCouponBlasterTests.swift */; };
 		B5678EE91D181C2900C2F531 /* Coupon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EE81D181C2900C2F531 /* Coupon.swift */; };
 		B5678EEB1D18403A00C2F531 /* NPCouponBlaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5678EEA1D18403A00C2F531 /* NPCouponBlaster.swift */; };
@@ -93,6 +96,7 @@
 		B52AF6FB1CB7BE9F00769ECE /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		B52AF6FC1CB7BE9F00769ECE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B52F0DA01CC0D14800EE91AC /* NPRecipesTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipesTests.swift; sourceTree = "<group>"; };
+		B53C0FE81D2A50F700896062 /* EvaluationRecipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluationRecipe.swift; sourceTree = "<group>"; };
 		B53D6D071CD0F17500500244 /* SendEventResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendEventResult.swift; sourceTree = "<group>"; };
 		B53D6D091CD10EF100500244 /* Recipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		B54707241CD3A9D500CD2DF0 /* NPRecipeReactionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPRecipeReactionsTests.swift; sourceTree = "<group>"; };
@@ -101,6 +105,8 @@
 		B54EB5A21CC7B80800A80B04 /* CorePlugin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePlugin.swift; sourceTree = "<group>"; };
 		B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PollAnswer.swift; sourceTree = "<group>"; };
 		B55E7A131CD23AF0008CCADC /* CorePluginError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CorePluginError.swift; sourceTree = "<group>"; };
+		B56456451D2A4E9600F3F616 /* Evaluation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Evaluation.swift; sourceTree = "<group>"; };
+		B56456481D2A507200F3F616 /* EvaluationPulse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EvaluationPulse.swift; sourceTree = "<group>"; };
 		B5678EE61D1819F000C2F531 /* NPCouponBlasterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPCouponBlasterTests.swift; sourceTree = "<group>"; };
 		B5678EE81D181C2900C2F531 /* Coupon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coupon.swift; sourceTree = "<group>"; };
 		B5678EEA1D18403A00C2F531 /* NPCouponBlaster.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NPCouponBlaster.swift; sourceTree = "<group>"; };
@@ -172,6 +178,7 @@
 				B503AD051CC1210D0081A581 /* Poll.swift */,
 				B5678EE81D181C2900C2F531 /* Coupon.swift */,
 				B5CC554C1D25177300193021 /* CustomJSONObject.swift */,
+				B56456471D2A505F00F3F616 /* Evaluation */,
 			);
 			path = ContentTypes;
 			sourceTree = "<group>";
@@ -265,6 +272,16 @@
 				B54EB5A41CC7BDEA00A80B04 /* PollAnswer.swift */,
 			);
 			path = UserActions;
+			sourceTree = "<group>";
+		};
+		B56456471D2A505F00F3F616 /* Evaluation */ = {
+			isa = PBXGroup;
+			children = (
+				B56456451D2A4E9600F3F616 /* Evaluation.swift */,
+				B56456481D2A507200F3F616 /* EvaluationPulse.swift */,
+				B53C0FE81D2A50F700896062 /* EvaluationRecipe.swift */,
+			);
+			name = Evaluation;
 			sourceTree = "<group>";
 		};
 		B58C48371CB816C2008714DC /* Protocols */ = {
@@ -526,13 +543,16 @@
 				B5FA83B11CB7DD7D0090E5CD /* NearSDK.swift in Sources */,
 				B5CBB1501CBFF874000DBA34 /* NPPolls.swift in Sources */,
 				B5E12BC91CCA286B00E4D911 /* NPDevice.swift in Sources */,
+				B56456461D2A4E9600F3F616 /* Evaluation.swift in Sources */,
 				B5AF70801CC658C5007AC07D /* ConsoleOutput.swift in Sources */,
 				B503AD0B1CC154690081A581 /* NPBeaconForestNavigator.swift in Sources */,
 				B54EB59F1CC7B50600A80B04 /* EventSerializable.swift in Sources */,
+				B53C0FE91D2A50F700896062 /* EvaluationRecipe.swift in Sources */,
 				B589B7DF1CE60769002CB061 /* NPBeaconForestRegion.swift in Sources */,
 				B513DD3C1CE31CF400486782 /* Typealiases.swift in Sources */,
 				B5C082E51CDB9257006CE400 /* DeviceInstallation.swift in Sources */,
 				B5CBB14C1CBFF84E000DBA34 /* NPContents.swift in Sources */,
+				B56456491D2A507200F3F616 /* EvaluationPulse.swift in Sources */,
 				B5AF70821CC658DF007AC07D /* ConsoleSymbol.swift in Sources */,
 				B54EB5A51CC7BDEA00A80B04 /* PollAnswer.swift in Sources */,
 				B5AB79FD1CECB18E00FC17BE /* NPSegmentationIdentifier.swift in Sources */,

@@ -17,6 +17,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     var didReceiveEvent: ((event: PluginEvent) -> Void)?
     var didReceiveError: ((error: NearSDKError, message: String) -> Void)?
     var didEvaluateRecipe: ((recipe: Recipe) -> Void)?
+    var didFailToEvaluate: ((evaluation: Evaluation) -> Void)?
     var didReceiveDidEvaluateRecipeCommand: ((arguments: JSON) -> Void)?
     var didReceiveDidDetectRegionEvent: ((arguments: JSON) -> Void)?
     var sdkDidSync: ((errors: [CorePluginError]) -> Void)?
@@ -31,6 +32,7 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
         didReceiveEvent = nil
         didReceiveError = nil
         didEvaluateRecipe = nil
+        didFailToEvaluate = nil
         didReceiveDidEvaluateRecipeCommand = nil
         didReceiveDidDetectRegionEvent = nil
         sdkDidSync = nil
@@ -49,6 +51,9 @@ class THSDKDelegate: NSObject, NearSDKDelegate {
     }
     func nearSDKRegionMonitoringDidFail(configuredRegionsCount configuredRegionsCount: Int, authorizationStatus: CLAuthorizationStatus) {
         sdkMonitoringDidFail?(regions: configuredRegionsCount, status: authorizationStatus)
+    }
+    func nearSDKDidFailToEvaluate(evaluation: Evaluation) {
+        didFailToEvaluate?(evaluation: evaluation)
     }
     func nearSDKDidReceiveEvent(event: PluginEvent) {
         if let command = event.command where event.from == "com.near.sampleplugin" {

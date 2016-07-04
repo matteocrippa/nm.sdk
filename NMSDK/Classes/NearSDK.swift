@@ -864,10 +864,32 @@ public class NearSDK: NSObject, Extensible {
         if let errorValue = event.content.int("error"), error = NearSDKError(rawValue: errorValue), message = event.content.string("message") {
             delegate?.nearSDKDidFail?(error: error, message: message)
             
-            if error == NearSDKError.RegionMonitoringDidFail {
+            switch error {
+            case NearSDKError.RegionMonitoringDidFail:
                 delegate?.nearSDKRegionMonitoringDidFail?(
                     configuredRegionsCount: event.content.int("details.configured-regions-count", fallback: 0)!,
                     authorizationStatus: CLLocationManager.authorizationStatus())
+            case NearSDKError.CannotEvaluateRecipe:
+                var pulse: EvaluationPulse?
+                var recipe: EvaluationRecipe?
+                
+                if let
+                    action = event.content.string("details.pulse.action"),
+                    bundle = event.content.string("details.pulse.bundle"),
+                    plugin = event.content.string("details.pulse.plugin") {
+                    pulse = EvaluationPulse(plugin: plugin, action: action, bundle: bundle)
+                }
+                if let id = event.content.string("details.recipe.id") {
+                    recipe = EvaluationRecipe(id: id, online: event.content.bool("details.recipe.online", fallback: false)!)
+                }
+                
+                guard let evaluation = Evaluation(pulse: pulse, recipe: recipe) else {
+                    return true
+                }
+                
+                delegate?.nearSDKDidFailToEvaluate?(evaluation)
+            default:
+                break
             }
             
             return true
