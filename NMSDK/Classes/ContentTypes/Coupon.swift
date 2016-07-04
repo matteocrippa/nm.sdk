@@ -55,6 +55,11 @@ public class Coupon: NSObject {
      */
     public private (set) var redeemDate: NSDate?
     
+    /**
+     The identifier of the coupon's icon.
+     */
+    public private (set) var iconID: String?
+    
     // MARK: Initializers
     /**
      Initializes a new `Coupon`.
@@ -72,6 +77,7 @@ public class Coupon: NSObject {
         claimDate = coupon.claimDate
         expirationDate = coupon.expirationDate
         redeemDate = coupon.redeemDate
+        iconID = coupon.iconID
     }
     
     // MARK: Properties
@@ -79,6 +85,6 @@ public class Coupon: NSObject {
      Human-readable description of `Self`.
      */
     public override var description: String {
-        return Console.describe(Coupon.self, properties: ("id", id), ("name", name), ("details", details), ("value", value), ("serialNumber", serialNumber), ("claimDate", claimDate), ("expirationDate", expirationDate), ("redeemDate", redeemDate))
+        return Console.describe(Coupon.self, properties: ("id", id), ("name", name), ("details", details), ("value", value), ("serialNumber", serialNumber), ("claimDate", claimDate), ("expirationDate", expirationDate), ("redeemDate", redeemDate), ("iconID", iconID))
     }
 }
