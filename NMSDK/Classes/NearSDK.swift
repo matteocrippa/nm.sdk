@@ -324,25 +324,51 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        downloadRecipe(id) { (success) in
+        downloadAndCacheRecipe(id) { (success) in
             completionHandler?(success: success, notificationTouched: true, recipeDownloaded: success)
         }
     }
     
     // MARK: Recipes
     /**
-     Downloads a recipe.
+     Downloads and caches a recipe.
      
-     This method should be used whenever the download of a recipe is preferred, for example in response to a remote notification.
+     This method should be used whenever downloading-and-caching a recipe is required, for example in response to a remote notification.
      
      - parameter id: the identifier of the recipe which should be downloaded
      - parameter completionHandler: an optional handler which informs if the download succeeded or not
      */
-    public class func downloadRecipe(id: String, completionHandler: DidCompleteOperation? = nil) {
+    public class func downloadAndCacheRecipe(id: String, completionHandler: DidCompleteOperation? = nil) {
         plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval])) { (response) in
             completionHandler?(success: response.status == .OK)
         }
     }
+    /**
+     Downloads and does not cache a recipe.
+     
+     This method should be used whenever downloading a recipe is required, for example in response to a remote notification.
+     
+     - parameter id: the identifier of the recipe which should be downloaded
+     - parameter completionHandler: an optional handler which informs if the download succeeded or not and that can return the recipe and its reaction
+     */
+    public class func getRecipe(id: String, completionHandler: DidDownloadRecipe? = nil) {
+        Console.info(NearSDK.self, text: "Will download recipe \(id)")
+        Console.infoLine("The recipe and its contents will not be cached offline")
+        
+        APRecipes.get(id) { (apRecipe, reactions, status) in
+            guard let recipe = apRecipe where status.codeClass == .Successful else {
+                Console.error(NearSDK.self, text: "Cannot download recipe \(id)")
+                Console.errorLine("HTTPStatusCode: \(status)")
+                
+                completionHandler?(recipe: nil, status: status)
+                return
+            }
+            
+            Console.info(NearSDK.self, text: "Recipe \(id) has been downloaded correctly")
+            completionHandler?(recipe: Recipe(recipe: recipe, reactions: reactions), status: status)
+        }
+    }
+    
     /**
      Downloads processed recipes from nearit.com backend.
      
@@ -434,7 +460,7 @@ public class NearSDK: NSObject, Extensible {
         downloadAndEvaluateRecipe(id, completionHandler: completionHandler)
     }
     private class func downloadAndEvaluateRecipe(id: String, completionHandler: DidEvaluateRecipe?) {
-        downloadRecipe(id) { (success) in
+        downloadAndCacheRecipe(id) { (success) in
             let response = NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": id]))
             completionHandler?(success: (response.status == PluginResponseStatus.OK), didDownloadRecipe: success)
         }
@@ -515,8 +541,11 @@ public class NearSDK: NSObject, Extensible {
      - seealso: `installationID`
      */
     public class func requestNewProfileID(completionHandler: DidRefreshIdentifier?) {
+        Console.info(NearSDK.self, text: "Will request a new profile identifier...")
         APSegmentation.requestProfileID(appID: API.appID) { (id, status) in
             NearSDK.profileID = id
+            
+            Console.info(NearSDK.self, text: "Profile identifier received: \(id ?? "-")")
             completionHandler?(id: id)
         }
     }
