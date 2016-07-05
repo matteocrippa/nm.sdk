@@ -339,7 +339,15 @@ public class NearSDK: NSObject, Extensible {
      - parameter completionHandler: an optional handler which informs if the download succeeded or not
      */
     public class func downloadAndCacheRecipe(id: String, completionHandler: DidCompleteOperation? = nil) {
-        plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval])) { (response) in
+        guard let pid = profileID else {
+            Console.error(NearSDK.self, text: "Recipe \(id) cannot be downloaded")
+            Console.errorLine("A profile identifier is required")
+            
+            completionHandler?(success: false)
+            return
+        }
+        
+        plugins.runAsync(CorePlugin.Recipes.name, command: "download", withArguments: JSON(dictionary: ["id": id, "app-token": appToken, "timeout-interval": timeoutInterval, "profile-id": pid])) { (response) in
             completionHandler?(success: response.status == .OK)
         }
     }
@@ -352,10 +360,18 @@ public class NearSDK: NSObject, Extensible {
      - parameter completionHandler: an optional handler which informs if the download succeeded or not and that can return the recipe and its reaction
      */
     public class func getRecipe(id: String, completionHandler: DidDownloadRecipe? = nil) {
+        guard let pid = profileID else {
+            Console.error(NearSDK.self, text: "Recipe \(id) cannot be downloaded")
+            Console.errorLine("A profile identifier is required")
+            
+            completionHandler?(recipe: nil, status: HTTPStatusCode._Undefined)
+            return
+        }
+        
         Console.info(NearSDK.self, text: "Will download recipe \(id)")
         Console.infoLine("The recipe and its contents will not be cached offline")
         
-        APRecipes.get(id) { (apRecipe, reactions, status) in
+        APRecipes.get(recipe: id, forProfile: pid) { (apRecipe, reactions, status) in
             guard let recipe = apRecipe where status.codeClass == .Successful else {
                 Console.error(NearSDK.self, text: "Cannot download recipe \(id)")
                 Console.errorLine("HTTPStatusCode: \(status)")
@@ -457,7 +473,7 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        downloadAndEvaluateRecipe(id, completionHandler: completionHandler)
+        completionHandler?(success: false, didDownloadRecipe: false)
     }
     private class func downloadAndEvaluateRecipe(id: String, completionHandler: DidEvaluateRecipe?) {
         downloadAndCacheRecipe(id) { (success) in

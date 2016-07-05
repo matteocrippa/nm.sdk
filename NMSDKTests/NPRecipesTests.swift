@@ -205,6 +205,7 @@ class NPRecipesTests: XCTestCase {
         XCTAssertTrue(NearSDK.start(appToken: THStubs.SDKToken))
         waitForExpectationsWithTimeout(1, handler: nil)
     }
+    
     func testCannotEvaluateRecipe_NotFound() {
         THStubs.stubConfigurationAPIResponse()
         let expectation = expectationWithDescription("test recipe not found")
@@ -318,6 +319,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test download recipe - content reaction")
         
+        NearSDK.profileID = "profile-id"
         NearSDK.downloadAndCacheRecipe("CONTENT-RECIPE") { (success) in
             XCTAssertTrue(success)
             expectation.fulfill()
@@ -329,6 +331,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test download recipe - poll reaction")
         
+        NearSDK.profileID = "profile-id"
         NearSDK.downloadAndCacheRecipe("POLL-RECIPE") { (success) in
             XCTAssertTrue(success)
             expectation.fulfill()
@@ -342,6 +345,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe - content reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
@@ -357,6 +361,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe - poll reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
@@ -372,6 +377,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - content reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
@@ -391,6 +397,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test evaluate downloaded recipe via SDK - poll reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
@@ -410,11 +417,12 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test download and evaluate recipe via SDK - content reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
         }
-        NearSDK.evaluateRecipe("CONTENT-RECIPE") { (success, didDownloadRecipe) in
+        NearSDK.evaluateRecipe("CONTENT-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
             XCTAssertTrue(success)
             XCTAssertTrue(didDownloadRecipe)
         }
@@ -425,11 +433,12 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test download and evaluate recipe via SDK - poll reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
         }
-        NearSDK.evaluateRecipe("POLL-RECIPE") { (success, didDownloadRecipe) in
+        NearSDK.evaluateRecipe("POLL-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
             XCTAssertTrue(success)
             XCTAssertTrue(didDownloadRecipe)
         }
@@ -440,6 +449,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - content reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
@@ -457,6 +467,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test force download and evaluate recipe via SDK - poll reaction")
         
+        NearSDK.profileID = "profile-id"
         SDKDelegate.didEvaluateRecipe = { (recipe) in
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
