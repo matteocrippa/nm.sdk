@@ -186,7 +186,7 @@ public class Recipe: NSObject {
      - parameter recipe: the source `APRecipe` instance
      - parameter reactions: the source `APReactions` object which may contain "content", "poll", "coupon" or "json" reactions
      */
-    public convenience init(recipe: APRecipe, reactions: APReactions? = nil) {
+    public convenience init(recipe: APRecipe, reactions: APReactions?) {
         self.init(recipe: recipe, contentReaction: reactions?.content, pollReaction: reactions?.poll, couponReaction: reactions?.coupon, jsonReaction: reactions?.json)
     }
     
