@@ -135,6 +135,10 @@ public class Recipe: NSObject {
      Initializes a new `Recipe`.
      
      - parameter recipe: the source `APRecipe` instance
+     - parameter contentReaction: the source `APRecipeContent` "content" reaction
+     - parameter pollReaction: the source `APPollContent` "poll" reaction
+     - parameter couponReaction: the source `APCoupon` "coupon" reaction
+     - parameter jsonReaction: the source `APJSONObject` "json" reaction
     */
     public init(recipe: APRecipe, contentReaction: APRecipeContent? = nil, pollReaction: APRecipePoll? = nil, couponReaction: APCoupon? = nil, jsonReaction: APJSONObject? = nil) {
         super.init()
@@ -175,6 +179,15 @@ public class Recipe: NSObject {
         if let reaction = jsonReaction {
             customJSONObject = CustomJSONObject(jsonObject: reaction)
         }
+    }
+    /**
+     Initializes a new `Recipe`.
+     
+     - parameter recipe: the source `APRecipe` instance
+     - parameter reactions: the source `APReactions` object which may contain "content", "poll", "coupon" or "json" reactions
+     */
+    public convenience init(recipe: APRecipe, reactions: APReactions? = nil) {
+        self.init(recipe: recipe, contentReaction: reactions?.content, pollReaction: reactions?.poll, couponReaction: reactions?.coupon, jsonReaction: reactions?.json)
     }
     
     // MARK: Properties

@@ -318,7 +318,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubContentEvaluation()
         let expectation = expectationWithDescription("test download recipe - content reaction")
         
-        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("CONTENT-RECIPE") { (success) in
             XCTAssertTrue(success)
             expectation.fulfill()
         }
@@ -329,7 +329,7 @@ class NPRecipesTests: XCTestCase {
         THStubs.stubPollEvaluation()
         let expectation = expectationWithDescription("test download recipe - poll reaction")
         
-        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("POLL-RECIPE") { (success) in
             XCTAssertTrue(success)
             expectation.fulfill()
         }
@@ -346,7 +346,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("CONTENT-RECIPE") { (success) in
             XCTAssertTrue(success)
             NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": "CONTENT-RECIPE"]))
         }
@@ -361,7 +361,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("POLL-RECIPE") { (success) in
             XCTAssertTrue(success)
             NearSDK.plugins.run(CorePlugin.Recipes.name, command: "evaluate-recipe-by-id", withArguments: JSON(dictionary: ["id": "POLL-RECIPE"]))
         }
@@ -376,7 +376,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("CONTENT-RECIPE") { (success) in
             XCTAssertTrue(success)
             
             NearSDK.evaluateRecipe("CONTENT-RECIPE") { (success, didDownloadRecipe) in
@@ -395,7 +395,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("POLL-RECIPE") { (success) in
             XCTAssertTrue(success)
             
             NearSDK.evaluateRecipe("POLL-RECIPE") { (success, didDownloadRecipe) in
@@ -444,7 +444,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.content)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("CONTENT-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("CONTENT-RECIPE") { (success) in
             NearSDK.evaluateRecipe("CONTENT-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
                 XCTAssertTrue(success)
                 XCTAssertTrue(didDownloadRecipe)
@@ -461,7 +461,7 @@ class NPRecipesTests: XCTestCase {
             XCTAssertNotNil(recipe.poll)
             expectation.fulfill()
         }
-        NearSDK.downloadRecipe("POLL-RECIPE") { (success) in
+        NearSDK.downloadAndCacheRecipe("POLL-RECIPE") { (success) in
             NearSDK.evaluateRecipe("POLL-RECIPE", downloadAgain: true) { (success, didDownloadRecipe) in
                 XCTAssertTrue(success)
                 XCTAssertTrue(didDownloadRecipe)

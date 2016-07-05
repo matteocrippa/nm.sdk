@@ -26,6 +26,11 @@ public typealias DidEvaluateRecipe = ((success: Bool, didDownloadRecipe: Bool) -
 public typealias DidCompleteOperation = ((success: Bool) -> Void)
 
 /**
+ Used when a recipe is downloaded from nearit.com servers, but has not been cached.
+ */
+public typealias DidDownloadRecipe = ((recipe: Recipe?, status: HTTPStatusCode) -> Void)
+
+/**
  Used when the identifier of a resource has been refreshed.
  If `id` is nil, it is assumed that the refresh operation did fail.
  */
