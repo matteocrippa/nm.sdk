@@ -251,13 +251,18 @@ class NPRecipes: Plugin {
         API.authorizationToken = appToken
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
-        guard let id = arguments.string("id") else {
+        guard let id = arguments.string("id"), profileID = cachedIdentifiers().profile else {
             Console.commandError(NPRecipes.self, command: "Cannot download recipe", requiredParameters: ["recipe-id"])
+            
+            if cachedIdentifiers().profile == nil {
+                Console.errorLine("A profile identifier must be obtained and stored before downloading recipes")
+            }
+            
             completionHandler?(response: PluginResponse.cannotRun("download", requiredParameters: ["recipe-id"]))
             return
         }
         
-        APRecipes.get(id) { (recipe, reaction, status) in
+        APRecipes.get(recipe: id, forProfile: profileID) { (recipe, reaction, status) in
             guard let evaluatedRecipe = recipe, evaluatedReaction = reaction, pluginHub = self.hub, evaluator = self.evaluatorName(evaluatedRecipe) where status == .OK else {
                 Console.commandError(NPRecipes.self, command: "Cannot download recipe \(id)", cause: "Cannot download the recipe, the reaction or both, plugin hub may be nil")
                 return
