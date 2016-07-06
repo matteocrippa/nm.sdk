@@ -587,7 +587,8 @@ public class NearSDK: NSObject, Extensible {
             return
         }
         
-        APDevice.updateInstallationID(iid, NearSDKVersion: currentVersion, APNSToken: APNSToken, profileID: pid) { (installation, status) in
+        let info = APDeviceInformations(sdkVersion: NearSDK.currentVersion, apnsToken: APNSToken, profileID: pid)
+        APDevice.updateInstallationID(iid, info: info) { (installation, status) in
             if let object = installation where status.codeClass == .Successful {
                 Console.info(NearSDK.self, text: "Profile \(pid) has been successfully linked to installation \(object.id)")
             }
@@ -765,9 +766,15 @@ public class NearSDK: NSObject, Extensible {
      If a device installation can be found locally, it will be used to update the remote counterpart on nearit.com servers, otherwise a new installation will be requested and stored offline.
      
      - parameter APNSToken: the optional Apple Push Notification token which should be associated to the device installation
+     - parameter bluetoothIsOn: a flag which indicates if bluetooth is enabled, defaults to `nil`
+     - parameter bluetoothIsOn: a flag which indicates if location services are enabled, defaults to `nil`
      - parameter didRefresh: the closure which should be called when the refresh of the installation identifier ends
      */
-    public class func refreshInstallationID(APNSToken APNSToken: String?, didRefresh: DidRefreshInstallationIdentifier?) {
+    public class func refreshInstallationID(APNSToken APNSToken: String?,
+                                                      bluetoothIsOn: Bool? = nil,
+                                                      locationIsOn: Bool? = nil,
+                                                      didRefresh: DidRefreshInstallationIdentifier?) {
+        
         var dictionary = [String: AnyObject]()
         dictionary["app-token"] = NearSDK.appToken
         dictionary["timeout-interval"]  = NearSDK.timeoutInterval
@@ -777,6 +784,12 @@ public class NearSDK: NSObject, Extensible {
         }
         if let profile = profileID {
             dictionary["profile-id"] = profile
+        }
+        if let flag = bluetoothIsOn {
+            dictionary["bluetooth-available"] = flag
+        }
+        if let flag = locationIsOn {
+            dictionary["location-available"] = flag
         }
         
         plugins.runAsync(CorePlugin.Device.name, command: "refresh", withArguments: JSON(dictionary: dictionary)) { (response) in

@@ -43,23 +43,30 @@ class NPDevice: Plugin {
     // MARK: Refresh
     func refresh(arguments: JSON, sender: String?, completionHandler: ResponseHandler?) {
         guard let appToken = arguments.string("app-token") else {
-            Console.commandError(NPDevice.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token", "profile-id"])
-            completionHandler?(response: PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token", "profile-id"]))
+            Console.commandError(NPDevice.self, command: "sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token", "profile-id", "bluetooth-available", "location-available"])
+            completionHandler?(response: PluginResponse.cannotRun("sync", requiredParameters: ["app-token"], optionalParameters: ["timeout-interval", "apns-token", "profile-id", "bluetooth-available", "location-available"]))
             return
         }
+        
+        let info = APDeviceInformations(
+            sdkVersion: NearSDK.currentVersion,
+            apnsToken: arguments.string("apns-token"),
+            profileID: arguments.string("profile-id"),
+            bluetooth: arguments.bool("bluetooth-available"),
+            location: arguments.bool("location-available"))
         
         API.authorizationToken = appToken
         API.timeoutInterval = arguments.double("timeout-interval") ?? 10.0
         
         guard let installations: [APDeviceInstallation] = hub?.cache.resourcesIn(collection: "Installations", forPlugin: self), installation = installations.first else {
-            APDevice.requestInstallationID(NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token"), profileID: arguments.string("profile-id")) { (installation, status) in
+            APDevice.requestInstallationID(info) { (installation, status) in
                 self.manageSyncResponse(true, installation: installation, status: status, completionHandler: completionHandler)
             }
             
             return
         }
         
-        APDevice.updateInstallationID(installation.id, NearSDKVersion: NearSDK.currentVersion, APNSToken: arguments.string("apns-token"), profileID: arguments.string("profile-id")) { (installation, status) in
+        APDevice.updateInstallationID(installation.id, info: info) { (installation, status) in
             self.manageSyncResponse(false, installation: installation, status: status, completionHandler: completionHandler)
         }
     }
