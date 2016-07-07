@@ -347,12 +347,43 @@ class NPBeaconForest: Plugin, CLLocationManagerDelegate {
         }
     }
     private func enter(region: CLRegion) {
-        APBeaconForest.postBeaconDetected(region.identifier, response: nil)
+        let identifiers = cachedIdentifiers()
+        APBeaconForest.postBeaconDetected(region.identifier, profileID: identifiers.profile, installationID: identifiers.installation) { (data, status) in
+            if status.codeClass == .Successful {
+                Console.info(NPBeaconForest.self, text: "Beacon detection stat has been recorded")
+                Console.infoLine("Beacon id: \(region.identifier)")
+                return
+            }
+            
+            Console.error(NPBeaconForest.self, text: "Beacon detection stat cannot be recorded")
+            Console.errorLine("Beacon id: \(region.identifier)")
+        }
+        
         triggerEnterEventWithRegion(region)
         updateMonitoredRegions(navigator.enter(region.identifier, forceForestNavigation: &forceForestNavigation))
         broadcastRegionEvent(enter: true, region: region)
         
         Console.info(NPBeaconForest.self, text: "Entered region \(region.identifier) - node name \(nodeName(region))")
+    }
+    private func cachedIdentifiers() -> (profile: String?, installation: String?) {
+        guard let pluginHub = hub else {
+            return (profile: nil, installation: nil)
+        }
+        
+        var profile: String?
+        var installation: String?
+        
+        let pidResponse = pluginHub.send("read", fromPluginNamed: name, toPluginNamed: CorePlugin.Segmentation.name, withArguments: JSON())
+        if let id = pidResponse.content.string("profile-id") where pidResponse.status == .OK {
+            profile = id
+        }
+        
+        let nidResponse = pluginHub.send("read", fromPluginNamed: name, toPluginNamed: CorePlugin.Device.name, withArguments: JSON())
+        if let id = pidResponse.content.string("installation-id") where nidResponse.status == .OK {
+            installation = id
+        }
+        
+        return (profile: profile, installation: installation)
     }
     private func exit(region: CLRegion) {
         updateMonitoredRegions(navigator.exit(region.identifier, forceForestNavigation: &forceForestNavigation))
