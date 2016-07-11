@@ -101,6 +101,54 @@ The following code snippets illustrate how `NearSDK` can be started:
 
 Because `NearSDK` uses iBeacon™ technology, apps should start the SDK after appropriate permissions have been obtained; more specifically, apps should request `use always authorization` permission to `CoreLocation` before starting `NearSDK`.
 
+```swift
+import CoreLocation
+
+let manager = CLLocationManager()
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    let locationManager = CLLocationManager()
+
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        // setup location manager
+        setupLocationManager()
+        
+        // ...
+    }
+}
+
+// MARK: - Location manager
+extension AppDelegate {
+    func setupLocationManager() {
+        switch CLLocationManager.authorizationStatus() {
+            case .AuthorizedAlways:
+            break
+            case .NotDetermined:
+                locationManager.requestAlwaysAuthorization()
+            case .AuthorizedWhenInUse, .Restricted, .Denied:
+                let alertController = UIAlertController(
+                    title: "Background location disabled",
+                    message: "In order to be notified, please open this app's settings and set location access to 'Always'.",
+                    preferredStyle: .Alert
+                )
+        
+                let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+                alertController.addAction(cancelAction)
+        
+                let openAction = UIAlertAction(title: "Open Settings", style: .Default) { (action) in
+                    if let url = NSURL(string:UIApplicationOpenSettingsURLString) {
+                        UIApplication.sharedApplication().openURL(url)
+                    }
+                }
+                alertController.addAction(openAction)
+        
+                window?.rootViewController?.presentViewController(alertController, animated: true, completion: nil)
+        }
+    }
+}
+```
+
 `NearSDK`-to-Xcode console output can be enabled by setting class property`consoleOutput` to `true`.
 
 *Using nearit.com contents*
