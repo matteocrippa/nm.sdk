@@ -1,31 +1,30 @@
 # NMSDK
 nearit.com iOS SDK
 
-**Note**
+### Note
 
 This is a pre-release software - features are subject to change.
 
 Code snippets contained in this README are Swift 2.2.
 
-**Installation**
+## Installation
 
 `NearSDK` is available as a CocoaPod for iOS 8 and later and can be easily integrated into existing iOS apps by adding `pod 'NMSDK'` command to your `Podfile`.
 
 The following code snippet may be used as a template of a `Podfile`.
+```
+use_frameworks!
 
-**Code snippet** - *sample `Podfile`*
-
-    use_frameworks!
-
-    target '<the name of the target of your app>' do
-      pod 'NMSDK'
-    end
+target '<the name of the target of your app>' do
+    pod 'NMSDK'
+end
+```
 
 For more informations about CocoaPods, check visit the [official website](https://guides.cocoapods.org).
 
-**Using `NearSDK`**
+## Using `NearSDK
 
-*Configuring an iOS app*
+### Configuring an iOS app
 
 `NearSDK` interacts with nearit.com APIs, thus an app token is required: it can be obtained by creating an app on nearit.com.
 
@@ -50,15 +49,16 @@ to your app's users: this implies that iOS apps using the SDK must:
   - `Location updates`
   - `Uses Bluetooth LE accessories`
 
-*Interacting with NearSDK*
+### Interacting with NearSDK
 
 `NearSDK` can be used in any class of your app by importing its module
+```swift
+import NMSDK
 
-    import NMSDK
-
-    class YourClass {
-      // Your class implementation
-    }
+class YourClass {
+    // Your class implementation
+}
+```
 
 `NearSDK` must be started before being ready to use, thus apps using the SDK must call one of these class methods:
 
@@ -69,35 +69,37 @@ Calling one of such methods should be typically done at app's startup, for examp
 
 If `start()` method is called, nearit.com app token must be set in app's `Info.plist` file (see above), otherwise the token will be the only (`token`) parameter required by the method.
 
-The following code snippets illustrate how `NearSDK` can be started:
+The following code snippets illustrate how `NearSDK` using token provided in `Info.plist` can be started:
 
-**Code snippet** - *nearit.com app token in app's `Info.plist` file, key `NearSDKToken`*
+#### NearSDK setup passing token via `Info.plist`
 
-    import UIKit
-    import NMSDK
-
-    @UIApplicationMain
-    class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
-      var window: UIWindow?
-
-      func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+```swift
+import UIKit
+import NMSDK
+    
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate { 
+    var window: UIWindow?
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         NearSDK.start()
-      }
     }
+}
+```
 
-**Code snippet** - *nearit.com app token set at startup*
+#### NearSDK setup passing token in start func 
 
-    import UIKit
-    import NMSDK
-
-    @UIApplicationMain
-    class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
-      var window: UIWindow?
-
-      func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+```swift
+import UIKit
+import NMSDK
+    
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate { 
+    var window: UIWindow?
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         NearSDK.start(token: "<nearit.com app token>")
-      }
     }
+}
+```
 
 Because `NearSDK` uses iBeacon™ technology, apps should start the SDK after appropriate permissions have been obtained; more specifically, apps should request `use always authorization` permission to `CoreLocation` before starting `NearSDK`.
 
@@ -151,7 +153,8 @@ extension AppDelegate {
 
 `NearSDK`-to-Xcode console output can be enabled by setting class property`consoleOutput` to `true`.
 
-*Using nearit.com contents*
+
+## Using nearit.com contents
 
 `NearSDK` can detect iBeacon™s registered for nearit.com apps: whenever a beacon is detected, a content or a poll may be evaluated by the SDK.
 
@@ -173,7 +176,7 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
     - `answer2`
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
 
-*Push notifications and NearSDK*
+## Push notifications and NearSDK
 
 `NearSDK` can manage push notifications sent from nearit.com backend.
 
@@ -200,7 +203,7 @@ Because this method accepts an optional `APNSToken`, it should be called either 
       NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
     }
 
-*Segmentation*
+## Segmentation
 
 `NearSDK` exposes functionalities which can be used to profile users, without the need of a user account: this means that apps using `NearSDK` can create user profiles and define them with properties.
 
@@ -218,7 +221,7 @@ Calling `NearSDK` class method `linkProfileToInstallation(_:completionHandler:)`
 
 Calling `linkProfileToInstallation(_:completionHandler:)` will fail if the value of `profileID` is `nil`.
 
-**Notes about NearSDK Core Plugins**
+## Notes about NearSDK Core Plugins
 
 `NearSDK` uses some "core" plugins which fulfills requirements of the SDK itself: such plugins are built with [NMPlug](https://github.com/nearit/nm.plug) module.
 
