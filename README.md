@@ -1,7 +1,7 @@
 # NMSDK
 [nearit.com](http://nearit.com) iOS SDK
 
-### Note
+#### Note
 
 This is a pre-release software - features are subject to change.
 
@@ -191,14 +191,14 @@ Installation identifiers can be only refreshed by calling `refreshInstallationID
 
 Because this method accepts an optional `APNSToken`, it should be called either when an APNS token has been obtained or not.
 
-### Refresh installation id with APNS token
+#### Refresh installation id with APNS token
 ```swift
 func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
     NearSDK.refreshInstallationID(APNSToken: deviceToken, didRefresh: nil)
 }
 ```
 
-### Refresh installation id without APNS token
+#### Refresh installation id without APNS token
 ```swift
 func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
     NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
