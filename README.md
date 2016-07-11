@@ -29,7 +29,13 @@ For more informations about CocoaPods, check visit the [official website](https:
 
 `NearSDK` interacts with nearit.com APIs, thus an app token is required: it can be obtained by creating an app on nearit.com.
 
-Once a token has been obtained, it must be set either in app's `Info.plist` file (key `NearSDKToken`) or whenever `NearSDK` is started; those approaches are mutually exclusive.
+Once a **token** has been obtained, it must be set either in app's `Info.plist` file (key `NearSDKToken`) or whenever `NearSDK` is started; those approaches are mutually exclusive.
+
+In your `Info.plist` add this line __updating__ the token with your one.
+```xml
+<key>NearSDKToken</key>
+<string>Your token ID</string>
+```
 
 `NearSDK` uses location services to better assist indoor navigation and to provide contents
 to your app's users: this implies that iOS apps using the SDK must:
