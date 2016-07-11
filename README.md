@@ -191,17 +191,19 @@ Installation identifiers can be only refreshed by calling `refreshInstallationID
 
 Because this method accepts an optional `APNSToken`, it should be called either when an APNS token has been obtained or not.
 
-**Code snippet** - *refresh installation id with APNS token*
+### Refresh installation id with APNS token
+```swift
+func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+    NearSDK.refreshInstallationID(APNSToken: deviceToken, didRefresh: nil)
+}
+```
 
-    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-      NearSDK.refreshInstallationID(APNSToken: deviceToken, didRefresh: nil)
-    }
-
-**Code snippet** - *refresh installation id without APNS token*
-
-    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
-      NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
-    }
+### Refresh installation id without APNS token
+```swift
+func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
+    NearSDK.refreshInstallationID(APNSToken: nil, didRefresh: nil)
+}
+```
 
 ## Segmentation
 
