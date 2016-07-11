@@ -34,8 +34,13 @@ Once a token has been obtained, it must be set either in app's `Info.plist` file
 `NearSDK` uses location services to better assist indoor navigation and to provide contents
 to your app's users: this implies that iOS apps using the SDK must:
 
-- define `NSLocationAlwaysUsageDescription` key in `Info.plist`
-- enable `Background Modes` capabilities:
+- add `NSLocationAlwaysUsageDescription` key in `Info.plist`
+```xml
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Your message goes here</string>
+```
+
+- enable `Background Modes` in your app **Capabilities**:
   - `Location updates`
   - `Uses Bluetooth LE accessories`
 
