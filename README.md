@@ -177,14 +177,14 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
         - the chosen answer can be sent to nearit.com by calling `NearSDK`'s class method `sendPollAnswer(_:forPoll:response:)`
 
 For example set `NearSDK` **delegate**:
-```
+```swift
 NearSDK.start()
 NearSDK.delegate = self
 ```
 
 Then add an **extension** to your class to manage the delegates:
 
-```
+```swift
 // MARK: - NearSDK delegate
 extension AppDelegate: NearSDKDelegate {
     func nearSDKDidEvaluateRecipe(recipe: Recipe) {
