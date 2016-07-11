@@ -1,5 +1,5 @@
 # NMSDK
-nearit.com iOS SDK
+[nearit.com](http://nearit.com) iOS SDK
 
 ### Note
 
