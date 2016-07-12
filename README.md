@@ -178,8 +178,8 @@ The app which adopts `NearSDK` can receive such reactions by implementing some o
 
 For example set `NearSDK` **delegate**:
 ```swift
-NearSDK.start()
 NearSDK.delegate = self
+NearSDK.start()
 ```
 
 Then add an **extension** to your class to manage the delegates:
